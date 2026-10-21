@@ -391,4 +391,50 @@
     <string name="wear_setup_no_app_title">ATA not found on the watch</string>
     <string name="wear_setup_no_app_text">Download the wear APK (ATA-wear-…apk) from the release page.\nInstall it on the watch, e.g. with an installer app like \"Easy Fire Tools\" / \"Wear Installer\" or adb over Wi-Fi.\nUse the same version as on the phone, then open ATA on the watch once.</string>
     <string name="wear_setup_download">Open release page</string>
+    <string name="presets_title">Fixed values (e.g. temperature 21 °C)</string>
+    <string name="presets_desc">Actions with a preset value, published as app shortcuts: Samsung Routines and the icon menu run them without asking. They share the space of the routine actions above.</string>
+    <string name="presets_add">+ Add fixed value</string>
+    <string name="presets_delete">Remove</string>
+    <string name="finder_title">Find my car</string>
+    <string name="finder_need_location">The compass needs your location to point to the car.</string>
+    <string name="finder_no_car_location">No car position saved yet. ATA saves it automatically whenever it reaches the car over Bluetooth (status, commands), or tap \"Parked here\" next to the car.</string>
+    <string name="finder_waiting_gps">Waiting for GPS …</string>
+    <string name="finder_here">You are at the car</string>
+    <string name="finder_gps_accuracy">GPS accuracy ±%1$d m</string>
+    <string name="finder_saved">Car position saved %1$s</string>
+    <string name="finder_open_map">Show in maps</string>
+    <string name="finder_parked_here">Parked here (save position)</string>
+    <string name="finder_how">The car position is the phone\'s GPS position the last time ATA reached the car over Bluetooth, so it is accurate to a few metres. Hold the phone flat for the compass.</string>
+    <string name="finder_age_now">just now</string>
+    <string name="finder_age_minutes">%1$d min ago</string>
+    <string name="finder_age_hours">%1$d h ago</string>
+    <string name="finder_age_days">%1$d days ago</string>
+    <string name="finder_widget_label">ATA find my car</string>
+    <string name="finder_widget_no_car">No car position yet</string>
+    <string name="finder_widget_no_gps">No location</string>
+    <string name="finder_widget_tap">tap for compass</string>
+    <string-array name="compass_directions">
+        <item>N</item>
+        <item>NE</item>
+        <item>E</item>
+        <item>SE</item>
+        <item>S</item>
+        <item>SW</item>
+        <item>W</item>
+        <item>NW</item>
+    </string-array>
+    <string name="a_climate_keep_off">Climate mode off</string>
+    <string name="a_defrost_off">Defrost off</string>
+    <string name="a_steering_wheel_heater_off">Steering wheel heater off</string>
+    <string name="a_bioweapon_on">Bioweapon defense on</string>
+    <string name="a_bioweapon_off">Bioweapon defense off</string>
+    <string name="a_overheat_protection_on">Cabin overheat protection on</string>
+    <string name="a_overheat_protection_off">Cabin overheat protection off</string>
+    <string name="a_door_driver_open">Open driver door</string>
+    <string name="a_door_passenger_open">Open passenger door</string>
+    <string name="a_trunk_close">Close trunk</string>
+    <string name="a_remote_drive">Keyless driving</string>
+    <string name="a_media_toggle">Media play/pause</string>
+    <string name="a_media_next">Next track</string>
+    <string name="a_media_previous">Previous track</string>
 </resources>

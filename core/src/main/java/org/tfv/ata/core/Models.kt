@@ -64,6 +64,11 @@ data class AtaSettings(
   val homeActionIds: List<String> = emptyList(),
   val vehicleActionIds: List<String> = emptyList(),
   val wearActionIds: List<String> = emptyList(),
+  /**
+   * Actions with a fixed value ("set_temperature|21"), published as app shortcuts so Samsung Routines and the
+   * icon menu can run them without asking for the value.
+   */
+  val presets: List<String> = emptyList(),
   val launcherMenuActionIds: List<String> = listOf(
     AtaAction.OPEN_TESLA_APP.id,
     AtaAction.NAVIGATE_HOME.id,

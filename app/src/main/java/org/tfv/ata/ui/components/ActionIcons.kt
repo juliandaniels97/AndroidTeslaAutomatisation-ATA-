@@ -12,6 +12,14 @@ import androidx.compose.material.icons.filled.Luggage
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material.icons.filled.Nightlight
+import androidx.compose.material.icons.filled.SkipPrevious
+import androidx.compose.material.icons.filled.SkipNext
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Key
+import androidx.compose.material.icons.filled.DoorBack
+import androidx.compose.material.icons.filled.DoorFront
+import androidx.compose.material.icons.filled.DeviceThermostat
+import androidx.compose.material.icons.filled.Masks
 import androidx.compose.material.icons.filled.OpenInNew
 import androidx.compose.material.icons.filled.Pets
 import androidx.compose.material.icons.filled.PowerSettingsNew
@@ -61,4 +69,18 @@ fun iconFor(action: AtaAction): ImageVector = when (action) {
   AtaAction.CLIMATE_KEEP -> Icons.Filled.Air
   AtaAction.DOG_MODE -> Icons.Filled.Pets
   AtaAction.CAMP_MODE -> Icons.Filled.Nightlight
+  AtaAction.CLIMATE_KEEP_OFF -> Icons.Filled.PowerSettingsNew
+  AtaAction.DEFROST_OFF -> Icons.Filled.AcUnit
+  AtaAction.STEERING_WHEEL_HEATER_OFF -> Icons.Filled.WbSunny
+  AtaAction.BIOWEAPON_ON -> Icons.Filled.Masks
+  AtaAction.BIOWEAPON_OFF -> Icons.Filled.Masks
+  AtaAction.OVERHEAT_PROTECTION_ON -> Icons.Filled.DeviceThermostat
+  AtaAction.OVERHEAT_PROTECTION_OFF -> Icons.Filled.DeviceThermostat
+  AtaAction.DOOR_DRIVER_OPEN -> Icons.Filled.DoorFront
+  AtaAction.DOOR_PASSENGER_OPEN -> Icons.Filled.DoorBack
+  AtaAction.TRUNK_CLOSE -> Icons.Filled.Luggage
+  AtaAction.REMOTE_DRIVE -> Icons.Filled.Key
+  AtaAction.MEDIA_TOGGLE -> Icons.Filled.PlayArrow
+  AtaAction.MEDIA_NEXT -> Icons.Filled.SkipNext
+  AtaAction.MEDIA_PREVIOUS -> Icons.Filled.SkipPrevious
 }

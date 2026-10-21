@@ -46,6 +46,9 @@ object ActionPolicy {
     AtaAction.FRUNK,
     AtaAction.VENT_WINDOWS,
     AtaAction.SENTRY_OFF,
+    AtaAction.DOOR_DRIVER_OPEN,
+    AtaAction.DOOR_PASSENGER_OPEN,
+    AtaAction.REMOTE_DRIVE,
   )
 
   fun isCritical(action: AtaAction): Boolean = action in critical

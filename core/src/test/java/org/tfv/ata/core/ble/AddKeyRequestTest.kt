@@ -35,6 +35,7 @@ class AddKeyRequestTest {
   fun faultNamesAreReadable() {
     assertTrue(faultName(10).contains("decoding"))
     assertTrue(faultName(14).contains("full"))
+    assertTrue(faultName(25).contains("exceeds MTU"))
     assertTrue(faultName(99).contains("99"))
   }
 }

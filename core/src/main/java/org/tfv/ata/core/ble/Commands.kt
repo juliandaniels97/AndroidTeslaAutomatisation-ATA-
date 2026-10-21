@@ -35,6 +35,23 @@ internal object Commands {
     AtaAction.CLIMATE_KEEP -> infotainment(44, buildProto { enum(1, 1) })
     AtaAction.DOG_MODE -> infotainment(44, buildProto { enum(1, 2) })
     AtaAction.CAMP_MODE -> infotainment(44, buildProto { enum(1, 3) })
+    AtaAction.CLIMATE_KEEP_OFF -> infotainment(44, buildProto { enum(1, 0) })
+    AtaAction.DEFROST_OFF -> infotainment(12, buildProto { bool(1, false) })
+    AtaAction.STEERING_WHEEL_HEATER_OFF -> infotainment(13, buildProto { bool(1, false) })
+    AtaAction.BIOWEAPON_ON -> infotainment(35, buildProto { bool(1, true) })
+    AtaAction.BIOWEAPON_OFF -> infotainment(35, buildProto { bool(1, false) })
+    AtaAction.OVERHEAT_PROTECTION_ON -> infotainment(50, buildProto { bool(1, true) })
+    AtaAction.OVERHEAT_PROTECTION_OFF -> infotainment(50, buildProto { bool(1, false) })
+    // ClosureMoveRequest: 1 front driver door, 2 front passenger door, 5 rear trunk; move type 3 OPEN, 4 CLOSE.
+    // Opening a door releases its latch; not every model supports it.
+    AtaAction.DOOR_DRIVER_OPEN -> vcsecClosure(field = 1, move = 3)
+    AtaAction.DOOR_PASSENGER_OPEN -> vcsecClosure(field = 2, move = 3)
+    AtaAction.TRUNK_CLOSE -> vcsecClosure(field = 5, move = 4)
+    // RKE_ACTION_REMOTE_DRIVE: keyless driving for about two minutes.
+    AtaAction.REMOTE_DRIVE -> vcsecRke(20)
+    AtaAction.MEDIA_TOGGLE -> infotainment(15, ByteArray(0))
+    AtaAction.MEDIA_NEXT -> infotainment(19, ByteArray(0))
+    AtaAction.MEDIA_PREVIOUS -> infotainment(20, ByteArray(0))
     else -> null
   }
 
@@ -56,16 +73,22 @@ internal object Commands {
   fun statusRequest(): Command =
     Command(Domain.VEHICLE_SECURITY, buildProto { message(1, buildProto { enum(1, 0) }) })
 
-  fun vehicleData(): Command =
+  /** GetVehicleData categories (car_server.proto): charge, climate, closures. */
+  const val DATA_CHARGE = 2
+  const val DATA_CLIMATE = 3
+  const val DATA_CLOSURES = 8
+  val STATUS_CATEGORIES = listOf(DATA_CHARGE, DATA_CLIMATE, DATA_CLOSURES)
+
+  /**
+   * Vehicle data for one category. Over BLE the whole answer must fit in one message: asking for several
+   * categories at once fails with fault 25 (response size exceeds MTU), so callers ask one by one.
+   */
+  fun vehicleData(category: Int): Command =
     Command(
       Domain.INFOTAINMENT,
       buildProto {
         message(2, buildProto {
-          message(1, buildProto {
-            message(2, ByteArray(0))
-            message(3, ByteArray(0))
-            message(8, ByteArray(0))
-          })
+          message(1, buildProto { message(category, ByteArray(0)) })
         })
       },
     )

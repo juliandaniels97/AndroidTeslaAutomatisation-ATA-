@@ -40,5 +40,19 @@ object ActionInfo {
     AtaAction.CLIMATE_KEEP -> R.string.a_climate_keep
     AtaAction.DOG_MODE -> R.string.a_dog_mode
     AtaAction.CAMP_MODE -> R.string.a_camp_mode
+    AtaAction.CLIMATE_KEEP_OFF -> R.string.a_climate_keep_off
+    AtaAction.DEFROST_OFF -> R.string.a_defrost_off
+    AtaAction.STEERING_WHEEL_HEATER_OFF -> R.string.a_steering_wheel_heater_off
+    AtaAction.BIOWEAPON_ON -> R.string.a_bioweapon_on
+    AtaAction.BIOWEAPON_OFF -> R.string.a_bioweapon_off
+    AtaAction.OVERHEAT_PROTECTION_ON -> R.string.a_overheat_protection_on
+    AtaAction.OVERHEAT_PROTECTION_OFF -> R.string.a_overheat_protection_off
+    AtaAction.DOOR_DRIVER_OPEN -> R.string.a_door_driver_open
+    AtaAction.DOOR_PASSENGER_OPEN -> R.string.a_door_passenger_open
+    AtaAction.TRUNK_CLOSE -> R.string.a_trunk_close
+    AtaAction.REMOTE_DRIVE -> R.string.a_remote_drive
+    AtaAction.MEDIA_TOGGLE -> R.string.a_media_toggle
+    AtaAction.MEDIA_NEXT -> R.string.a_media_next
+    AtaAction.MEDIA_PREVIOUS -> R.string.a_media_previous
   }
 }

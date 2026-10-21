@@ -31,7 +31,12 @@ object ShortcutSync {
       val token = store.triggerToken()
       // Icon-menu actions first (rank 0–3: the launcher shows these), then the extra routine actions.
       val ids = publishedActionIds(app, settings.launcherMenuActionIds, settings.routineActionIds)
-      val dynamic = ids.mapIndexed { rank, id -> build(app, "dyn_$id", id, null, token, rank) }
+      val plain = ids.mapIndexed { rank, id -> build(app, "dyn_$id", id, null, token, rank) }
+      // Fixed-value actions after the plain ones, as long as the launcher accepts more shortcuts.
+      val presets = settings.presets.mapNotNull { parsePreset(it) }
+        .take((maxPublished(app) - plain.size).coerceAtLeast(0))
+        .mapIndexed { i, (id, value) -> build(app, presetShortcutId(id, value), id, value, token, plain.size + i) }
+      val dynamic = plain + presets
       runCatching { ShortcutManagerCompat.setDynamicShortcuts(app, dynamic) }
       runCatching {
         val pinned = ShortcutManagerCompat.getShortcuts(app, ShortcutManagerCompat.FLAG_MATCH_PINNED)
@@ -57,6 +62,20 @@ object ShortcutSync {
     return (first + extra).take(maxPublished(context))
   }
 
+  /** "set_temperature|21" → (action id, value); null if malformed or the action takes no value. */
+  fun parsePreset(entry: String): Pair<String, String>? {
+    val id = entry.substringBefore('|')
+    val value = entry.substringAfter('|', "").trim()
+    val action = AtaAction.fromId(id) ?: return null
+    if (!action.needsValue || value.isEmpty()) return null
+    return id to value
+  }
+
+  fun presetEntry(actionId: String, value: String): String = "$actionId|${value.trim()}"
+
+  private fun presetShortcutId(actionId: String, value: String): String =
+    "dyn_p_${actionId}_" + value.filter { it.isLetterOrDigit() }.take(20) + "_" + Integer.toHexString(value.hashCode())
+
   fun pinToHome(context: Context, action: AtaAction, value: String? = null) = pinToHome(context, action.id, value)
 
   fun pinToHome(context: Context, actionId: String, value: String? = null) {
@@ -78,7 +97,14 @@ object ShortcutSync {
       IntentContract.ACTION_ID_SET_PASSIVE -> context.getString(R.string.shortcut_set_passive)
       else -> AtaAction.fromId(actionId)?.let { context.getString(ActionInfo.labelRes(it)) } ?: actionId
     }
-    return if (value.isNullOrBlank()) base else "$base: $value"
+    if (value.isNullOrBlank()) return base
+    val unit = when (AtaAction.fromId(actionId)) {
+      AtaAction.SET_TEMPERATURE -> " °C"
+      AtaAction.CHARGE_LIMIT -> " %"
+      AtaAction.CHARGING_AMPS -> " A"
+      else -> ""
+    }
+    return "$base: ${value.trim()}$unit"
   }
 
   private fun build(context: Context, id: String, actionId: String, value: String?, token: String, rank: Int = 0): ShortcutInfoCompat {

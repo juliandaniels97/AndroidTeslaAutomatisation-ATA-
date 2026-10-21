@@ -112,12 +112,23 @@ object TeslaController {
         val session = handshakeWithRetry(conn, vin, Domain.INFOTAINMENT, routing, if (wake) 3 else 1)
         PairedKeys.set(context, vin, true)
         BleLog.add("infotainment session ok")
-        val bytes = execute(conn, session, Commands.vehicleData().payload, routing, Domain.INFOTAINMENT)
+        val parts = Commands.STATUS_CATEGORIES.mapNotNull { category ->
+          try {
+            val part = execute(conn, session, Commands.vehicleData(category).payload, routing, Domain.INFOTAINMENT)
+            BleLog.add("vehicle data $category: ${part?.size ?: 0} bytes")
+            part
+          } catch (e: BleException) {
+            // One category failing (e.g. too large) shouldn't cost the others.
+            BleLog.add("vehicle data $category failed: ${e.message}")
+            if (e.code == FailureCode.NOT_REACHABLE) throw e
+            null
+          }
+        }
+        val bytes = StatusParser.combine(parts)
         if (bytes == null) {
-          BleLog.add("vehicle data: no payload")
+          BleLog.add("vehicle data: no answer")
           return@withVehicle null
         }
-        BleLog.add("vehicle data: ${bytes.size} bytes ${bytes.hexPrefix(32)}")
         val snapshot = StatusParser.parse(bytes)
         if (snapshot == null) {
           BleLog.add("vehicle data could not be parsed")

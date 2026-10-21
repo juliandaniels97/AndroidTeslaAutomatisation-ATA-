@@ -1,6 +1,10 @@
 package org.tfv.ata.ui
 
 import android.content.Intent
+import androidx.glance.appwidget.updateAll
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
+import org.tfv.ata.widget.CarFinderWidget
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -60,11 +64,21 @@ class MainActivity : FragmentActivity() {
     routeFor(intent)?.let { pendingRoute.value = it }
   }
 
-  private fun routeFor(intent: Intent?): String? =
-    if (intent?.data?.toString() == WearContract.DEEP_LINK_WEAR_PAIR) "wear_pair" else null
+  private fun routeFor(intent: Intent?): String? = when (intent?.data?.toString()) {
+    WearContract.DEEP_LINK_WEAR_PAIR -> "wear_pair"
+    DEEP_LINK_FIND_CAR -> "find_car"
+    else -> null
+  }
+
+  companion object {
+    /** Opened by the "find my car" widget (explicit intent, not exported as a link). */
+    const val DEEP_LINK_FIND_CAR = "ata://find-car"
+  }
 
   override fun onResume() {
     super.onResume()
+    // The "find my car" widget shows the distance from the phone's position: refresh it when the app opens.
+    lifecycleScope.launch { runCatching { CarFinderWidget().updateAll(this@MainActivity) } }
     KeyCardRegistration.setForeground(this, resumed = true)
   }
 

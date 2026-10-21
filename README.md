@@ -15,10 +15,10 @@ tap — or an automation — triggers exactly the action you want.
 
 ## Downloads
 
-Latest release **v1.4.4** — phone APK for **64‑bit ARM (arm64‑v8a)**, watch APK for **64‑ and 32‑bit ARM (arm64‑v8a + armeabi‑v7a)**:
+Latest release **v1.4.5** — phone APK for **64‑bit ARM (arm64‑v8a)**, watch APK for **64‑ and 32‑bit ARM (arm64‑v8a + armeabi‑v7a)**:
 
-- 📱 Phone APK: **[ATA-phone-v1.4.4-arm64-v8a.apk](https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-/releases/download/v1.4.4/ATA-phone-v1.4.4-arm64-v8a.apk)**
-- ⌚ Wear OS APK: **[ATA-wear-v1.4.4.apk](https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-/releases/download/v1.4.4/ATA-wear-v1.4.4.apk)**
+- 📱 Phone APK: **[ATA-phone-v1.4.5-arm64-v8a.apk](https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-/releases/download/v1.4.5/ATA-phone-v1.4.5-arm64-v8a.apk)**
+- ⌚ Wear OS APK: **[ATA-wear-v1.4.5.apk](https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-/releases/download/v1.4.5/ATA-wear-v1.4.5.apk)**
 
 All releases are listed under [Releases](https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-/releases).
 All release builds are signed with the same release key, so new versions install as an update over

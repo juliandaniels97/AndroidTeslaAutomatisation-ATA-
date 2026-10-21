@@ -3,6 +3,17 @@ package org.tfv.ata.core.ble
 import org.tfv.ata.core.VehicleSnapshot
 
 internal object StatusParser {
+  /**
+   * Merges the answers of one-category requests into one Response: the VehicleData of each answer holds a
+   * different field (charge 3, climate 4, closures 9), so their contents can simply be concatenated.
+   */
+  fun combine(responses: List<ByteArray>): ByteArray? {
+    val parts = responses.mapNotNull { ProtoReader(it).bytes(2) }
+    if (parts.isEmpty()) return null
+    val vehicleData = parts.fold(ByteArray(0)) { acc, part -> acc + part }
+    return buildProto { message(2, vehicleData) }
+  }
+
   /** Parses a CarServer.Response carrying VehicleData (field numbers from vehicle.proto). */
   fun parse(responseBytes: ByteArray): VehicleSnapshot? {
     val response = ProtoReader(responseBytes)

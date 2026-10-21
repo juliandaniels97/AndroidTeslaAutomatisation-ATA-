@@ -391,4 +391,50 @@
     <string name="wear_setup_no_app_title">ATA auf der Uhr nicht gefunden</string>
     <string name="wear_setup_no_app_text">Die Wear-APK (ATA-wear-…apk) von der Release-Seite herunterladen.\nAuf der Uhr installieren, z. B. mit einer Installer-App wie „Easy Fire Tools“ / „Wear Installer“ oder adb über WLAN.\nDieselbe Version wie auf dem Handy verwenden, dann ATA auf der Uhr einmal öffnen.</string>
     <string name="wear_setup_download">Release-Seite öffnen</string>
+    <string name="presets_title">Feste Werte (z. B. Temperatur 21 °C)</string>
+    <string name="presets_desc">Aktionen mit festem Wert, veröffentlicht als App-Verknüpfungen: Samsung Routinen und das Icon-Menü führen sie ohne Nachfrage aus. Sie teilen sich den Platz mit den Routine-Aktionen oben.</string>
+    <string name="presets_add">+ Festen Wert hinzufügen</string>
+    <string name="presets_delete">Entfernen</string>
+    <string name="finder_title">Auto finden</string>
+    <string name="finder_need_location">Der Kompass braucht deinen Standort, um zum Auto zu zeigen.</string>
+    <string name="finder_no_car_location">Noch keine Autoposition gespeichert. ATA speichert sie automatisch, sobald es das Auto per Bluetooth erreicht (Status, Befehle), oder tippe am Auto auf „Hier geparkt“.</string>
+    <string name="finder_waiting_gps">Warte auf GPS …</string>
+    <string name="finder_here">Du bist am Auto</string>
+    <string name="finder_gps_accuracy">GPS-Genauigkeit ±%1$d m</string>
+    <string name="finder_saved">Autoposition gespeichert %1$s</string>
+    <string name="finder_open_map">In Karten zeigen</string>
+    <string name="finder_parked_here">Hier geparkt (Position speichern)</string>
+    <string name="finder_how">Die Autoposition ist die GPS-Position des Handys beim letzten Bluetooth-Kontakt mit dem Auto, also auf wenige Meter genau. Für den Kompass das Handy flach halten.</string>
+    <string name="finder_age_now">gerade eben</string>
+    <string name="finder_age_minutes">vor %1$d min</string>
+    <string name="finder_age_hours">vor %1$d h</string>
+    <string name="finder_age_days">vor %1$d Tagen</string>
+    <string name="finder_widget_label">ATA Auto finden</string>
+    <string name="finder_widget_no_car">Noch keine Autoposition</string>
+    <string name="finder_widget_no_gps">Kein Standort</string>
+    <string name="finder_widget_tap">tippen für Kompass</string>
+    <string-array name="compass_directions">
+        <item>N</item>
+        <item>NO</item>
+        <item>O</item>
+        <item>SO</item>
+        <item>S</item>
+        <item>SW</item>
+        <item>W</item>
+        <item>NW</item>
+    </string-array>
+    <string name="a_climate_keep_off">Klima-Modus aus</string>
+    <string name="a_defrost_off">Enteisen aus</string>
+    <string name="a_steering_wheel_heater_off">Lenkradheizung aus</string>
+    <string name="a_bioweapon_on">Bioschutz-Modus an</string>
+    <string name="a_bioweapon_off">Bioschutz-Modus aus</string>
+    <string name="a_overheat_protection_on">Überhitzungsschutz an</string>
+    <string name="a_overheat_protection_off">Überhitzungsschutz aus</string>
+    <string name="a_door_driver_open">Fahrertür öffnen</string>
+    <string name="a_door_passenger_open">Beifahrertür öffnen</string>
+    <string name="a_trunk_close">Kofferraum schließen</string>
+    <string name="a_remote_drive">Fahren ohne Schlüssel</string>
+    <string name="a_media_toggle">Musik Play/Pause</string>
+    <string name="a_media_next">Nächster Titel</string>
+    <string name="a_media_previous">Vorheriger Titel</string>
 </resources>

@@ -17,7 +17,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -40,6 +43,9 @@ fun MenuConfigScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit) {
   val context = androidx.compose.ui.platform.LocalContext.current
   val maxExtra = (org.tfv.ata.shortcut.ShortcutSync.maxPublished(context) - menu.size).coerceAtLeast(0)
   val routineChoices = (funcB + funcA).filter { !it.needsValue && it.id !in menu }
+  val presets = state.settings.presets
+  var pickPreset by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(false) }
+  var presetAction by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf<AtaAction?>(null) }
 
   Scaffold(
     topBar = {
@@ -76,12 +82,26 @@ fun MenuConfigScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit) {
       Text(stringResource(R.string.menu_routines_desc, maxExtra), style = MaterialTheme.typography.bodySmall)
       routineChoices.forEach { action ->
         val checked = action.id in routine
-        ActionCheckRow(action, checked, enabled = checked || routine.count { it !in menu } < maxExtra) {
+        ActionCheckRow(action, checked, enabled = checked || routine.count { it !in menu } + presets.size < maxExtra) {
           vm.updateSettings { s ->
             s.copy(routineActionIds = if (checked) s.routineActionIds - action.id else s.routineActionIds + action.id)
           }
         }
       }
+
+      GroupLabel(stringResource(R.string.presets_title))
+      Text(stringResource(R.string.presets_desc), style = MaterialTheme.typography.bodySmall)
+      presets.forEach { entry ->
+        val (id, value) = org.tfv.ata.shortcut.ShortcutSync.parsePreset(entry) ?: return@forEach
+        val action = AtaAction.fromId(id) ?: return@forEach
+        PresetRow(action, org.tfv.ata.shortcut.ShortcutSync.label(context, id, value)) {
+          vm.updateSettings { s -> s.copy(presets = s.presets - entry) }
+        }
+      }
+      androidx.compose.material3.OutlinedButton(
+        onClick = { pickPreset = true },
+        enabled = routine.count { it !in menu } + presets.size < maxExtra,
+      ) { Text(stringResource(R.string.presets_add)) }
 
       Text(stringResource(R.string.menu_widget_title), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(top = 16.dp))
       Text(stringResource(R.string.menu_widget_desc), style = MaterialTheme.typography.bodySmall)
@@ -99,6 +119,27 @@ fun MenuConfigScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit) {
         }
       }
     }
+  }
+
+  if (pickPreset) {
+    ActionPickerDialog(
+      title = stringResource(R.string.presets_add),
+      actions = AtaAction.entries.filter { it.enabled && it.needsValue },
+      onPick = { pickPreset = false; presetAction = it },
+      onDismiss = { pickPreset = false },
+    )
+  }
+  presetAction?.let { action ->
+    ValueInputDialog(
+      action = action,
+      onConfirm = { v ->
+        presetAction = null
+        if (v.isNotBlank()) {
+          vm.updateSettings { s -> s.copy(presets = (s.presets + org.tfv.ata.shortcut.ShortcutSync.presetEntry(action.id, v)).distinct()) }
+        }
+      },
+      onDismiss = { presetAction = null },
+    )
   }
 }
 
@@ -136,6 +177,18 @@ fun RoutinesHint(modifier: Modifier = Modifier) {
         color = MaterialTheme.colorScheme.onSecondaryContainer,
         modifier = Modifier.padding(top = 4.dp),
       )
+    }
+  }
+}
+
+@Composable
+private fun PresetRow(action: AtaAction, label: String, onDelete: () -> Unit) {
+  val palette = org.tfv.ata.ui.theme.AtaColors.current
+  Row(Modifier.fillMaxWidth().padding(vertical = 2.dp), verticalAlignment = Alignment.CenterVertically) {
+    Icon(org.tfv.ata.ui.components.iconFor(action), contentDescription = null, tint = palette.accent, modifier = Modifier.padding(horizontal = 12.dp))
+    Text(label, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+    IconButton(onClick = onDelete) {
+      Icon(androidx.compose.material.icons.Icons.Filled.Delete, contentDescription = stringResource(R.string.presets_delete))
     }
   }
 }

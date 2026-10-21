@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
@@ -53,7 +54,13 @@ import org.tfv.ata.ui.components.VehicleArt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun VehicleScreen(vm: AtaViewModel, state: AtaUiState, onAddVehicle: () -> Unit = {}, onPair: () -> Unit = {}) {
+fun VehicleScreen(
+  vm: AtaViewModel,
+  state: AtaUiState,
+  onAddVehicle: () -> Unit = {},
+  onPair: () -> Unit = {},
+  onFindCar: () -> Unit = {},
+) {
   val context = LocalContext.current
   val scope = rememberCoroutineScope()
   val snapshot = state.snapshot
@@ -97,6 +104,9 @@ fun VehicleScreen(vm: AtaViewModel, state: AtaUiState, onAddVehicle: () -> Unit 
                 Text(stringResource(R.string.save_layout))
               }
               experimental -> {
+                IconButton(onClick = onFindCar) {
+                  Icon(Icons.Filled.Explore, contentDescription = stringResource(R.string.finder_title))
+                }
                 IconButton(onClick = { if (!refreshing) vm.refreshStatus(wake = true, onDone = reportRefresh) }, enabled = !refreshing) {
                   if (refreshing) CircularProgressIndicator(modifier = Modifier.padding(4.dp), strokeWidth = 2.dp)
                   else Icon(Icons.Filled.Refresh, contentDescription = stringResource(R.string.refresh))

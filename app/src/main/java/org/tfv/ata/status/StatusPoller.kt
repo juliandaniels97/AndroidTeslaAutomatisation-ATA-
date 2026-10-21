@@ -13,6 +13,7 @@ import org.tfv.ata.core.VehicleSnapshot
 import org.tfv.ata.core.ble.TeslaController
 import org.tfv.ata.data.AtaStore
 import java.util.concurrent.TimeUnit
+import androidx.glance.appwidget.updateAll
 
 object StatusPoller {
   private const val WORK_NAME = "ata-status-poll"
@@ -44,9 +45,22 @@ object StatusPoller {
       fresh
     }
     store.saveSnapshot(vehicle.id, snapshot)
+    // The car answered over Bluetooth, so the phone is within a few metres of it: remember where it is parked.
+    rememberCarLocation(context)
     if (settings.statusBroadcast) broadcastStatus(context, vehicle.id, snapshot)
     org.tfv.ata.wear.WearPush.pushStatus(context, snapshot, vehicle.name)
     return snapshot
+  }
+
+  /** Stores the phone's current position as the car's position (call only right after reaching the car). */
+  suspend fun rememberCarLocation(context: Context) {
+    val loc = org.tfv.ata.geo.Geo.lastLocation(context) ?: return
+    // Old fixes (e.g. from home) would put the car in the wrong place.
+    if (System.currentTimeMillis() - loc.time > 2 * 60_000L) return
+    AtaStore.get(context).updateSettings {
+      it.copy(carLat = loc.latitude, carLng = loc.longitude, carLocAt = System.currentTimeMillis())
+    }
+    runCatching { org.tfv.ata.widget.CarFinderWidget().updateAll(context) }
   }
 
   private fun broadcastStatus(context: Context, vehicleId: String, snapshot: VehicleSnapshot) {

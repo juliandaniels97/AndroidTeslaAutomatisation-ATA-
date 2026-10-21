@@ -1,27 +1,32 @@
-## ATA v1.4.4 — Startanimation, NFC-Schlüsselkarte für Handy und Uhr, Uhr koppeln vom Handgelenk
+## ATA v1.4.5 — Fahrzeugstatus per Bluetooth, Auto-finden-Kompass, feste Werte für Routinen
 
-- **Neue Startanimation:** das animierte ATA-Logo mit Lichtringen, bildschirmfüllend. Die komplette Animation läuft in 1,5 Sekunden, danach blendet sie weich in die App über. Antippen überspringt sie.
-- **Fahrzeug-Tab nach der Kopplung:** Die Karte „Handy als Schlüssel koppeln“ verschwindet, sobald der Schlüssel funktioniert. ATA merkt sich das nach jeder erfolgreichen Verbindung.
-- **Status wird automatisch gelesen,** sobald der Fahrzeug-Tab geöffnet wird (ohne das Auto zu wecken; ↻ weckt es). Klappt das Lesen nicht, erscheint ein Hinweis statt stiller „--“.
-- **„Diese Uhr koppeln“ auf der Uhr öffnet den Kopplungs-Assistenten auf dem Handy.** Klappt das direkte Öffnen nicht, öffnet das Handy ihn selbst oder zeigt eine Benachrichtigung zum Antippen.
-- **Gekoppelt-Status auf der Uhr:** Funktioniert der Schlüssel der Uhr, zeigt sie „✓ Mit dem Auto gekoppelt“. Der Uhr-Assistent auf dem Handy zeigt das ebenfalls und bietet an, die Direktsteuerung einzuschalten.
-- **Kopplungs-Assistenten (Handy und Uhr):** Ist das Gerät bereits gekoppelt, werden keine Kopplungsschritte mehr angeboten, sondern „✓ gekoppelt“. Neu koppeln geht weiterhin über „Trotzdem neu koppeln“.
-- **NFC-Schlüsselkarte mit Einrichtungsassistent** (Einstellungen → NFC-Schlüsselkarte einrichten):
-  - Live-Prüfung: NFC vorhanden und eingeschaltet, Kartenemulation, Karte in ATA an, „Kartenleser erreicht ATA“.
-  - Schritte zum Anlernen im Auto.
-  - Live-Anzeige des letzten Kontakts mit dem Kartenleser.
-- **Eigener Schlüssel für die NFC-Karte:** Bisher nutzte die Karte denselben Schlüssel wie die Bluetooth-Kopplung. Das Auto lehnte sie deshalb als „bereits vorhanden“ ab. Jetzt hat sie einen eigenen Schlüssel und kann als neue Karte angelernt werden.
-- **Uhr als NFC-Schlüsselkarte (BETA):** Mit der Uhr an der B-Säule entriegeln und am Kartenleser losfahren. Die Uhr nutzt einen eigenen Schlüssel und antwortet nur entsperrt.
-  - Einrichtung über einen Assistenten auf dem Handy (Wear OS Uhr → Uhr als NFC-Schlüsselkarte). Live-Prüfung auf der Uhr: NFC vorhanden und an, Kartenemulation, Karte an.
-  - Schritte zum Anlernen und Kontakt-Anzeige.
-  - Kartenleser-Protokoll der Uhr im Assistenten und im Fehlerbericht.
-  - Auf der Uhr gibt es zusätzlich einen Schalter „NFC-Schlüsselkarte: an/aus“.
-- **Hinweis in den Uhr-Einstellungen,** wenn keine Uhr verbunden ist oder ATA auf der Uhr fehlt. Er nennt die nötigen Schritte und hat einen Link zur Release-Seite mit der Wear-APK.
-- **NFC-Protokoll:** Jede Anfrage des Kartenlesers wird protokolliert, auch bei geschlossener App. Zu sehen im Assistenten und im Fehlerbericht.
-- **Hinweis, wenn NFC ausgeschaltet ist,** mit Button zu den NFC-Einstellungen: bei den NFC-Tags, der Schlüsselkarte und im Assistenten.
-- Jeder Schritt der Statusabfrage steht im Protokoll bzw. Fehlerbericht.
-- Kleiner als ein Video und ohne Video-Decoder: Die Animation ist als animiertes WebP eingebunden (ca. 0,6 MB).
+### Behoben
+- **Fahrzeugstatus (Akku, Reichweite, Temperaturen) über Bluetooth:** Das Auto lehnte die Abfrage mit „vehicle fault 25“ ab (Antwort zu groß für eine Bluetooth-Nachricht). ATA fragt Akku, Klima und Türen jetzt einzeln ab, wie Teslas `tesla-control`, und fügt die Antworten zusammen. Dafür musst du nicht im Auto sitzen: Bluetooth-Reichweite genügt.
+- Fehler des Autos ab Nummer 20 werden im Protokoll im Klartext angezeigt.
 
-Enthält alle Korrekturen zur Bluetooth-Kopplung aus 1.4.1–1.4.3, u. a. „Verbindung testen“ mit Kopplungsstatus, den Uhr-Assistenten und den Fehlerbericht.
+### Neu
+- **Auto finden:** Live-Kompass mit Pfeil, Entfernung und Himmelsrichtung zum Auto (Fahrzeug-Tab → Kompass-Symbol).
+  - Die Autoposition speichert ATA automatisch bei jedem Bluetooth-Kontakt mit dem Auto (dann ist das Handy wenige Meter entfernt). Alternativ geht es manuell über „Hier geparkt“.
+  - Dazu „In Karten zeigen“.
+- **Widget „ATA Auto finden“:** zeigt Entfernung und Richtung (Pfeil nach Norden ausgerichtet). Antippen öffnet den Live-Kompass. Widgets können dem Kompass des Handys nicht live folgen, deshalb ist der drehende Pfeil in der App.
+- **Feste Werte für Shortcuts** (Einstellungen → Menü & Widgets → Samsung Routinen → „Festen Wert hinzufügen“), z. B. „Temperatur einstellen: 21 °C“ oder „Ladelimit: 80 %“.
+  - Sie werden als App-Verknüpfungen veröffentlicht. Samsung Routinen und das Icon-Menü führen sie ohne Nachfrage aus.
+
+### Neue Aktionen (BETA, per Bluetooth)
+- **Fahrertür öffnen** und **Beifahrertür öffnen**: öffnet die jeweilige Tür (je nach Modell muss das Auto vorher entriegelt sein). Gilt als kritische Aktion mit Bestätigung. Ob dein Modell das Öffnen per Befehl unterstützt, zeigt der Test am Auto.
+- **Kofferraum schließen** (bei elektrischer Heckklappe).
+- **Fahren ohne Schlüssel** (ca. 2 Minuten, kritisch mit Bestätigung).
+- **Musik:** Play/Pause, nächster und vorheriger Titel.
+- **Klima:** Klima-Modus aus, Enteisen aus, Lenkradheizung aus.
+- **Bioschutz-Modus** an/aus, **Überhitzungsschutz** an/aus.
+- Alle neuen Aktionen gibt es in der App, im Widget, auf der Uhr, in Routinen und auf NFC-Tags.
+
+### Optik
+- **Neue Fahrzeuggrafik** im Fahrzeug-Tab: das Auto von oben mit Rädern, Spiegeln, Glasdach, Scheinwerfern und Rückleuchten (statt der bisherigen schlichten Form).
+- **Akku-Ring:** farbig nach Ladestand (blau, ab 30 % gelb, ab 15 % rot, beim Laden grün mit Lauflicht). Gestrichelt, solange noch kein Wert bekannt ist.
+- **Zustände direkt am Auto:**
+  - Ladeanschluss leuchtet beim Laden.
+  - Glasdach färbt sich bei aktiver Klimatisierung.
+  - Darunter Symbole für verriegelt/offen, Laden, Klima und Wächter-Modus.
 
 BLE-Funktionen, NFC-Schlüsselkarte und Uhr-Direktsteuerung bleiben **BETA**.
