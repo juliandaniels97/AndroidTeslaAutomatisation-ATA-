@@ -41,6 +41,10 @@ class CreateShortcutActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setResult(Activity.RESULT_CANCELED)
+    // The shortcut (with ATA's token) goes to the calling app: show the user who that is.
+    val caller = callingActivity?.packageName?.let { pkg ->
+      runCatching { packageManager.getApplicationLabel(packageManager.getApplicationInfo(pkg, 0)).toString() }.getOrDefault(pkg)
+    }
     val actions = AtaAction.entries.filter { it.enabled }
     val ids = listOf(IntentContract.ACTION_ID_SET_ACTIVE, IntentContract.ACTION_ID_SET_PASSIVE) +
       actions.filter { it.category == AtaCategory.FUNCTION_B }.map { it.id } +
@@ -52,6 +56,14 @@ class CreateShortcutActivity : ComponentActivity() {
         Surface(Modifier.fillMaxSize()) {
           Column(Modifier.padding(16.dp)) {
             Text(stringResource(R.string.create_shortcut_title), style = MaterialTheme.typography.titleLarge)
+            if (caller != null) {
+              Text(
+                stringResource(R.string.create_shortcut_for, caller),
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(top = 8.dp),
+              )
+            }
             Text(
               stringResource(R.string.create_shortcut_desc),
               style = MaterialTheme.typography.bodySmall,

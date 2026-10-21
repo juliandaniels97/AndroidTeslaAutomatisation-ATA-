@@ -29,7 +29,7 @@ class ConfirmActionActivity : FragmentActivity() {
     Notifier.cancelConfirmation(this, action)
     val label = getString(ActionInfo.labelRes(action))
 
-    AlertDialog.Builder(this)
+    AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert)
       .setTitle(getString(R.string.confirm_title, label))
       .setMessage(R.string.confirm_critical_message)
       .setPositiveButton(R.string.confirm_action) { _, _ -> authenticateAndRun(request, label) }
