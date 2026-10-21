@@ -84,7 +84,8 @@ jobs:
           mkdir -p dist
           VERSION=$(grep '^versionName=' version.properties | cut -d= -f2)
           cp app/build/outputs/apk/release/*.apk "dist/ATA-phone-v${VERSION}-arm64-v8a.apk"
-          cp wear/build/outputs/apk/release/*.apk "dist/ATA-wear-v${VERSION}-arm64-v8a.apk"
+          # One watch APK for 64-bit (arm64-v8a) and 32-bit (armeabi-v7a) watches.
+          cp wear/build/outputs/apk/release/*.apk "dist/ATA-wear-v${VERSION}.apk"
           ls -la dist
 
       - name: Upload APKs

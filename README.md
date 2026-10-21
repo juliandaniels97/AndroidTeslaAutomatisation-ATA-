@@ -15,10 +15,10 @@ tap — or an automation — triggers exactly the action you want.
 
 ## Downloads
 
-Latest release **v1.3.2**, built for **64‑bit ARM (arm64‑v8a)**:
+Latest release **v1.3.3** — phone APK for **64‑bit ARM (arm64‑v8a)**, watch APK for **64‑ and 32‑bit ARM (arm64‑v8a + armeabi‑v7a)**:
 
-- 📱 Phone APK: **[ATA-phone-v1.3.2-arm64-v8a.apk](https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-/releases/download/v1.3.2/ATA-phone-v1.3.2-arm64-v8a.apk)**
-- ⌚ Wear OS APK: **[ATA-wear-v1.3.2-arm64-v8a.apk](https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-/releases/download/v1.3.2/ATA-wear-v1.3.2-arm64-v8a.apk)**
+- 📱 Phone APK: **[ATA-phone-v1.3.3-arm64-v8a.apk](https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-/releases/download/v1.3.3/ATA-phone-v1.3.3-arm64-v8a.apk)**
+- ⌚ Wear OS APK: **[ATA-wear-v1.3.3.apk](https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-/releases/download/v1.3.3/ATA-wear-v1.3.3.apk)**
 
 All releases are listed under [Releases](https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-/releases).
 All release builds are signed with the same release key, so new versions install as an update over
@@ -30,7 +30,7 @@ uninstall it once and pair the phone with the car again.)
 | | Phone | Watch |
 |---|---|---|
 | OS | Android 12+ (minSdk 31, targets Android 17 / API 37) | Wear OS 3+ (Galaxy Watch 4 and newer, minSdk 30, targets API 37) |
-| CPU | arm64‑v8a | arm64‑v8a |
+| CPU | arm64‑v8a | arm64‑v8a or armeabi‑v7a (32‑bit, e.g. Galaxy Watch 6) — one APK for both |
 | Needs the phone? | — | Relays to the phone by default, or **direct control** over BLE once the watch is paired |
 
 ## Two feature sets, one app

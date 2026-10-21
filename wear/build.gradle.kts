@@ -23,7 +23,8 @@ android {
     versionCode = (System.getenv("ATA_VERSION_CODE")?.toIntOrNull()) ?: versionProps.getProperty("versionCode").toInt()
     versionName = versionProps.getProperty("versionName")
     // -PataAllAbis keeps every ABI (used by the CI emulator smoke test on x86_64).
-    if (!project.hasProperty("ataAllAbis")) ndk { abiFilters += listOf("arm64-v8a") }
+    // 64-bit and 32-bit ARM: e.g. Galaxy Watch 4–6 run a 32-bit (armeabi-v7a) system.
+    if (!project.hasProperty("ataAllAbis")) ndk { abiFilters += listOf("arm64-v8a", "armeabi-v7a") }
   }
 
   val releaseStoreFile = System.getenv("ATA_KEYSTORE_FILE")
