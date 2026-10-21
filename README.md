@@ -9,6 +9,9 @@ tap — or an automation — triggers exactly the action you want.
 >
 > **Commercial use requires prior written permission** from the author — see [Legal](#legal).
 
+<img width="1440" height="2964" alt="Screenshot_20261021_130000_ATA  Android Tesla Automatisation" src="https://github.com/user-attachments/assets/9fa60ba9-cd46-47d9-8e0d-c394c7df635b" />
+
+
 ## Downloads
 
 Built automatically for **64‑bit ARM (arm64‑v8a)** from `main`:
@@ -288,6 +291,13 @@ keytool -genkey -v -keystore release-keystore.jks -keyalg RSA -keysize 2048 \
 
 Keep the `.jks` file and its passwords safe and **out of git** — losing them means you can't ship
 signed updates that install over an existing install.
+
+## Screenshots:
+<img width="320" alt="Screenshot_20261021_130113_ATA  Android Tesla Automatisation" src="https://github.com/user-attachments/assets/6ff48488-9be4-40d1-8479-cf973f9fefd4" />
+<img width="640" alt="58774-08-18_01-39-53_id64784_Screenshots" src="https://github.com/user-attachments/assets/59111c73-0328-4b62-8735-a25e39e538b1" />
+<img width="640" alt="Screenshot_20261021_130053_ATA  Android Tesla Automatisation" src="https://github.com/user-attachments/assets/90265a16-a418-432d-b054-3460e451ae73" />
+<img width="320" alt="Screenshot_20261021_130036_ATA  Android Tesla Automatisation" src="https://github.com/user-attachments/assets/dc471d71-8da1-4178-9cf6-b5bf36d15dd8" />
+
 
 ## Legal
 
