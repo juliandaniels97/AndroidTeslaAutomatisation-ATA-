@@ -93,13 +93,15 @@ fun PairScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit, onVehicl
   }
   val permissionOk = remember(tick) { TeslaController.hasBlePermission(context) }
   val bluetoothOn = remember(tick) { BleTransport.isBluetoothOn(context) }
+  val locationPermOk = remember(tick) { BleTransport.hasLocationPermission(context) }
+  val locationOn = remember(tick) { BleTransport.isLocationOn(context) }
   val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { tick++ }
   val bluetoothLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { tick++ }
 
   val supported = VehicleKey.isSupported
   val bleOn = state.settings.experimentalBle
   val vinOk = vehicle != null && Vin.isValid(Vin.normalize(vehicle.vin))
-  val ready = supported && bleOn && vinOk && permissionOk && bluetoothOn
+  val ready = supported && bleOn && vinOk && permissionOk && bluetoothOn && locationPermOk && locationOn
 
   var nearCar by rememberSaveable { mutableStateOf(false) }
   var carAwake by rememberSaveable { mutableStateOf(false) }
@@ -152,8 +154,22 @@ fun PairScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit, onVehicl
         title = stringResource(R.string.pair_check_permission),
         actionLabel = stringResource(R.string.pair_action_allow),
         onAction = {
-          permissionLauncher.launch(arrayOf(Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT))
+          permissionLauncher.launch(org.tfv.ata.core.ble.TeslaController.BLE_PERMISSIONS)
         },
+      )
+      StatusRow(
+        ok = locationPermOk,
+        title = stringResource(R.string.pair_check_location_permission),
+        hint = if (locationPermOk) null else stringResource(R.string.pair_location_why),
+        actionLabel = stringResource(R.string.pair_action_allow),
+        onAction = { permissionLauncher.launch(org.tfv.ata.core.ble.TeslaController.BLE_PERMISSIONS) },
+      )
+      StatusRow(
+        ok = locationOn,
+        title = stringResource(R.string.pair_check_location_on),
+        hint = if (locationOn) null else stringResource(R.string.pair_location_on_why),
+        actionLabel = stringResource(R.string.pair_action_bluetooth),
+        onAction = { runCatching { bluetoothLauncher.launch(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)) } },
       )
       StatusRow(
         ok = bluetoothOn,

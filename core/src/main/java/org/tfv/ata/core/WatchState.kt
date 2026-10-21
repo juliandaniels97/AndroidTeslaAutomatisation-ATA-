@@ -12,6 +12,8 @@ data class WatchState(
   val supported: Boolean = false,
   val permission: Boolean = false,
   val bluetoothOn: Boolean = false,
+  val locationPermission: Boolean = false,
+  val locationOn: Boolean = false,
   val vin: String = "",
   val directMode: Boolean = false,
   /** "pair" or "probe" while one runs, else empty. */
@@ -34,6 +36,8 @@ data class WatchState(
     kv("supported", supported)
     kv("permission", permission)
     kv("bluetooth", bluetoothOn)
+    kv("locperm", locationPermission)
+    kv("locon", locationOn)
     kv("vin", vin)
     kv("direct", directMode)
     kv("running", running)
@@ -58,6 +62,8 @@ data class WatchState(
         supported = b("supported"),
         permission = b("permission"),
         bluetoothOn = b("bluetooth"),
+        locationPermission = b("locperm"),
+        locationOn = b("locon"),
         vin = map["vin"].orEmpty(),
         directMode = b("direct"),
         running = map["running"].orEmpty(),

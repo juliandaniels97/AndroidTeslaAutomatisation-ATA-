@@ -85,7 +85,7 @@ fun WearPairScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit, onRe
   val vehicle = state.selected
   val w = watch
   val vinOnWatch = w != null && vehicle != null && Vin.normalize(w.vin) == Vin.normalize(vehicle.vin)
-  val ready = w != null && w.supported && w.permission && w.bluetoothOn && vinOnWatch
+  val ready = w != null && w.supported && w.permission && w.locationPermission && w.locationOn && w.bluetoothOn && vinOnWatch
   val running = w?.running.orEmpty()
   var nearCar by rememberSaveable { mutableStateOf(false) }
   var cardReady by rememberSaveable { mutableStateOf(false) }
@@ -139,6 +139,20 @@ fun WearPairScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit, onRe
           ok = w.permission,
           title = stringResource(R.string.wear_pair_check_permission),
           hint = if (w.permission) null else stringResource(R.string.wear_pair_permission_hint),
+          actionLabel = stringResource(R.string.wear_pair_retry_check),
+          onAction = { refresh() },
+        )
+        StatusRow(
+          ok = w.locationPermission,
+          title = stringResource(R.string.wear_pair_check_location_permission),
+          hint = if (w.locationPermission) null else stringResource(R.string.wear_pair_permission_hint),
+          actionLabel = stringResource(R.string.wear_pair_retry_check),
+          onAction = { refresh() },
+        )
+        StatusRow(
+          ok = w.locationOn,
+          title = stringResource(R.string.wear_pair_check_location_on),
+          hint = if (w.locationOn) null else stringResource(R.string.wear_pair_location_on_hint),
           actionLabel = stringResource(R.string.wear_pair_retry_check),
           onAction = { refresh() },
         )

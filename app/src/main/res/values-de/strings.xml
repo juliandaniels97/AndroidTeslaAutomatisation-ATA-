@@ -266,10 +266,10 @@
     <string name="pair_added_next">Dieses Handy kann das Auto jetzt per Bluetooth steuern. Tipp: Benenne den Schlüssel im Auto unter Steuerung → Schlösser um.</string>
     <string name="pair_awaiting_next">Hat das Auto „Schlüssel hinzugefügt“ angezeigt, ist alles in Ordnung: Probiere einfach eine Bluetooth-Aktion aus. Sonst erneut starten und die Schlüsselkarte auflegen, sobald das Auto danach fragt.</string>
     <string name="pair_retry">Erneut versuchen</string>
-    <string name="pair_help_not_found">• VIN prüfen (Windschutzscheibe unten links oder Fahrzeugschein).\n• Im Auto oder höchstens ca. 2 m entfernt bleiben.\n• Auto wecken: Tür öffnen oder Bildschirm antippen.\n• Bluetooth am Handy aus- und wieder einschalten.</string>
+    <string name="pair_help_not_found">• Standort für ATA erlauben und Standort einschalten (sonst verbirgt Android das Bluetooth-Signal des Autos).\n• VIN prüfen (Windschutzscheibe unten links oder Fahrzeugschein).\n• Im Auto oder höchstens ca. 2 m entfernt bleiben.\n• Auto wecken: Tür öffnen oder Bildschirm antippen.\n• Bluetooth aus- und wieder einschalten.</string>
     <string name="pair_help_bluetooth">Bluetooth einschalten (Button oben), dann erneut starten.</string>
     <string name="pair_help_permission">„Geräte in der Nähe“ erlauben (Button oben), dann erneut starten.</string>
-    <string name="pair_help_rejected">Das Auto hat die Anfrage abgelehnt. Achte darauf, dass die Meldung im Auto nicht abgebrochen wurde und das Auto weniger als 19 Schlüssel hat (Steuerung → Schlösser).</string>
+    <string name="pair_help_rejected">Das Auto hat die Anfrage abgelehnt (Grund in Klammern oben). Wurde die Meldung im Auto abgebrochen, einfach erneut starten. Bleibt der Fehler, bitte einen Fehlerbericht senden: Er enthält die genaue Antwort des Autos.</string>
     <string name="pair_help_no_response">Das Auto hat nicht geantwortet. Wecke es (Tür öffnen) und starte erneut.</string>
     <string name="pair_help_general">Nah am Auto erneut starten. Klappt es weiterhin nicht, Bluetooth am Handy neu starten.</string>
     <string name="pair_fingerprint">Schlüssel-Kennung dieses Handys (zum Wiederfinden in der Schlüsselliste des Autos)</string>
@@ -330,7 +330,7 @@
     <string name="wear_pair_vin_hint">Die Uhr kennt das ausgewählte Fahrzeug noch nicht.</string>
     <string name="wear_pair_sync">Übertragen</string>
     <string name="wear_pair_check_permission">Bluetooth-Berechtigung auf der Uhr</string>
-    <string name="wear_pair_permission_hint">ATA auf der Uhr öffnen und „Geräte in der Nähe“ erlauben, dann erneut prüfen.</string>
+    <string name="wear_pair_permission_hint">ATA auf der Uhr öffnen und „Geräte in der Nähe“ sowie „Standort“ erlauben, dann erneut prüfen.</string>
     <string name="wear_pair_check_bluetooth">Bluetooth an der Uhr eingeschaltet</string>
     <string name="wear_pair_bluetooth_hint">Bluetooth in den Einstellungen der Uhr einschalten, dann erneut prüfen.</string>
     <string name="wear_pair_tick_near">Ich bin mit der Uhr im Auto oder direkt daneben</string>
@@ -339,4 +339,11 @@
     <string name="wear_pair_test_failed">Die Uhr konnte das Auto nicht erreichen.</string>
     <string name="wear_pair_start">Uhr koppeln</string>
     <string name="wear_paired_next">Die Uhr kann das Auto jetzt direkt per Bluetooth steuern. Die Direktsteuerung wurde auf der Uhr eingeschaltet.</string>
+    <string name="pair_check_location_permission">Standort-Berechtigung (während der Nutzung)</string>
+    <string name="pair_location_why">Android zeigt das Bluetooth-Signal des Autos (ein iBeacon) nur Apps mit Standortzugriff. ATA verwendet deinen Standort nicht.</string>
+    <string name="pair_check_location_on">Standort eingeschaltet</string>
+    <string name="pair_location_on_why">Bei ausgeschaltetem Standort findet Android keine Bluetooth-Beacons, also auch nicht das Auto.</string>
+    <string name="wear_pair_check_location_permission">Standort-Berechtigung auf der Uhr</string>
+    <string name="wear_pair_check_location_on">Standort auf der Uhr eingeschaltet</string>
+    <string name="wear_pair_location_on_hint">Standort in den Einstellungen der Uhr einschalten (nur dann findet Android das Bluetooth-Signal des Autos), dann erneut prüfen.</string>
 </resources>

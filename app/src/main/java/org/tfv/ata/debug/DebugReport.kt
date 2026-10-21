@@ -62,6 +62,9 @@ object DebugReport {
         "Bluetooth: on=${BleTransport.isBluetoothOn(context)} permission=${TeslaController.hasBlePermission(context)} " +
           "keySupported=${VehicleKey.isSupported} key=${fingerprint ?: "-"}",
       )
+      appendLine(
+        "Location: permission=${BleTransport.hasLocationPermission(context)} on=${BleTransport.isLocationOn(context)}",
+      )
       appendLine("Notifications=${Notifier.canNotify(context)} overlay=${BackgroundLaunch.allowed(context)}")
       appendLine()
       appendLine("--- Phone Bluetooth log ---")
@@ -74,6 +77,7 @@ object DebugReport {
           appendLine("Watch: ${watch.model}, SDK ${watch.sdk}, app ${watch.appVersion}")
           appendLine(
             "supported=${watch.supported} permission=${watch.permission} bluetooth=${watch.bluetoothOn} " +
+              "location=${watch.locationPermission}/${watch.locationOn} " +
               "direct=${watch.directMode} vin=${maskVin(watch.vin)}",
           )
           appendLine("last: running=${watch.running} step=${watch.step} outcome=${watch.outcome} code=${watch.code} probe=${watch.probe}")

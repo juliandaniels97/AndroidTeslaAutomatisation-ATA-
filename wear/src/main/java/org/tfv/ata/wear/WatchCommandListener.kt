@@ -123,6 +123,8 @@ class WatchCommandListener : WearableListenerService() {
     supported = WearControl.directSupported,
     permission = WearControl.hasBlePermission(context),
     bluetoothOn = BleTransport.isBluetoothOn(context),
+    locationPermission = BleTransport.hasLocationPermission(context),
+    locationOn = BleTransport.isLocationOn(context),
     vin = WearPrefs.vin(context),
     directMode = WearPrefs.directMode(context),
     log = BleLog.text(),

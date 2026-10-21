@@ -110,5 +110,56 @@ internal class SessionInfo(data: ByteArray) {
 }
 
 internal const val FAULT_UNKNOWN_KEY_ID = 3
+
+/** UniversalMessage.MessageFault_E as readable text, e.g. "vehicle fault 10 (decoding error)". */
+fun faultName(fault: Int): String {
+  val name = when (fault) {
+    0 -> "none"
+    1 -> "busy"
+    2 -> "timeout"
+    3 -> "unknown key"
+    4 -> "inactive key"
+    5 -> "invalid signature"
+    6 -> "invalid token or counter"
+    7 -> "insufficient privileges"
+    8 -> "invalid domains"
+    9 -> "invalid command"
+    10 -> "decoding error"
+    11 -> "internal error"
+    12 -> "wrong personalization"
+    13 -> "bad parameter"
+    14 -> "key list full"
+    15 -> "incorrect epoch"
+    16 -> "IV incorrect length"
+    17 -> "time expired"
+    18 -> "not provisioned with identity"
+    19 -> "could not hash metadata"
+    else -> "unknown"
+  }
+  return "vehicle fault $fault ($name)"
+}
+
+/**
+ * Add-key request as Tesla's vehicle-command sends it over BLE: a bare ToVCSECMessage whose SignedMessage
+ * (signature type PRESENT_KEY) carries an UnsignedMessage with the whitelist operation. The car then asks to
+ * confirm with a key card. Role: 2 owner, 3 driver. Form factor 7: Android device.
+ */
+internal fun addKeyRequest(publicKey: ByteArray, owner: Boolean): ByteArray {
+  val unsigned = buildProto {
+    message(16, buildProto {
+      message(5, buildProto {
+        message(1, buildProto { bytes(1, publicKey) })
+        enum(4, if (owner) 2 else 3)
+      })
+      message(6, buildProto { enum(1, 7) })
+    })
+  }
+  return buildProto {
+    message(1, buildProto {
+      bytes(2, unsigned)
+      enum(3, 2)
+    })
+  }
+}
 internal const val SESSION_STATUS_KEY_NOT_ON_WHITELIST = 1
 internal const val OPERATION_STATUS_WAIT = 1

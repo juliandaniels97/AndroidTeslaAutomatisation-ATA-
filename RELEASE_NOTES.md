@@ -1,26 +1,13 @@
-## ATA v1.4.1 — Kopplung von Handy und Uhr: robuster, mit Assistent und Fehlerbericht
+## ATA v1.4.2 — Kopplung: Auto wird gefunden, Anfrage im richtigen Format
 
-### Koppeln neben der Tesla-App
-- ATA legt einen **eigenen, zusätzlichen Schlüssel** an. Der Handy-Schlüssel der Tesla-App bleibt unverändert und funktioniert weiter.
-- Ist das Auto schon über die Tesla-App mit dem Handy verbunden, nutzt ATA diese bestehende Bluetooth-Verbindung mit, statt vergeblich nach dem Auto zu suchen.
-- Antworten des Autos werden jetzt passend zum Auto abonniert (Indications oder Notifications). Bisher konnten sie je nach Auto ausbleiben.
-- Antworten an die Tesla-App, die über dieselbe Verbindung laufen, werden sauber herausgefiltert.
-- Nach dem Senden der Kopplungsanfrage wartet ATA ruhig auf die Bestätigung mit der Schlüsselkarte. Die Abfrage im Auto wird nicht mehr durch Zwischenanfragen gestört. Erst danach prüft ATA einmal, ob das Auto den Schlüssel angenommen hat.
-- Schlägt die erste Bluetooth-Verbindung fehl (unter Android häufig), versucht ATA es automatisch noch einmal.
+### Behoben
+- **Kopplung von Handy und Uhr:** Das Auto lehnte die Kopplungsanfrage mit „vehicle fault 10“ ab, einem Dekodierfehler. ATA hatte die Anfrage in eine Nachrichtenhülle gepackt, die das Auto an dieser Stelle nicht erwartet. Jetzt geht sie wie in Teslas offizieller Implementierung (vehicle-command) direkt über Bluetooth an das Auto.
+- **Auto wurde bei der Bluetooth-Suche nicht gefunden** (z. B. auf der Uhr: hunderte Geräte gesehen, aber kein Tesla). Teslas senden ihr Bluetooth-Signal als iBeacon, und Android zeigt Beacons nur Apps mit Standortzugriff. ATA fragt deshalb jetzt nach der Standort-Berechtigung, nur während der Nutzung. Der Standort selbst wird nicht verwendet.
+- Nach der ersten Verbindung merkt sich ATA die Bluetooth-Adresse des Autos und verbindet sich danach direkt, ohne Suche. So laufen Automationen im Hintergrund auch ohne Standortzugriff.
+- Kopplungs-Assistent für Handy und Uhr prüft jetzt auch Standort-Berechtigung und Standort-Schalter. Fehlerbericht und Protokoll zeigen beides sowie gesehene Tesla-Beacons.
+- Fehler des Autos werden im Klartext angezeigt, z. B. „vehicle fault 10 (decoding error)“ statt nur der Nummer.
+- Der Hilfetext bei abgelehnten Anfragen verweist nicht mehr fälschlich auf eine volle Schlüsselliste.
 
-### Diagnose im Kopplungs-Assistenten
-- **Verbindung testen:** Prüft ohne Koppeln, ob ATA das Auto findet und eine Antwort bekommt.
-- **Technische Details:** Protokoll des letzten Versuchs mit Button „Protokoll kopieren“. Es zeigt, welche Teslas in Reichweite waren, ob die Verbindung stand und was das Auto geantwortet hat. Bitte bei Problemen mitschicken.
-
-### Uhr koppeln – Assistent auf dem Handy
-- Neu unter **Wear OS Uhr → Uhr koppeln**: Das Handy steuert die Kopplung der Uhr. Die Uhr meldet jeden Schritt und ihr Protokoll zurück.
-- Live-Prüfung auf der Uhr, jeweils mit Hinweis oder Button zum Beheben: ATA installiert und erreichbar, Wear OS 4+, Fahrzeug übertragen, Bluetooth-Berechtigung, Bluetooth an.
-- „Verbindung testen“ direkt von der Uhr aus, dann „Uhr koppeln“ mit Fortschritt und Schlüsselkarten-Hinweis. Nach erfolgreicher Kopplung wird die Direktsteuerung auf der Uhr automatisch eingeschaltet.
-- Die Uhr übernimmt das Fahrzeug vom Handy jetzt auch, wenn ATA auf der Uhr gerade nicht geöffnet ist. Sie fragt beim Öffnen gleich nach der Bluetooth-Berechtigung.
-
-### Fehlerbericht direkt aus der App
-- **Einstellungen → Fehlerbericht senden** (auch aus beiden Kopplungs-Assistenten): sammelt App- und Geräteinfos, Einrichtung sowie die Bluetooth-Protokolle von **Handy und Uhr**.
-- **Auf GitHub melden** öffnet ein vorausgefülltes Issue im Projekt. Alternativ per E-Mail oder Messenger teilen oder kopieren.
-- Die VIN wird gekürzt, Schlüssel oder Tokens sind nicht enthalten.
+Alle Neuerungen aus 1.4.1 bleiben: Koppeln neben der Tesla-App, Uhr-Assistent auf dem Handy, „Verbindung testen“ und Fehlerbericht.
 
 BLE-Funktionen, NFC-Schlüsselkarte und Uhr-Direktsteuerung bleiben **BETA**.

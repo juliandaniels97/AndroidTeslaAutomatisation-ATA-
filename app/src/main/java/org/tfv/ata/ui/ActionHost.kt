@@ -65,7 +65,8 @@ fun ActionHost(
   val permissionLauncher = rememberLauncherForActivityResult(
     ActivityResultContracts.RequestMultiplePermissions(),
   ) { result ->
-    val granted = result.values.all { it }
+    // Location is optional (finding the car without the Tesla app connected); Bluetooth is required.
+    val granted = org.tfv.ata.core.ble.TeslaController.hasBlePermission(context)
     val action = pendingAction
     val value = pendingValue
     pendingAction = null
@@ -75,7 +76,7 @@ fun ActionHost(
 
   fun runWithPermissions(action: AtaAction, value: String?) {
     if (action.category == AtaCategory.FUNCTION_A) {
-      val perms = arrayOf(Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT)
+      val perms = org.tfv.ata.core.ble.TeslaController.BLE_PERMISSIONS
       val missing = perms.any { ContextCompat.checkSelfPermission(context, it) != PackageManager.PERMISSION_GRANTED }
       if (missing) {
         pendingAction = action

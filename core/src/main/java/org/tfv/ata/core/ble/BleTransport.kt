@@ -78,7 +78,12 @@ class BleConnection internal constructor(private val context: Context) : Bluetoo
     rx(value)
   }
 
+  /** Bluetooth address of the connected car, remembered for direct connections without scanning. */
+  var address: String = ""
+    private set
+
   internal suspend fun open(device: BluetoothDevice, timeoutMs: Long): Boolean {
+    address = device.address
     val g = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
       device.connectGatt(context, false, this, BluetoothDevice.TRANSPORT_LE)
     } else {
@@ -208,6 +213,18 @@ class BleConnection internal constructor(private val context: Context) : Bluetoo
 
 @SuppressLint("MissingPermission")
 object BleTransport {
+  /** iBeacon UUID Tesla vehicles advertise (manufacturer data of Apple, 0x004C). */
+  private val TESLA_BEACON = byteArrayOf(
+    0x74, 0x27, 0x8B.toByte(), 0xDA.toByte(), 0xB6.toByte(), 0x44, 0x45, 0x20,
+    0x8F.toByte(), 0x0C, 0x72, 0x0E, 0xAF.toByte(), 0x05, 0x99.toByte(), 0x35,
+  )
+
+  private fun isTeslaBeacon(result: ScanResult): Boolean {
+    val data = result.scanRecord?.getManufacturerSpecificData(0x004C) ?: return false
+    return data.size >= 18 && data[0] == 0x02.toByte() && data[1] == 0x15.toByte() &&
+      data.copyOfRange(2, 18).contentEquals(TESLA_BEACON)
+  }
+
   /** Tesla BLE names: "S" + 16 hex digits + a letter (C = car). */
   private val TESLA_NAME = Regex("^S[0-9a-f]{16}[A-Z]$")
 
@@ -221,35 +238,75 @@ object BleTransport {
    * the controller, so the rest of the time is spent on an unfiltered scan that compares names in software.
    * Returns the device from the scan result (keeps the car's random address type for connecting).
    */
+  fun hasLocationPermission(context: Context): Boolean =
+    androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION) ==
+      android.content.pm.PackageManager.PERMISSION_GRANTED
+
+  fun isLocationOn(context: Context): Boolean {
+    val lm = context.getSystemService(Context.LOCATION_SERVICE) as? android.location.LocationManager ?: return false
+    return androidx.core.location.LocationManagerCompat.isLocationEnabled(lm)
+  }
+
+  /**
+   * Finds the car by its BLE local name. First with a hardware name filter; some phones don't match names in
+   * the controller, so the rest of the time is spent on an unfiltered scan that compares names in software.
+   * The car's advertisement contains an iBeacon: Android only reports it to apps with location access.
+   */
   suspend fun scanDevice(context: Context, localName: String, timeoutMs: Long): BluetoothDevice? {
-    BleLog.add("looking for $localName")
-    connectedDevice(context, localName)?.let { return it }
+    BleLog.add("location permission=${hasLocationPermission(context)} location on=${isLocationOn(context)}")
     val filtered = scan(context, localName, timeoutMs / 2, useFilter = true)
     return filtered ?: scan(context, localName, timeoutMs - timeoutMs / 2, useFilter = false)
   }
 
   /**
-   * The car may already be connected to this phone (e.g. by the Tesla app) and then stop advertising.
+   * The car may already be connected to this device (e.g. by the Tesla app) and then not be found by a scan.
    * Android shares that link: ATA can open its own GATT client on the same device.
    */
-  private fun connectedDevice(context: Context, localName: String): BluetoothDevice? {
+  fun connectedDevice(context: Context, localName: String): BluetoothDevice? {
     val manager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
     val connected = runCatching { manager.getConnectedDevices(BluetoothProfile.GATT) }.getOrDefault(emptyList())
     BleLog.add("already connected: " + connected.joinToString { it.name ?: "?" }.ifEmpty { "none" })
     return connected.firstOrNull { it.name == localName }?.also { BleLog.add("using existing connection") }
   }
 
+  /** The car's address from the last successful connection, to connect without scanning. */
+  fun knownDevice(context: Context, localName: String): BluetoothDevice? {
+    val address = prefs(context).getString(localName, null) ?: return null
+    val adapter = (context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager).adapter ?: return null
+    return runCatching {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        adapter.getRemoteLeDevice(address, BluetoothDevice.ADDRESS_TYPE_RANDOM)
+      } else {
+        adapter.getRemoteDevice(address)
+      }
+    }.getOrNull()
+  }
+
+  fun remember(context: Context, localName: String, address: String) {
+    if (address.isNotBlank()) prefs(context).edit().putString(localName, address).apply()
+  }
+
+  fun forget(context: Context, localName: String) {
+    prefs(context).edit().remove(localName).apply()
+  }
+
+  private fun prefs(context: Context) = context.getSharedPreferences("ata_ble_devices", Context.MODE_PRIVATE)
+
   private suspend fun scan(context: Context, localName: String, timeoutMs: Long, useFilter: Boolean): BluetoothDevice? {
     val manager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
     val scanner = manager.adapter?.takeIf { it.isEnabled }?.bluetoothLeScanner ?: return null
     val found = CompletableDeferred<BluetoothDevice?>()
     val teslas = mutableSetOf<String>()
+    val beacons = mutableSetOf<String>()
     var seen = 0
     val cb = object : ScanCallback() {
       override fun onScanResult(callbackType: Int, result: ScanResult) {
         seen++
         val name = result.scanRecord?.deviceName ?: result.device.name
         if (name != null && TESLA_NAME.matches(name) && teslas.add(name)) BleLog.add("Tesla seen: $name rssi=${result.rssi}")
+        if (name == null && isTeslaBeacon(result) && beacons.add(result.device.address)) {
+          BleLog.add("Tesla beacon without name seen rssi=${result.rssi}")
+        }
         if (name == localName && !found.isCompleted) found.complete(result.device)
       }
 

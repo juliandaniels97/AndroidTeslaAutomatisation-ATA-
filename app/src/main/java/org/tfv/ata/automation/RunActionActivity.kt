@@ -29,7 +29,7 @@ class RunActionActivity : ComponentActivity() {
   private val permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
     val request = pending
     pending = null
-    if (request != null && result.values.isNotEmpty() && result.values.all { it }) {
+    if (request != null && org.tfv.ata.core.ble.TeslaController.hasBlePermission(this)) {
       ActionLauncher.runNow(this, request)
     } else {
       Toast.makeText(this, R.string.fail_permission, Toast.LENGTH_LONG).show()
@@ -87,7 +87,7 @@ class RunActionActivity : ComponentActivity() {
 
       if (!TeslaController.hasBlePermission(this@RunActionActivity)) {
         pending = request
-        permissionLauncher.launch(arrayOf(Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT))
+        permissionLauncher.launch(org.tfv.ata.core.ble.TeslaController.BLE_PERMISSIONS)
         return@launch
       }
       ActionLauncher.runNow(this@RunActionActivity, request)

@@ -29,6 +29,7 @@ data class ProbeResult(val reached: Boolean, val code: FailureCode? = null, val 
 object TeslaController {
   private const val SCAN_TIMEOUT = 20_000L
   private const val CONNECT_TIMEOUT = 20_000L
+  private const val KNOWN_CONNECT_TIMEOUT = 8_000L
   private const val REPLY_TIMEOUT = 10_000L
   private const val STATUS_TIMEOUT = 5_000L
   private const val PAIR_TIMEOUT = 60_000L
@@ -46,6 +47,14 @@ object TeslaController {
     message: String,
     val resync: Boolean = false,
   ) : Exception(message)
+
+  /** Everything ATA asks for before Bluetooth use. Location: Android hides the car's iBeacon advertisement without it. */
+  val BLE_PERMISSIONS = arrayOf(
+    Manifest.permission.BLUETOOTH_SCAN,
+    Manifest.permission.BLUETOOTH_CONNECT,
+    Manifest.permission.ACCESS_FINE_LOCATION,
+    Manifest.permission.ACCESS_COARSE_LOCATION,
+  )
 
   fun hasBlePermission(context: Context): Boolean =
     arrayOf(Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT).all {
@@ -132,8 +141,9 @@ object TeslaController {
       BleLog.reset()
       withVehicle<PairResult>(context, vin, onError = { code, msg -> PairResult(PairOutcome.FAILED, code, msg) }, onStep = onStep) { conn ->
         val routing = newId()
-        // Same envelope as Tesla's vehicle-command: an unsigned RoutableMessage to the VCSEC domain.
-        if (!conn.send(unsignedRequest(Domain.VEHICLE_SECURITY, addKeyEnvelope(owner), newId(), routing))) {
+        // Like Tesla's vehicle-command: the add-key request is a bare ToVCSECMessage (signature type PRESENT_KEY),
+        // not wrapped in a RoutableMessage. Wrapped, the car can't decode it (fault 10).
+        if (!conn.send(addKeyRequest(VehicleKey.publicKeyBytes(), owner))) {
           return@withVehicle PairResult(PairOutcome.FAILED, FailureCode.NOT_REACHABLE, "send failed")
         }
         BleLog.add("add-key request sent, waiting for the key card tap")
@@ -148,9 +158,9 @@ object TeslaController {
             BleLog.add("ignored reply for another app")
             continue
           }
-          BleLog.add("reply: domain=${parsed?.fromDomain} fault=${parsed?.fault} payload=${(parsed?.protobufBytes ?: raw).hexPrefix()}")
+          BleLog.add("reply: domain=${parsed?.fromDomain} fault=${parsed?.fault?.let { faultName(it) }} payload=${(parsed?.protobufBytes ?: raw).hexPrefix()}")
           if (parsed != null && parsed.fault != 0) {
-            return@withVehicle PairResult(PairOutcome.FAILED, FailureCode.VEHICLE_REJECTED, "vehicle fault ${parsed.fault}")
+            return@withVehicle PairResult(PairOutcome.FAILED, FailureCode.VEHICLE_REJECTED, faultName(parsed.fault))
           }
           // Replies may come as a RoutableMessage or as a bare FromVCSECMessage.
           when (val reply = VcsecReply.forWhitelist(parsed?.protobufBytes ?: raw)) {
@@ -191,13 +201,34 @@ object TeslaController {
     var connection: BleConnection? = null
     return try {
       onStep(PairStep.SEARCHING)
-      val device = BleTransport.scanDevice(context, Vin.bleLocalName(Vin.normalize(vin)), SCAN_TIMEOUT)
-        ?: return onError(FailureCode.NOT_REACHABLE, "vehicle not found")
-      onStep(PairStep.CONNECTING)
-      // The first GATT connection often fails on Android (status 133): retry once.
-      val conn = BleTransport.connect(context, device, CONNECT_TIMEOUT)
-        ?: run { delay(1_500); BleLog.add("retrying connection"); BleTransport.connect(context, device, CONNECT_TIMEOUT) }
-        ?: return onError(FailureCode.NOT_REACHABLE, "connection failed")
+      val name = Vin.bleLocalName(Vin.normalize(vin))
+      BleLog.add("looking for $name")
+      // 1. Link the Tesla app (or ATA) already holds, 2. last known address, 3. scan.
+      var conn = BleTransport.connectedDevice(context, name)?.let {
+        onStep(PairStep.CONNECTING)
+        BleTransport.connect(context, it, CONNECT_TIMEOUT)
+      }
+      if (conn == null) {
+        conn = BleTransport.knownDevice(context, name)?.let {
+          BleLog.add("trying last known address")
+          onStep(PairStep.CONNECTING)
+          BleTransport.connect(context, it, KNOWN_CONNECT_TIMEOUT)
+        }
+      }
+      if (conn == null) {
+        onStep(PairStep.SEARCHING)
+        val device = BleTransport.scanDevice(context, name, SCAN_TIMEOUT)
+          ?: return onError(
+            FailureCode.NOT_REACHABLE,
+            if (BleTransport.hasLocationPermission(context) && BleTransport.isLocationOn(context)) "vehicle not found" else "vehicle not found (location off)",
+          )
+        onStep(PairStep.CONNECTING)
+        // The first GATT connection often fails on Android (status 133): retry once.
+        conn = BleTransport.connect(context, device, CONNECT_TIMEOUT)
+          ?: run { delay(1_500); BleLog.add("retrying connection"); BleTransport.connect(context, device, CONNECT_TIMEOUT) }
+          ?: return onError(FailureCode.NOT_REACHABLE, "connection failed")
+      }
+      BleTransport.remember(context, name, conn.address)
       connection = conn
       block(conn)
     } catch (e: CancellationException) {
@@ -337,7 +368,7 @@ object TeslaController {
     if (fault == FAULT_UNKNOWN_KEY_ID) {
       BleException(FailureCode.KEY_NOT_PAIRED, "key not paired with this car")
     } else {
-      BleException(FailureCode.VEHICLE_REJECTED, "vehicle fault $fault", resync = fault in RESYNC_FAULTS)
+      BleException(FailureCode.VEHICLE_REJECTED, faultName(fault), resync = fault in RESYNC_FAULTS)
     }
 
   private suspend fun receive(conn: BleConnection, timeoutMs: Long): ByteArray? {
@@ -349,22 +380,4 @@ object TeslaController {
 
   private fun ParsedResponse.isFor(routing: ByteArray): Boolean = toRoutingAddress?.contentEquals(routing) == true
 
-  private fun addKeyEnvelope(owner: Boolean): ByteArray {
-    val role = if (owner) 2 else 3
-    val unsigned = buildProto {
-      message(16, buildProto {
-        message(5, buildProto {
-          message(1, buildProto { bytes(1, VehicleKey.publicKeyBytes()) })
-          enum(4, role)
-        })
-        message(6, buildProto { enum(1, 7) })
-      })
-    }
-    return buildProto {
-      message(1, buildProto {
-        bytes(2, unsigned)
-        enum(3, 2)
-      })
-    }
-  }
 }

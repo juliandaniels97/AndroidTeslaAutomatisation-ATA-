@@ -81,21 +81,23 @@ private fun WearApp() {
   ) { result ->
     val run = pendingAfterPerm
     pendingAfterPerm = null
-    if (result.values.all { it }) run?.invoke()
+    if (WearControl.hasBlePermission(context)) run?.invoke()
   }
   fun withBle(block: () -> Unit) {
     if (WearControl.hasBlePermission(context)) {
       block()
     } else {
       pendingAfterPerm = block
-      blePermLauncher.launch(arrayOf(Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_SCAN))
+      blePermLauncher.launch(org.tfv.ata.core.ble.TeslaController.BLE_PERMISSIONS)
     }
   }
 
   // Ask for Bluetooth right away once a car is synced: the phone's watch-pairing assistant needs it.
   LaunchedEffect(vin) {
-    if (vin.isNotBlank() && WearControl.directSupported && !WearControl.hasBlePermission(context)) {
-      blePermLauncher.launch(arrayOf(Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_SCAN))
+    if (vin.isNotBlank() && WearControl.directSupported &&
+      (!WearControl.hasBlePermission(context) || !org.tfv.ata.core.ble.BleTransport.hasLocationPermission(context))
+    ) {
+      blePermLauncher.launch(org.tfv.ata.core.ble.TeslaController.BLE_PERMISSIONS)
     }
   }
 

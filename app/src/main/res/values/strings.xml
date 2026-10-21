@@ -266,10 +266,10 @@
     <string name="pair_added_next">This phone can now control the car over Bluetooth. Tip: rename the key in the car under Controls → Locks.</string>
     <string name="pair_awaiting_next">If the car showed \"Key added\", everything is fine: just try a Bluetooth action. Otherwise start again and place the key card on the reader as soon as the car asks.</string>
     <string name="pair_retry">Try again</string>
-    <string name="pair_help_not_found">• Check the VIN (windscreen, bottom left, or vehicle registration).\n• Stay in the car or within about 2 m.\n• Wake the car: open a door or tap the screen.\n• Turn Bluetooth off and on again on the phone.</string>
+    <string name="pair_help_not_found">• Allow location for ATA and turn location on (Android hides the car\'s Bluetooth signal otherwise).\n• Check the VIN (windscreen, bottom left, or vehicle registration).\n• Stay in the car or within about 2 m.\n• Wake the car: open a door or tap the screen.\n• Turn Bluetooth off and on again.</string>
     <string name="pair_help_bluetooth">Turn on Bluetooth (button above), then start again.</string>
     <string name="pair_help_permission">Allow \"Nearby devices\" (button above), then start again.</string>
-    <string name="pair_help_rejected">The car rejected the request. Make sure nobody cancelled the prompt on the car screen and that the car has fewer than 19 keys (Controls → Locks).</string>
+    <string name="pair_help_rejected">The car rejected the request (reason in brackets above). If the prompt on the car screen was cancelled, start again. If the problem stays, please send a bug report: it contains the exact reply of the car.</string>
     <string name="pair_help_no_response">The car did not answer. Wake it (open a door) and start again.</string>
     <string name="pair_help_general">Start again close to the car. If it keeps failing, restart Bluetooth on the phone.</string>
     <string name="pair_fingerprint">Key ID of this phone (to find it in the car\'s key list)</string>
@@ -330,7 +330,7 @@
     <string name="wear_pair_vin_hint">The watch doesn\'t have the selected car yet.</string>
     <string name="wear_pair_sync">Send</string>
     <string name="wear_pair_check_permission">Bluetooth permission on the watch</string>
-    <string name="wear_pair_permission_hint">Open ATA on the watch and allow \"Nearby devices\", then check again.</string>
+    <string name="wear_pair_permission_hint">Open ATA on the watch and allow \"Nearby devices\" and \"Location\", then check again.</string>
     <string name="wear_pair_check_bluetooth">Bluetooth on the watch on</string>
     <string name="wear_pair_bluetooth_hint">Turn on Bluetooth in the watch settings, then check again.</string>
     <string name="wear_pair_tick_near">I am in the car or right next to it with the watch</string>
@@ -339,4 +339,11 @@
     <string name="wear_pair_test_failed">The watch could not reach the car.</string>
     <string name="wear_pair_start">Pair watch</string>
     <string name="wear_paired_next">The watch can now control the car directly over Bluetooth. Direct control was turned on on the watch.</string>
+    <string name="pair_check_location_permission">Location permission (while using the app)</string>
+    <string name="pair_location_why">Android only shows the car\'s Bluetooth signal (an iBeacon) to apps with location access. ATA doesn\'t use your location.</string>
+    <string name="pair_check_location_on">Location turned on</string>
+    <string name="pair_location_on_why">Without location turned on, Android finds no Bluetooth beacons, including the car.</string>
+    <string name="wear_pair_check_location_permission">Location permission on the watch</string>
+    <string name="wear_pair_check_location_on">Location on the watch on</string>
+    <string name="wear_pair_location_on_hint">Turn on location in the watch settings (Android finds the car\'s Bluetooth signal only then), then check again.</string>
 </resources>
