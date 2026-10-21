@@ -308,10 +308,9 @@ Keep the `.jks` file and its passwords safe and **out of git** — losing them m
 signed updates that install over an existing install.
 
 ## Screenshots:
-<img width="320" alt="Screenshot_20261021_130113_ATA  Android Tesla Automatisation" src="https://github.com/user-attachments/assets/6ff48488-9be4-40d1-8479-cf973f9fefd4" />
-<img width="640" alt="58774-08-18_01-39-53_id64784_Screenshots" src="https://github.com/user-attachments/assets/59111c73-0328-4b62-8735-a25e39e538b1" />
-<img width="640" alt="Screenshot_20261021_130053_ATA  Android Tesla Automatisation" src="https://github.com/user-attachments/assets/90265a16-a418-432d-b054-3460e451ae73" />
-<img width="320" alt="Screenshot_20261021_130036_ATA  Android Tesla Automatisation" src="https://github.com/user-attachments/assets/dc471d71-8da1-4178-9cf6-b5bf36d15dd8" />
+<img width="1832" height="800" alt="image-1792595409759" src="https://github.com/user-attachments/assets/17b9e633-1670-4330-b8b8-5beb92775a66" />
+<img width="1832" height="800" alt="image-1792595423405" src="https://github.com/user-attachments/assets/381bafba-b584-49ca-8475-b1e1b420e24b" />
+
 
 
 ## Legal
