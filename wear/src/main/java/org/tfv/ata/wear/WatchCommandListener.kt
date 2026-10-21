@@ -65,7 +65,12 @@ class WatchCommandListener : WearableListenerService() {
     }
     send(context, phone, state(context).copy(running = "probe"))
     val result = withContext(Dispatchers.IO) { TeslaController.probe(context, WearPrefs.vin(context)) }
-    send(context, phone, state(context).copy(probe = if (result.reached) "ok" else "fail", code = result.code?.name.orEmpty()))
+    val probe = when {
+      !result.reached -> "fail"
+      result.paired == true -> "paired"
+      else -> "ok"
+    }
+    send(context, phone, state(context).copy(probe = probe, code = result.code?.name.orEmpty()))
   }
 
   private suspend fun pair(context: Context, phone: String) {

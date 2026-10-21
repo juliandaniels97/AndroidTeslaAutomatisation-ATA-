@@ -15,6 +15,8 @@ internal sealed interface AppReply {
 }
 
 internal object VcsecReply {
+  private const val WL_ALREADY_ON_LIST = 13
+
   private const val VEHICLE_STATUS = 1
   private const val COMMAND_STATUS = 4
   private const val NOMINAL_ERROR = 46
@@ -45,14 +47,64 @@ internal object VcsecReply {
     val msg = ProtoReader(payload)
     msg.message(NOMINAL_ERROR)?.let { return AppReply.Error("VCSEC error ${it.varint(1) ?: 0}") }
     val status = msg.message(COMMAND_STATUS) ?: return AppReply.KeepWaiting
+    val info = status.message(3)?.varint(1)?.toInt() ?: 0
+    // The car reports ERROR when the key is already on its list: for pairing that means "done".
+    if (info == WL_ALREADY_ON_LIST) return AppReply.Done
     // CommandStatus.operationStatus: 0 OK, 1 WAIT (e.g. waiting for the key card tap), 2 ERROR.
     when (status.varint(1)?.toInt() ?: 0) {
       1 -> return AppReply.KeepWaiting
-      2 -> return AppReply.Error("VCSEC operation error ${status.message(3)?.varint(1) ?: 0}")
+      2 -> return AppReply.Error(whitelistInfoName(info))
     }
-    val whitelist = status.message(3) ?: return AppReply.KeepWaiting
-    val info = whitelist.varint(1)?.toInt() ?: 0
-    return if (info == 0) AppReply.Done else AppReply.Error("key list error $info")
+    if (!status.has(3)) return AppReply.KeepWaiting
+    return if (info == 0) AppReply.Done else AppReply.Error(whitelistInfoName(info))
+  }
+
+  /** True if the reply says the key is already on the car's key list. */
+  fun alreadyOnWhitelist(payload: ByteArray?): Boolean =
+    payload != null && ProtoReader(payload).message(COMMAND_STATUS)?.message(3)?.varint(1)?.toInt() == WL_ALREADY_ON_LIST
+
+  /** WhitelistOperation_information_E as readable text. */
+  fun whitelistInfoName(info: Int): String {
+    val name = when (info) {
+      0 -> "none"
+      1 -> "undocumented error"
+      2 -> "no permission to remove oneself"
+      3 -> "key fob slots full"
+      4 -> "key list full"
+      5 -> "no permission to add"
+      6 -> "invalid public key"
+      7 -> "no permission to remove"
+      8 -> "no permission to change permissions"
+      9 -> "attempting to elevate other above oneself"
+      10 -> "attempting to demote superior"
+      11 -> "attempting to remove own permissions"
+      12 -> "public key not on key list"
+      WL_ALREADY_ON_LIST -> "key already on key list"
+      14 -> "not allowed to add unless on reader"
+      15 -> "factory mode: modifying outside of factory mode"
+      16 -> "factory mode: attempting to add permanent key"
+      17 -> "factory mode: attempting to remove permanent key"
+      18 -> "keychain full"
+      19 -> "attempting to add key without role"
+      20 -> "attempting to add key with service role"
+      21 -> "non-service key attempting to add service tech"
+      22 -> "service key attempting to add service tech outside service mode"
+      else -> "unknown"
+    }
+    return "key list $info ($name)"
+  }
+
+  /** One-line description of a VCSEC reply for the log. */
+  fun describe(payload: ByteArray?): String {
+    if (payload == null) return "empty"
+    val msg = ProtoReader(payload)
+    msg.message(NOMINAL_ERROR)?.let { return "nominal error ${it.varint(1) ?: 0}" }
+    if (msg.has(3)) return "authentication request to another key (ignored)"
+    if (msg.has(VEHICLE_STATUS)) return "vehicle status"
+    val status = msg.message(COMMAND_STATUS) ?: return "no command status"
+    val op = when (status.varint(1)?.toInt() ?: 0) { 0 -> "OK"; 1 -> "WAIT"; 2 -> "ERROR"; else -> "?" }
+    val info = status.message(3)?.varint(1)?.toInt()
+    return "operation=$op" + (info?.let { " " + whitelistInfoName(it) } ?: "")
   }
 
   /** VCSEC VehicleStatus from a GET_STATUS reply, or null. */
@@ -67,7 +119,7 @@ internal object VcsecReply {
 
   private fun whitelistError(status: ProtoReader): String? {
     val code = status.message(3)?.varint(1)?.toInt() ?: 0
-    return if (code != 0) "key list error $code" else null
+    return if (code != 0) whitelistInfoName(code) else null
   }
 }
 

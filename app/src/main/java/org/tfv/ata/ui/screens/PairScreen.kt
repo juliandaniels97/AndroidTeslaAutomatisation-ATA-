@@ -289,7 +289,10 @@ private fun ProbeResultText(result: ProbeResult) {
   val context = LocalContext.current
   val text = if (result.reached) {
     stringResource(
-      R.string.pair_test_ok,
+      when (result.paired) {
+        true -> R.string.pair_test_ok_paired
+        else -> R.string.pair_test_ok
+      },
       stringResource(if (result.locked == true) R.string.pair_test_locked else R.string.pair_test_unlocked),
     )
   } else {

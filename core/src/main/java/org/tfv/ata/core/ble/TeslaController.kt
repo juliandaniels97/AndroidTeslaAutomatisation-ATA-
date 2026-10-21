@@ -24,7 +24,14 @@ enum class PairStep { SEARCHING, CONNECTING, WAITING_FOR_CARD }
 data class PairResult(val outcome: PairOutcome, val code: FailureCode? = null, val detail: String = "")
 
 /** Result of [TeslaController.probe]: whether the car was reached and answered over Bluetooth. */
-data class ProbeResult(val reached: Boolean, val code: FailureCode? = null, val locked: Boolean? = null, val asleep: Boolean? = null)
+data class ProbeResult(
+  val reached: Boolean,
+  val code: FailureCode? = null,
+  val locked: Boolean? = null,
+  val asleep: Boolean? = null,
+  /** Whether this device's key is on the car's key list (null: not checked). */
+  val paired: Boolean? = null,
+)
 
 object TeslaController {
   private const val SCAN_TIMEOUT = 20_000L
@@ -121,7 +128,9 @@ object TeslaController {
           ProbeResult(false, FailureCode.NO_RESPONSE)
         } else {
           BleLog.add("status reply: locked=${status.locked} asleep=${status.asleep}")
-          ProbeResult(true, locked = status.locked, asleep = status.asleep)
+          val paired = runCatching { keyAccepted(conn, vin) }.getOrNull()
+          BleLog.add("key paired: $paired")
+          ProbeResult(true, locked = status.locked, asleep = status.asleep, paired = paired)
         }
       }
     }
@@ -150,6 +159,7 @@ object TeslaController {
         onStep(PairStep.WAITING_FOR_CARD)
         // Wait quietly: the car answers once the owner tapped the key card (or rejected the request).
         // No other requests meanwhile, so the prompt on the car screen isn't disturbed.
+        var alreadyListed = false
         val deadline = System.currentTimeMillis() + PAIR_TIMEOUT
         while (System.currentTimeMillis() < deadline) {
           val raw = receive(conn, deadline - System.currentTimeMillis()) ?: break
@@ -158,12 +168,17 @@ object TeslaController {
             BleLog.add("ignored reply for another app")
             continue
           }
-          BleLog.add("reply: domain=${parsed?.fromDomain} fault=${parsed?.fault?.let { faultName(it) }} payload=${(parsed?.protobufBytes ?: raw).hexPrefix()}")
+          val vcsec = parsed?.protobufBytes ?: raw
+          BleLog.add("reply: ${VcsecReply.describe(vcsec)} fault=${parsed?.fault ?: 0} payload=${vcsec.hexPrefix()}")
           if (parsed != null && parsed.fault != 0) {
             return@withVehicle PairResult(PairOutcome.FAILED, FailureCode.VEHICLE_REJECTED, faultName(parsed.fault))
           }
           // Replies may come as a RoutableMessage or as a bare FromVCSECMessage.
-          when (val reply = VcsecReply.forWhitelist(parsed?.protobufBytes ?: raw)) {
+          if (VcsecReply.alreadyOnWhitelist(vcsec)) {
+            BleLog.add("this key is already on the car's key list")
+            alreadyListed = true
+          }
+          when (val reply = VcsecReply.forWhitelist(vcsec)) {
             is AppReply.Error -> return@withVehicle PairResult(PairOutcome.FAILED, FailureCode.VEHICLE_REJECTED, reply.detail)
             AppReply.Done -> break
             else -> Unit
@@ -173,6 +188,9 @@ object TeslaController {
         if (keyAccepted(conn, vin)) {
           BleLog.add("key accepted by the car")
           return@withVehicle PairResult(PairOutcome.ADDED)
+        }
+        if (alreadyListed) {
+          return@withVehicle PairResult(PairOutcome.FAILED, FailureCode.VEHICLE_REJECTED, "key on the key list, but no session")
         }
         PairResult(PairOutcome.AWAITING_CONFIRMATION)
       }

@@ -346,4 +346,6 @@
     <string name="wear_pair_check_location_permission">Location permission on the watch</string>
     <string name="wear_pair_check_location_on">Location on the watch on</string>
     <string name="wear_pair_location_on_hint">Turn on location in the watch settings (Android finds the car\'s Bluetooth signal only then), then check again.</string>
+    <string name="pair_test_ok_paired">Connection works and this phone is already paired as a key (car %1$s). Bluetooth actions work now; no new pairing needed.</string>
+    <string name="wear_pair_test_paired">Connection from the watch works and the watch is already paired as a key. Direct control on the watch can be used now.</string>
 </resources>

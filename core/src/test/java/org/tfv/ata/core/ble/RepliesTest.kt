@@ -40,6 +40,33 @@ class RepliesTest {
   }
 
   @Test
+  fun keyAlreadyOnListCountsAsPaired() {
+    // Real reply after the key card tap: ERROR, whitelist info 13 (already on the list), signer = the card.
+    val reply = hex("220e08021a0a080d12060a047190efc6")
+    assertEquals(AppReply.Done, VcsecReply.forWhitelist(reply))
+    assertTrue(VcsecReply.alreadyOnWhitelist(reply))
+    assertTrue(VcsecReply.describe(reply).contains("already"))
+  }
+
+  @Test
+  fun whitelistErrorsAreReadable() {
+    val full = buildProto { message(4, buildProto { enum(1, 2); message(3, buildProto { enum(1, 4) }) }) }
+    assertEquals(AppReply.Error("key list 4 (key list full)"), VcsecReply.forWhitelist(full))
+  }
+
+  @Test
+  fun authenticationRequestsForOtherKeysAreIgnored() {
+    // FromVCSECMessage.authenticationRequest (3) with the key ID (SHA-1) of another key, as the car sends them.
+    val auth = buildProto {
+      message(3, buildProto { message(2, buildProto { bytes(1, ByteArray(20) { it.toByte() }) }); enum(3, 1) })
+    }
+    assertEquals(AppReply.KeepWaiting, VcsecReply.forWhitelist(auth))
+    assertTrue(VcsecReply.describe(auth).contains("authentication"))
+  }
+
+  private fun hex(s: String) = ByteArray(s.length / 2) { s.substring(it * 2, it * 2 + 2).toInt(16).toByte() }
+
+  @Test
   fun whitelistWaitStatusIsNotSuccess() {
     // WAIT with an (empty) whitelist status: the car still waits for the key card tap.
     val wait = buildProto { message(4, buildProto { enum(1, 1); message(3, buildProto { enum(1, 0) }) }) }

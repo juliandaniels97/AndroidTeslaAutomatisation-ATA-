@@ -346,4 +346,6 @@
     <string name="wear_pair_check_location_permission">Standort-Berechtigung auf der Uhr</string>
     <string name="wear_pair_check_location_on">Standort auf der Uhr eingeschaltet</string>
     <string name="wear_pair_location_on_hint">Standort in den Einstellungen der Uhr einschalten (nur dann findet Android das Bluetooth-Signal des Autos), dann erneut prüfen.</string>
+    <string name="pair_test_ok_paired">Verbindung klappt, und dieses Handy ist bereits als Schlüssel gekoppelt (Auto %1$s). Bluetooth-Aktionen funktionieren jetzt, eine neue Kopplung ist nicht nötig.</string>
+    <string name="wear_pair_test_paired">Verbindung von der Uhr klappt, und die Uhr ist bereits als Schlüssel gekoppelt. Die Direktsteuerung auf der Uhr kann jetzt genutzt werden.</string>
 </resources>

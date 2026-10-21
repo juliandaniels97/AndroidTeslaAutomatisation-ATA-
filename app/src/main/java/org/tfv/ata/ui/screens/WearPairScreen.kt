@@ -178,11 +178,15 @@ fun WearPairScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit, onRe
       }
       if (started == WearContract.WATCH_CMD_PROBE && running.isEmpty() && w != null && w.probe.isNotEmpty()) {
         val palette = AtaColors.current
+        val reached = w.probe == "ok" || w.probe == "paired"
         Text(
-          if (w.probe == "ok") stringResource(R.string.wear_pair_test_ok)
-          else stringResource(R.string.wear_pair_test_failed) + "\n\n" + stringResource(troubleshootingFor(code(w.code))),
+          when (w.probe) {
+            "paired" -> stringResource(R.string.wear_pair_test_paired)
+            "ok" -> stringResource(R.string.wear_pair_test_ok)
+            else -> stringResource(R.string.wear_pair_test_failed) + "\n\n" + stringResource(troubleshootingFor(code(w.code)))
+          },
           style = MaterialTheme.typography.bodySmall,
-          color = if (w.probe == "ok") palette.success else palette.danger,
+          color = if (reached) palette.success else palette.danger,
         )
       }
 
