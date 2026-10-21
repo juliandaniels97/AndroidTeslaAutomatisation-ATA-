@@ -1,0 +1,229 @@
+name: Build APKs
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - '**'
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      ATA_VERSION_CODE: ${{ github.run_number }}
+      ATA_KEYSTORE_BASE64: ${{ secrets.ATA_KEYSTORE_BASE64 }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Require release signing key
+        run: |
+          if [ -z "${ATA_KEYSTORE_BASE64}" ]; then
+            echo "::error::Secret ATA_KEYSTORE_BASE64 is not set. Release builds are never signed with a debug key."
+            exit 1
+          fi
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: 'platforms;android-37.0 build-tools;37.0.0 platform-tools'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Decode release keystore
+        env:
+          ATA_KEYSTORE_PASSWORD: ${{ secrets.ATA_KEYSTORE_PASSWORD }}
+          ATA_KEY_ALIAS: ${{ secrets.ATA_KEY_ALIAS }}
+          ATA_KEY_PASSWORD: ${{ secrets.ATA_KEY_PASSWORD }}
+        run: |
+          echo "${ATA_KEYSTORE_BASE64}" | base64 -d > "${RUNNER_TEMP}/ata-release.keystore"
+          {
+            echo "ATA_KEYSTORE_FILE=${RUNNER_TEMP}/ata-release.keystore"
+            echo "ATA_KEYSTORE_PASSWORD=${ATA_KEYSTORE_PASSWORD}"
+            echo "ATA_KEY_ALIAS=${ATA_KEY_ALIAS}"
+            echo "ATA_KEY_PASSWORD=${ATA_KEY_PASSWORD}"
+          } >> "$GITHUB_ENV"
+
+      - name: Unit tests
+        run: |
+          set -o pipefail
+          ./gradlew --no-daemon --stacktrace :core:testDebugUnitTest 2>&1 | tee -a build.log
+
+      - name: Build phone + wear APKs (arm64-v8a)
+        run: |
+          set -o pipefail
+          ./gradlew --no-daemon --stacktrace :app:assembleRelease :wear:assembleRelease 2>&1 | tee -a build.log
+
+      - name: Report build errors
+        if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          {
+            echo '### Build failed'
+            echo '```'
+            grep -nE "e: file|e: |error:|Error:|Unresolved reference|Compilation error|> Task .*FAILED|FAILURE:|What went wrong|Caused by:|Could not|Test.*FAILED|AssertionError|expected:" build.log | grep -viE "warning:|is deprecated" | head -150
+            echo '```'
+          } > errors.md
+          gh api "repos/${GITHUB_REPOSITORY}/commits/${GITHUB_SHA}/comments" -F body=@errors.md >/dev/null || true
+
+      - name: Collect APKs
+        run: |
+          mkdir -p dist
+          VERSION=$(grep '^versionName=' version.properties | cut -d= -f2)
+          cp app/build/outputs/apk/release/*.apk "dist/ATA-phone-v${VERSION}-arm64-v8a.apk"
+          # One watch APK for 64-bit (arm64-v8a) and 32-bit (armeabi-v7a) watches.
+          cp wear/build/outputs/apk/release/*.apk "dist/ATA-wear-v${VERSION}.apk"
+          ls -la dist
+
+      - name: Upload APKs
+        uses: actions/upload-artifact@v4
+        with:
+          name: apks
+          path: dist/*.apk
+
+  # Release gate: the minified release build must start on an emulator without crashing.
+  smoke:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: phone
+            module: app
+            api: 36
+            target: google_apis
+          - name: wear
+            module: wear
+            api: 34
+            target: android-wear
+    env:
+      ATA_KEYSTORE_BASE64: ${{ secrets.ATA_KEYSTORE_BASE64 }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: 'platforms;android-37.0 build-tools;37.0.0 platform-tools'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Decode release keystore
+        env:
+          ATA_KEYSTORE_PASSWORD: ${{ secrets.ATA_KEYSTORE_PASSWORD }}
+          ATA_KEY_ALIAS: ${{ secrets.ATA_KEY_ALIAS }}
+          ATA_KEY_PASSWORD: ${{ secrets.ATA_KEY_PASSWORD }}
+        run: |
+          echo "${ATA_KEYSTORE_BASE64}" | base64 -d > "${RUNNER_TEMP}/ata-release.keystore"
+          {
+            echo "ATA_KEYSTORE_FILE=${RUNNER_TEMP}/ata-release.keystore"
+            echo "ATA_KEYSTORE_PASSWORD=${ATA_KEYSTORE_PASSWORD}"
+            echo "ATA_KEY_ALIAS=${ATA_KEY_ALIAS}"
+            echo "ATA_KEY_PASSWORD=${ATA_KEY_PASSWORD}"
+          } >> "$GITHUB_ENV"
+      - name: Build release APK (all ABIs)
+        run: ./gradlew --no-daemon :${{ matrix.module }}:assembleRelease -PataAllAbis
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Launch on emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api }}
+          target: ${{ matrix.target }}
+          arch: x86_64
+          disable-animations: true
+          script: |
+            if [ "${{ matrix.name }}" = phone ]; then bash .github/smoke.sh "$(ls app/build/outputs/apk/release/*.apk | head -1)" phone "-n org.tfv.ata/.ui.MainActivity" "-n org.tfv.ata/.shortcut.CreateShortcutActivity" "-a org.tfv.ata.action.RUN -n org.tfv.ata/.automation.RunActionActivity --es action_id open_tesla_app" "-a org.tfv.ata.action.RUN -n org.tfv.ata/.automation.RunActionActivity --es action_id climate_on"; else bash .github/smoke.sh "$(ls wear/build/outputs/apk/release/*.apk | head -1)" wear "-n org.tfv.ata/.wear.WearMainActivity"; fi
+      - name: Post result
+        if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          { echo '### Smoke test ${{ matrix.name }} failed'; echo '```'; cat smoke-${{ matrix.name }}.txt 2>/dev/null | head -c 30000; echo '```'; } > out.md
+          gh api "repos/${GITHUB_REPOSITORY}/commits/${GITHUB_SHA}/comments" -F body=@out.md >/dev/null
+
+  publish:
+    needs: [build, smoke]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download APKs
+        uses: actions/download-artifact@v4
+        with:
+          name: apks
+          path: dist
+
+      - name: Move rolling tag to this commit
+        if: github.ref == 'refs/heads/main'
+        run: |
+          git tag -f "apk-${GITHUB_REF_NAME}"
+          git push -f origin "refs/tags/apk-${GITHUB_REF_NAME}"
+
+      - name: Publish APKs as pre-release
+        if: github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: apk-${{ github.ref_name }}
+          name: APK build (${{ github.ref_name }})
+          prerelease: true
+          files: dist/*.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # A new versionName on main (no tag v<version> yet) publishes the release and creates the tag.
+      - name: Detect new version
+        id: version
+        if: github.ref == 'refs/heads/main'
+        run: |
+          VERSION=$(grep '^versionName=' version.properties | cut -d= -f2)
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          if git ls-remote --exit-code --tags origin "refs/tags/v${VERSION}" >/dev/null; then
+            echo "new=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "new=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Publish versioned release
+        if: steps.version.outputs.new == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          target_commitish: ${{ github.sha }}
+          name: ATA v${{ steps.version.outputs.version }}
+          body_path: RELEASE_NOTES.md
+          prerelease: false
+          make_latest: true
+          files: dist/*.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish tagged release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ATA ${{ github.ref_name }}
+          body_path: RELEASE_NOTES.md
+          prerelease: false
+          files: dist/*.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

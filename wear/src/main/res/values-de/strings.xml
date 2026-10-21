@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ATA</string>
+    <string name="sent_to_phone">Ans Handy gesendet</string>
+    <string name="wear_sent_car">Ans Auto gesendet</string>
+    <string name="phone_unreachable">Handy nicht erreichbar</string>
+    <string name="wear_failed">Fehlgeschlagen (Auto oder Handy nicht erreichbar)</string>
+    <string name="wear_configure_on_phone">Aktionen in der Handy-App wählen → Einstellungen → Wear OS Uhr.</string>
+    <string name="wear_direct_control">Direktsteuerung</string>
+    <string name="wear_direct_on">Direktsteuerung: an</string>
+    <string name="wear_direct_off">Direktsteuerung: aus</string>
+    <string name="wear_direct_unsupported">Direktsteuerung braucht Wear OS 4 (Android 12) oder neuer. Befehle laufen über das Handy.</string>
+    <string name="wear_pair">Diese Uhr koppeln</string>
+    <string name="wear_pair_hint">Wähle in der Handy-App ein Fahrzeug, um es von der Uhr aus zu steuern.</string>
+    <string name="wear_paired_ok">Schlüssel im Auto hinzugefügt</string>
+    <string name="wear_pair_awaiting">Anfrage gesendet – im Auto mit der Schlüsselkarte bestätigen</string>
+    <string name="wear_pair_failed">Koppeln fehlgeschlagen</string>
+    <string name="wear_tap_again">Zum Bestätigen erneut tippen</string>
+    <string name="wear_confirm_label">Bestätigen: %1$s</string>
+    <string name="wear_locked">Entsperre zuerst die Uhr</string>
+    <string name="a_open_tesla_app">Tesla-App öffnen</string>
+    <string name="a_open_charging">Laden</string>
+    <string name="a_open_climate">Klima</string>
+    <string name="a_open_controls">Steuerung</string>
+    <string name="a_open_location">Standort</string>
+    <string name="a_navigate_home">Nach Hause navigieren</string>
+    <string name="a_navigate_work">Zur Arbeit navigieren</string>
+    <string name="a_share_location">Ziel teilen</string>
+</resources>

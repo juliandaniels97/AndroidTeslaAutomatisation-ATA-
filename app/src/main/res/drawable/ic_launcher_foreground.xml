@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Tesla-style headlight sweep -->
+    <path android:strokeWidth="4"
+        android:strokeLineCap="round"
+        android:strokeColor="#5FB8F2"
+        android:pathData="M26,28 L50,38 M82,28 L58,38" />
+
+    <!-- Automation: lightning bolt -->
+    <path android:pathData="M56,30 L48,40 L53,40 L50,47 L60,36 L55,36 L58,30 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient android:type="linear"
+                android:startX="48" android:startY="30"
+                android:endX="60" android:endY="47"
+                android:startColor="#FF6A3A" android:endColor="#E11C0B" />
+        </aapt:attr>
+    </path>
+
+    <!-- ATA wordmark with headlight glow gradient -->
+    <path android:strokeWidth="7.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M22,82 L32,48 L42,82 M26,66 L38,66 M44,48 L64,48 M54,48 L54,82 M66,82 L76,48 L86,82 M70,66 L82,66">
+        <aapt:attr name="android:strokeColor">
+            <gradient android:type="linear"
+                android:startX="54" android:startY="46"
+                android:endX="54" android:endY="84"
+                android:startColor="#FFFFFF" android:endColor="#8FDBFF" />
+        </aapt:attr>
+    </path>
+</vector>

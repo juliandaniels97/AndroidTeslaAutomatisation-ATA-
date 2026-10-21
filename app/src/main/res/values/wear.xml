@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:keep="@array/android_wear_capabilities">
+    <!-- Lets ATA's watch app find the phone that runs ATA (CapabilityClient). -->
+    <string-array name="android_wear_capabilities" translatable="false">
+        <item>ata_phone</item>
+    </string-array>
+</resources>

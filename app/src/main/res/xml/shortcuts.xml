@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="open_tesla_app"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/a_open_tesla_app">
+        <intent
+            android:action="org.tfv.ata.action.RUN"
+            android:targetPackage="org.tfv.ata"
+            android:targetClass="org.tfv.ata.automation.RunActionActivity"
+            android:data="ata://run?action=open_tesla_app" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="navigate_home"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/a_navigate_home">
+        <intent
+            android:action="org.tfv.ata.action.RUN"
+            android:targetPackage="org.tfv.ata"
+            android:targetClass="org.tfv.ata.automation.RunActionActivity"
+            android:data="ata://run?action=navigate_home" />
+    </shortcut>
+</shortcuts>
