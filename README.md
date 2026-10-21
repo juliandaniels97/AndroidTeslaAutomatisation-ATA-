@@ -15,12 +15,12 @@ tap — or an automation — triggers exactly the action you want.
 
 ## Downloads
 
-Built automatically for **64‑bit ARM (arm64‑v8a)** from `main`:
+Latest release **v1.3.1**, built for **64‑bit ARM (arm64‑v8a)**:
 
-- 📱 Phone APK: **[ATA-phone-v1.3.0-arm64-v8a.apk](https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-/releases/download/v1.3.0/ATA-phone-v1.3.0-arm64-v8a.apk)**
-- ⌚ Wear OS APK: **[ATA-wear-v1.3.0-arm64-v8a.apk](https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-/releases/download/v1.3.0/ATA-wear-v1.3.0-arm64-v8a.apk)**
+- 📱 Phone APK: **[ATA-phone-v1.3.1-arm64-v8a.apk](https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-/releases/download/v1.3.1/ATA-phone-v1.3.1-arm64-v8a.apk)**
+- ⌚ Wear OS APK: **[ATA-wear-v1.3.1-arm64-v8a.apk](https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-/releases/download/v1.3.1/ATA-wear-v1.3.1-arm64-v8a.apk)**
 
-Tagged releases (e.g. **v1.3.0**) are listed under [Releases](https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-/releases).
+All releases are listed under [Releases](https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-/releases).
 All release builds are signed with the same release key, so new versions install as an update over
 the old one. (Very early builds were signed with a public debug key; if ATA does not update over such a build,
 uninstall it once and pair the phone with the car again.)
@@ -29,7 +29,7 @@ uninstall it once and pair the phone with the car again.)
 
 | | Phone | Watch |
 |---|---|---|
-| OS | Android 12+ (minSdk 31) | Wear OS 3+ (Galaxy Watch 4 and newer, minSdk 30) |
+| OS | Android 12+ (minSdk 31, targets Android 17 / API 37) | Wear OS 3+ (Galaxy Watch 4 and newer, minSdk 30, targets API 37) |
 | CPU | arm64‑v8a | arm64‑v8a |
 | Needs the phone? | — | Relays to the phone by default, or **direct control** over BLE once the watch is paired |
 
@@ -106,13 +106,20 @@ The trust level comes **only** from ATA's own per‑install token — never from
 ## Automation
 
 ### Samsung Routines (recommended)
+
+> ⚠️ **Which actions can a routine run?** Samsung Routines only offers the **app shortcuts** ATA
+> publishes: the **4 actions of the icon menu** (Settings → *Menu & widgets*) plus the extra
+> **routine actions** you tick under Settings → *Menu & widgets* → *Samsung Routines* (up to about 11
+> more, depending on the device). Actions that need a value (address, charge limit …) can't be used
+> in routines. If an extra action doesn't appear in Routines on your device, only the 4 icon‑menu
+> actions work there — put the ones you need into the icon menu.
+
 Samsung Routines starts **app shortcuts**, and ATA's shortcuts carry the token, so routines are
 trusted:
 
-1. Pin the action you want (**Actions** tab → *Add to home screen*), or put it into the app‑icon menu
-   (Settings → *Menu & widgets*). Any action works — Basic and BLE, also with a value (e.g. a charge
-   limit) via the **ATA shortcut** picker (`Create shortcut`, offered by launchers and Tasker).
-2. In the routine, add the action **Open an app / app shortcut** and pick the ATA shortcut.
+1. Choose the actions under Settings → *Menu & widgets*: up to 4 in the **icon menu** and more under
+   **Samsung Routines**.
+2. In the routine, add the action **Open an app / app shortcut**, pick ATA and the action.
 3. For **ATA active / passive** there are shortcuts too (*ATA active*, *ATA passive* in the shortcut
    picker) — routines can't send broadcasts.
 
@@ -245,8 +252,8 @@ until the car confirms. After that, tap to lock/unlock like a card.
   protocol but **not yet verified on a real car**, so they may not work until tested on the vehicle.
 - **Proximity unlock** is not implemented — the setting is a placeholder and has no effect.
 - **Seat heater** has no BLE command mapped yet; the tile reports it as unavailable.
-- Whether Samsung Routines lists shortcuts created via the *ATA shortcut* picker depends on the
-  One UI version; pinned shortcuts and the app‑icon menu always work.
+- **Samsung Routines** only lists ATA's published app shortcuts (icon menu + routine actions, see
+  above); whether the extra routine actions appear depends on the One UI version.
 - Delays (`delay_ms`) are approximate: Android may postpone background work by a few minutes.
 - Tesla‑app section deep links are best‑effort and may just open the app on its main screen.
 
