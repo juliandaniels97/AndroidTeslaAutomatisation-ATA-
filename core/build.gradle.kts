@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
   alias(libs.plugins.android.library)
   alias(libs.plugins.kotlin.android)
@@ -6,7 +7,7 @@ plugins {
 
 android {
   namespace = "org.tfv.ata.core"
-  compileSdk = 35
+  compileSdk = 37
 
   defaultConfig {
     minSdk = 30
@@ -18,9 +19,12 @@ android {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
   }
-  kotlinOptions { jvmTarget = "17" }
   lint { abortOnError = true }
   testOptions { unitTests.isReturnDefaultValues = true }
+}
+
+kotlin {
+  compilerOptions { jvmTarget.set(JvmTarget.JVM_17) }
 }
 
 dependencies {

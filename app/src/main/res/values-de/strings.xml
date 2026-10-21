@@ -221,4 +221,8 @@
     <string name="value_amps">Ampere (%1$d–%2$d)</string>
     <string name="value_celsius">°C (%1$d–%2$d)</string>
     <string name="create_shortcut_for">Für: %1$s</string>
+    <string name="menu_routines_title">Samsung Routinen</string>
+    <string name="menu_routines_desc">Zusätzliche Aktionen für Routinen (auf diesem Gerät bis zu %1$d weitere). Das Icon-Menü zeigt weiterhin nur die 4 Aktionen oben.</string>
+    <string name="routines_hint_title">⚠️ Samsung Routinen: welche Aktionen gehen?</string>
+    <string name="routines_hint_text">Routinen können nur Aktionen starten, die ATA als App-Shortcut veröffentlicht: die bis zu 4 Aktionen des Icon-Menüs plus die zusätzlichen Routine-Aktionen unter Einstellungen → Menü &amp; Widgets → Samsung Routinen. Aktionen mit Wert (Adresse, Ladelimit …) gehen dort nicht. Erscheint eine zusätzliche Aktion auf deinem Gerät nicht in den Routinen, funktionieren nur die 4 Icon-Menü-Aktionen: lege die benötigten ins Icon-Menü.</string>
 </resources>

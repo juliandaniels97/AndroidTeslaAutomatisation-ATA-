@@ -90,6 +90,7 @@ fun AutomationScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit) {
       Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(16.dp),
       verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
+      RoutinesHint()
       Text(stringResource(R.string.automation_intro), style = MaterialTheme.typography.bodyMedium)
 
       if (!notifyAllowed) {

@@ -70,6 +70,11 @@ data class AtaSettings(
     AtaAction.OPEN_CHARGING.id,
     AtaAction.OPEN_CLIMATE.id,
   ),
+  /**
+   * Extra actions published as app shortcuts (after the 4 icon-menu ones) so Samsung Routines can pick them.
+   * Launchers show only the first 4 by rank in the icon menu.
+   */
+  val routineActionIds: List<String> = emptyList(),
   val widgetActionIds: List<String> = listOf(
     AtaAction.OPEN_TESLA_APP.id,
     AtaAction.NAVIGATE_HOME.id,

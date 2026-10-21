@@ -221,4 +221,8 @@
     <string name="value_amps">Amps (%1$d–%2$d)</string>
     <string name="value_celsius">°C (%1$d–%2$d)</string>
     <string name="create_shortcut_for">For: %1$s</string>
+    <string name="menu_routines_title">Samsung Routines</string>
+    <string name="menu_routines_desc">Extra actions for routines (up to %1$d more on this device). The launcher menu keeps showing only the 4 actions above.</string>
+    <string name="routines_hint_title">⚠️ Samsung Routines: which actions are available?</string>
+    <string name="routines_hint_text">Routines can only start actions that ATA publishes as app shortcuts: the up to 4 actions of the icon menu, plus the extra routine actions chosen under Settings → Menu &amp; widgets → Samsung Routines. Actions with a value (address, charge limit …) can't be used there. If an extra action doesn't show up in Routines on your device, only the 4 icon-menu actions work: put the ones you need into the icon menu.</string>
 </resources>

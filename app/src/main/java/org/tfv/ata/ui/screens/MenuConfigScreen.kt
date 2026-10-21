@@ -37,6 +37,10 @@ fun MenuConfigScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit) {
   val funcA = AtaAction.entries.filter { it.category == AtaCategory.FUNCTION_A && it.enabled }
   val menu = state.settings.launcherMenuActionIds
   val widget = state.settings.widgetActionIds
+  val routine = state.settings.routineActionIds
+  val context = androidx.compose.ui.platform.LocalContext.current
+  val maxExtra = (org.tfv.ata.shortcut.ShortcutSync.maxPublished(context) - menu.size).coerceAtLeast(0)
+  val routineChoices = (funcB + funcA).filter { !it.needsValue && it.id !in menu }
 
   Scaffold(
     topBar = {
@@ -65,6 +69,18 @@ fun MenuConfigScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit) {
         val checked = action.id in menu
         CheckRow(stringResource(ActionInfo.labelRes(action)), checked, enabled = checked || menu.size < 4) {
           toggleMenu(vm, action, checked)
+        }
+      }
+
+      Text(stringResource(R.string.menu_routines_title), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(top = 16.dp))
+      RoutinesHint()
+      Text(stringResource(R.string.menu_routines_desc, maxExtra), style = MaterialTheme.typography.bodySmall)
+      routineChoices.forEach { action ->
+        val checked = action.id in routine
+        CheckRow(stringResource(ActionInfo.labelRes(action)), checked, enabled = checked || routine.count { it !in menu } < maxExtra) {
+          vm.updateSettings { s ->
+            s.copy(routineActionIds = if (checked) s.routineActionIds - action.id else s.routineActionIds + action.id)
+          }
         }
       }
 
@@ -99,6 +115,29 @@ private fun toggleWidget(vm: AtaViewModel, action: AtaAction, checked: Boolean) 
   vm.updateSettings { s ->
     val list = if (checked) s.widgetActionIds - action.id else s.widgetActionIds + action.id
     s.copy(widgetActionIds = list)
+  }
+}
+
+/** Prominent note: Samsung Routines can only start actions ATA publishes as app shortcuts. */
+@Composable
+fun RoutinesHint(modifier: Modifier = Modifier) {
+  androidx.compose.material3.Card(
+    colors = androidx.compose.material3.CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer),
+    modifier = modifier.fillMaxWidth().padding(vertical = 6.dp),
+  ) {
+    Column(Modifier.padding(12.dp)) {
+      Text(
+        stringResource(R.string.routines_hint_title),
+        style = MaterialTheme.typography.titleSmall,
+        color = MaterialTheme.colorScheme.onTertiaryContainer,
+      )
+      Text(
+        stringResource(R.string.routines_hint_text),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onTertiaryContainer,
+        modifier = Modifier.padding(top = 4.dp),
+      )
+    }
   }
 }
 

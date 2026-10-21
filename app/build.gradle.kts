@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.util.Properties
 
 plugins {
@@ -13,12 +14,12 @@ val versionProps = Properties().apply {
 
 android {
   namespace = "org.tfv.ata"
-  compileSdk = 35
+  compileSdk = 37
 
   defaultConfig {
     applicationId = "org.tfv.ata"
     minSdk = 31
-    targetSdk = 35
+    targetSdk = 37
     versionCode = (System.getenv("ATA_VERSION_CODE")?.toIntOrNull()) ?: versionProps.getProperty("versionCode").toInt()
     versionName = versionProps.getProperty("versionName")
     ndk { abiFilters += listOf("arm64-v8a") }
@@ -61,8 +62,11 @@ android {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
   }
-  kotlinOptions { jvmTarget = "17" }
   lint { abortOnError = true }
+}
+
+kotlin {
+  compilerOptions { jvmTarget.set(JvmTarget.JVM_17) }
 }
 
 dependencies {

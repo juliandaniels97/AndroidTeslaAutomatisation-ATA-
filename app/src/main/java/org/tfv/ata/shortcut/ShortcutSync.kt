@@ -29,10 +29,9 @@ object ShortcutSync {
     CoroutineScope(Dispatchers.Default).launch {
       val settings = store.settings.first()
       val token = store.triggerToken()
-      val dynamic = settings.launcherMenuActionIds
-        .filter { AtaAction.fromId(it) != null }
-        .take(4)
-        .map { build(app, "dyn_$it", it, null, token) }
+      // Icon-menu actions first (rank 0–3: the launcher shows these), then the extra routine actions.
+      val ids = publishedActionIds(app, settings.launcherMenuActionIds, settings.routineActionIds)
+      val dynamic = ids.mapIndexed { rank, id -> build(app, "dyn_$id", id, null, token, rank) }
       runCatching { ShortcutManagerCompat.setDynamicShortcuts(app, dynamic) }
       runCatching {
         val pinned = ShortcutManagerCompat.getShortcuts(app, ShortcutManagerCompat.FLAG_MATCH_PINNED)
@@ -45,6 +44,17 @@ object ShortcutSync {
         if (pinned.isNotEmpty()) ShortcutManagerCompat.updateShortcuts(app, pinned)
       }
     }
+  }
+
+  /** Max number of app shortcuts this launcher accepts (usually 15); Samsung Routines lists these. */
+  fun maxPublished(context: Context): Int =
+    runCatching { ShortcutManagerCompat.getMaxShortcutCountPerActivity(context) }.getOrDefault(5).coerceIn(4, 15)
+
+  fun publishedActionIds(context: Context, menu: List<String>, routine: List<String>): List<String> {
+    val valid = { id: String -> AtaAction.fromId(id)?.let { !it.needsValue } == true }
+    val first = menu.filter(valid).distinct().take(4)
+    val extra = routine.filter { valid(it) && it !in first }.distinct()
+    return (first + extra).take(maxPublished(context))
   }
 
   fun pinToHome(context: Context, action: AtaAction, value: String? = null) = pinToHome(context, action.id, value)
@@ -71,7 +81,7 @@ object ShortcutSync {
     return if (value.isNullOrBlank()) base else "$base: $value"
   }
 
-  private fun build(context: Context, id: String, actionId: String, value: String?, token: String): ShortcutInfoCompat {
+  private fun build(context: Context, id: String, actionId: String, value: String?, token: String, rank: Int = 0): ShortcutInfoCompat {
     val label = label(context, actionId, value)
     val intent = Intent(context, RunActionActivity::class.java).apply {
       action = IntentContract.ACTION_RUN
@@ -84,6 +94,7 @@ object ShortcutSync {
       .setLongLabel(label)
       .setIcon(IconCompat.createWithResource(context, R.mipmap.ic_launcher))
       .setIntent(intent)
+      .setRank(rank)
       .build()
   }
 }

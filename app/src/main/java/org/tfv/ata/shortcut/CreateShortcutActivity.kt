@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
@@ -54,7 +55,7 @@ class CreateShortcutActivity : ComponentActivity() {
       AtaTheme(themeMode = ThemeMode.DARK, dynamicColor = false) {
         var valueAction by remember { mutableStateOf<AtaAction?>(null) }
         Surface(Modifier.fillMaxSize()) {
-          Column(Modifier.padding(16.dp)) {
+          Column(Modifier.systemBarsPadding().padding(16.dp)) {
             Text(stringResource(R.string.create_shortcut_title), style = MaterialTheme.typography.titleLarge)
             if (caller != null) {
               Text(
