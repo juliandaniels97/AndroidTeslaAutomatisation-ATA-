@@ -1,13 +1,7 @@
-## ATA v1.3.1
+## ATA v1.3.2 — Absturz beim Start behoben
 
-### Samsung Routinen
-- **Mehr Aktionen für Routinen:** Routinen bieten nur die App-Shortcuts an, die ATA veröffentlicht. Bisher waren das nur die 4 Aktionen des Icon-Menüs. Neu unter *Einstellungen → Menü & Widgets → Samsung Routinen*: zusätzliche Aktionen auswählen (je nach Gerät bis zu ca. 11 weitere). Das Icon-Menü zeigt weiterhin nur die 4 gewählten Aktionen.
-- **Deutlicher Hinweis** in *Menü & Widgets* und *Automation*, welche Aktionen in Routinen verfügbar sind. Erscheinen die zusätzlichen Aktionen auf einem Gerät nicht, gehen in Routinen nur die 4 Icon-Menü-Aktionen.
+- **Behoben:** v1.3.1 stürzte direkt beim Start ab (alle Android-Versionen). Ursache war der Code-Optimierer (R8) des neuen Android Gradle Plugin 9: Er hat einen Konstruktor entfernt, den WorkManager beim App-Start per Reflection braucht (`WorkDatabase_Impl`). Die nötigen Keep-Regeln sind ergänzt.
+- **Neu im Build:** Jedes Release wird vor der Veröffentlichung automatisch auf einem Android-16-Emulator (Telefon) und einem Wear-OS-Emulator (Uhr) gestartet. Stürzt die App ab, wird nichts veröffentlicht.
+- Alle Neuerungen aus v1.3.1 (targetSdk 37, mehr Aktionen für Samsung Routinen) sind enthalten.
 
-### Technik
-- **targetSdk 37 (Android 17)**, compileSdk 37. Läuft weiterhin ab Android 12 (minSdk unverändert).
-- Toolchain aktualisiert: Android Gradle Plugin 9.4.1, Gradle 9.8.2, Kotlin 2.4.21, kotlinx-serialization 1.12.0.
-- NFC-Tag- und Shortcut-Bildschirme berücksichtigen Status- und Navigationsleiste (Edge-to-Edge).
-
-### Hinweise
-- BLE-Funktionen, NFC-Schlüsselkarte und Uhr-Direktsteuerung sind weiterhin **BETA** und nicht an einem echten Auto verifiziert.
+BLE-Funktionen, NFC-Schlüsselkarte und Uhr-Direktsteuerung bleiben **BETA**.
