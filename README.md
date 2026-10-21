@@ -9,7 +9,8 @@ tap — or an automation — triggers exactly the action you want.
 >
 > **Commercial use requires prior written permission** from the author — see [Legal](#legal).
 
-<img width="1440" height="2964" alt="Screenshot_20261021_130000_ATA  Android Tesla Automatisation" src="https://github.com/user-attachments/assets/9fa60ba9-cd46-47d9-8e0d-c394c7df635b" />
+<img width="410" alt="Neon-ATA-Logo mit Flügelblitz" src="https://github.com/user-attachments/assets/bb4cdebf-f178-4cd7-a835-c01ea2eead8a" />
+<img width="200" alt="Screenshot_20261021_130000_ATA  Android Tesla Automatisation" src="https://github.com/user-attachments/assets/9fa60ba9-cd46-47d9-8e0d-c394c7df635b" />
 
 
 ## Downloads
