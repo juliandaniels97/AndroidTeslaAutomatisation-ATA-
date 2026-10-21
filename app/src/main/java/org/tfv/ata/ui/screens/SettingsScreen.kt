@@ -18,6 +18,7 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.AutoMode
 import androidx.compose.material.icons.filled.BugReport
+import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Nfc
@@ -70,6 +71,7 @@ fun SettingsScreen(
   onAbout: () -> Unit,
   onGuide: () -> Unit,
   onReport: () -> Unit,
+  onKeyCard: () -> Unit,
 ) {
   val s = state.settings
   val context = LocalContext.current
@@ -206,6 +208,7 @@ fun SettingsScreen(
       SwitchRow(stringResource(R.string.nfc_keycard), stringResource(R.string.nfc_keycard_desc), s.nfcKeyCard) {
         vm.updateSettings { it.copy(nfcKeyCard = it.nfcKeyCard.not()) }
       }
+      LinkRow(stringResource(R.string.keycard_title), Icons.Filled.CreditCard, onKeyCard)
       if (s.nfcKeyCard) KeyCardHint()
 
       HorizontalDivider()
@@ -285,6 +288,7 @@ private fun SwitchRow(title: String, desc: String?, checked: Boolean, onToggle: 
 @Composable
 private fun KeyCardHint() {
   val context = LocalContext.current
+  NfcOffCard()
   val teslaApp = remember { org.tfv.ata.nfc.KeyCardRegistration.teslaAppInstalled(context) }
   androidx.compose.material3.Card(
     colors = androidx.compose.material3.CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),

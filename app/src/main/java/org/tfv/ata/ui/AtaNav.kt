@@ -11,6 +11,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -26,6 +27,7 @@ import org.tfv.ata.ui.screens.AutomationScreen
 import org.tfv.ata.ui.screens.GuideScreen
 import org.tfv.ata.ui.screens.GuideTargets
 import org.tfv.ata.ui.screens.HomeScreen
+import org.tfv.ata.ui.screens.KeyCardScreen
 import org.tfv.ata.ui.screens.MenuConfigScreen
 import org.tfv.ata.ui.screens.PairScreen
 import org.tfv.ata.ui.screens.ReportScreen
@@ -33,6 +35,7 @@ import org.tfv.ata.ui.screens.SettingsScreen
 import org.tfv.ata.ui.screens.VehicleScreen
 import org.tfv.ata.ui.screens.VehiclesScreen
 import org.tfv.ata.ui.screens.WearConfigScreen
+import org.tfv.ata.ui.screens.WearKeyCardScreen
 import org.tfv.ata.ui.screens.WearPairScreen
 
 private enum class Tab(val route: String, val labelRes: Int) {
@@ -42,8 +45,14 @@ private enum class Tab(val route: String, val labelRes: Int) {
 }
 
 @Composable
-fun AtaNavHost(vm: AtaViewModel, state: AtaUiState) {
+fun AtaNavHost(vm: AtaViewModel, state: AtaUiState, pendingRoute: String? = null, onRouteShown: () -> Unit = {}) {
   val nav = rememberNavController()
+  LaunchedEffect(pendingRoute) {
+    if (pendingRoute != null) {
+      nav.navigate(pendingRoute) { launchSingleTop = true }
+      onRouteShown()
+    }
+  }
   val backStack by nav.currentBackStackEntryAsState()
   val currentRoute = backStack?.destination?.route
 
@@ -98,15 +107,29 @@ fun AtaNavHost(vm: AtaViewModel, state: AtaUiState) {
           onAbout = { nav.navigate("about") },
           onGuide = { nav.navigate("guide") },
           onReport = { nav.navigate("report") },
+          onKeyCard = { nav.navigate("nfc_card") },
         )
       }
       composable("vehicles") { VehiclesScreen(vm, state, onBack = { nav.popBackStack() }) }
       composable("menu") { MenuConfigScreen(vm, state, onBack = { nav.popBackStack() }) }
-      composable("wear") { WearConfigScreen(vm, state, onBack = { nav.popBackStack() }, onPairWatch = { nav.navigate("wear_pair") }) }
+      composable("wear") {
+        WearConfigScreen(
+          vm, state,
+          onBack = { nav.popBackStack() },
+          onPairWatch = { nav.navigate("wear_pair") },
+          onWatchKeyCard = { nav.navigate("wear_nfc_card") },
+        )
+      }
+      composable("wear_nfc_card") {
+        WearKeyCardScreen(onBack = { nav.popBackStack() }, onReport = { nav.navigate("report") })
+      }
       composable("wear_pair") {
         WearPairScreen(vm, state, onBack = { nav.popBackStack() }, onReport = { nav.navigate("report") })
       }
       composable("report") { ReportScreen(onBack = { nav.popBackStack() }) }
+      composable("nfc_card") {
+        KeyCardScreen(vm, state, onBack = { nav.popBackStack() }, onReport = { nav.navigate("report") })
+      }
       composable("automation") { AutomationScreen(vm, state, onBack = { nav.popBackStack() }) }
       composable("about") { AboutScreen(onBack = { nav.popBackStack() }) }
       composable("pair") {
@@ -127,6 +150,7 @@ fun AtaNavHost(vm: AtaViewModel, state: AtaUiState) {
             menu = { nav.navigate("menu") },
             wear = { nav.navigate("wear") },
             automation = { nav.navigate("automation") },
+            keyCard = { nav.navigate("nfc_card") },
           ),
         )
       }

@@ -109,6 +109,11 @@ fun PairScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit, onVehicl
   val running = pairState is PairUiState.Running
   val probe by vm.probe.collectAsStateWithLifecycle()
   val probing by vm.probing.collectAsStateWithLifecycle()
+  val pairedVins by remember { org.tfv.ata.core.ble.PairedKeys.vins(context) }.collectAsStateWithLifecycle()
+  // Already paired: no pairing steps, only the result and the connection test (re-pairing on request).
+  val alreadyPaired = vehicle != null && Vin.normalize(vehicle.vin) in pairedVins.orEmpty()
+  var repair by rememberSaveable { mutableStateOf(false) }
+  val showPairing = !alreadyPaired || repair || running
 
   Scaffold(
     topBar = {
@@ -181,33 +186,37 @@ fun PairScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit, onVehicl
         },
       )
 
-      GuideSection(stringResource(R.string.pair_section_car))
-      TickRow(stringResource(R.string.pair_tick_near), nearCar) { nearCar = it }
-      TickRow(stringResource(R.string.pair_tick_awake), carAwake) { carAwake = it }
-      TickRow(stringResource(R.string.pair_tick_card), cardReady) { cardReady = it }
+      if (alreadyPaired && !running) PairedCard(showRepair = !repair, onRepair = { repair = true })
 
-      GuideSection(stringResource(R.string.pair_section_pair))
-      Button(
-        onClick = { vehicle?.let { vm.pairKey(it.vin) } },
-        enabled = ready && nearCar && carAwake && cardReady && !running && !probing,
-        modifier = Modifier.fillMaxWidth(),
-      ) {
-        if (running) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
-        else Icon(Icons.Filled.Key, contentDescription = null)
-        Text(
-          stringResource(if (running) R.string.pair_in_progress else R.string.pair_start),
-          modifier = Modifier.padding(start = 8.dp),
-        )
-      }
-      if (!ready || !(nearCar && carAwake && cardReady)) {
-        Text(
-          stringResource(R.string.pair_start_hint),
-          style = MaterialTheme.typography.bodySmall,
-          color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-      }
+      if (showPairing) {
+        GuideSection(stringResource(R.string.pair_section_car))
+        TickRow(stringResource(R.string.pair_tick_near), nearCar) { nearCar = it }
+        TickRow(stringResource(R.string.pair_tick_awake), carAwake) { carAwake = it }
+        TickRow(stringResource(R.string.pair_tick_card), cardReady) { cardReady = it }
 
-      PairProgress(pairState, onRetry = { vm.resetPairing() })
+        GuideSection(stringResource(R.string.pair_section_pair))
+        Button(
+          onClick = { vehicle?.let { vm.pairKey(it.vin) } },
+          enabled = ready && nearCar && carAwake && cardReady && !running && !probing,
+          modifier = Modifier.fillMaxWidth(),
+        ) {
+          if (running) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+          else Icon(Icons.Filled.Key, contentDescription = null)
+          Text(
+            stringResource(if (running) R.string.pair_in_progress else R.string.pair_start),
+            modifier = Modifier.padding(start = 8.dp),
+          )
+        }
+        if (!ready || !(nearCar && carAwake && cardReady)) {
+          Text(
+            stringResource(R.string.pair_start_hint),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+          )
+        }
+
+        PairProgress(pairState, onRetry = { vm.resetPairing() })
+      }
 
       GuideSection(stringResource(R.string.pair_section_test))
       Text(stringResource(R.string.pair_test_desc), style = MaterialTheme.typography.bodySmall)
@@ -279,6 +288,29 @@ internal fun PairProgress(
           OutlinedButton(onClick = onRetry) { Text(stringResource(R.string.pair_retry)) }
         }
       }
+    }
+  }
+}
+
+/** Shown instead of the pairing steps once this phone's key works with the car. */
+@Composable
+private fun PairedCard(showRepair: Boolean, onRepair: () -> Unit) {
+  Card(
+    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+    modifier = Modifier.fillMaxWidth(),
+  ) {
+    Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+      Text(
+        stringResource(R.string.pair_done_title),
+        style = MaterialTheme.typography.titleSmall,
+        color = MaterialTheme.colorScheme.onPrimaryContainer,
+      )
+      Text(
+        stringResource(R.string.pair_done_text),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onPrimaryContainer,
+      )
+      if (showRepair) TextButton(onClick = onRepair) { Text(stringResource(R.string.pair_repair)) }
     }
   }
 }

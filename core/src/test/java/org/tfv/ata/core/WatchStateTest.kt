@@ -9,8 +9,10 @@ class WatchStateTest {
     val state = WatchState(
       model = "SM-R930", sdk = 34, appVersion = "1.4.1", supported = true, permission = true, bluetoothOn = true,
       locationPermission = true, locationOn = false,
-      vin = "5YJ3E7EB0KF000000", directMode = false, running = "pair", step = "CONNECTING", outcome = "",
+      vin = "5YJ3E7EB0KF000000", directMode = false, paired = true, running = "pair", step = "CONNECTING", outcome = "",
       code = "NOT_REACHABLE", probe = "ok", log = "  0.0s  line one\n  1.2s  line two\n\nafter blank",
+      nfc = true, nfcOn = true, cardEmulation = true, keyCard = true, nfcContactAgeSec = 12,
+      nfcLog = "12:00:00.000  SELECT 7465 → 9000\n12:00:00.100  GET PUBLIC KEY → 9000 (65 bytes)",
     )
     assertEquals(state, WatchState.decode(state.encode()))
   }

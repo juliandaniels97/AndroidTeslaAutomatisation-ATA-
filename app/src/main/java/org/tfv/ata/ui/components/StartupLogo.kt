@@ -1,9 +1,13 @@
 package org.tfv.ata.ui.components
 
+import android.graphics.ImageDecoder
+import android.graphics.drawable.Animatable2
+import android.graphics.drawable.AnimatedImageDrawable
+import android.graphics.drawable.Drawable
+import android.widget.ImageView
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -11,40 +15,39 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
+import androidx.compose.ui.viewinterop.AndroidView
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withTimeoutOrNull
 import org.tfv.ata.R
 
-private const val ZOOM_MS = 1000
-private const val HOLD_MS = 150
-private const val FADE_MS = 280
-private const val ZOOM_FROM = 1.0f
-private const val ZOOM_TO = 1.08f
-private const val LOGO_ASPECT = 940f / 1672f
+/** The animation itself is 1.5 s (animated WebP, played once); this is only a safety net. */
+private const val MAX_ANIMATION_MS = 2_500L
+private const val HOLD_MS = 120L
+private const val FADE_MS = 250
+private const val ANIMATION_ASPECT = 400f / 736f
 
-/** Navy of the logo artwork's edges, also used as the system splash background. */
+/** Navy of the animation's edges, also used as the system splash background. */
 val SplashNavy = Color(0xFF01040F)
 
-/** Start animation: the original portrait logo fills the screen and slowly zooms in for one second. */
+/** Start animation: the ATA logo animation, full screen, played once (1.5 s), then fades into the app. */
 @Composable
 fun StartupLogo(onDone: () -> Unit) {
-  val zoom = remember { Animatable(ZOOM_FROM) }
+  val done by rememberUpdatedState(onDone)
+  val ended = remember { CompletableDeferred<Unit>() }
   val alpha = remember { Animatable(1f) }
 
   LaunchedEffect(Unit) {
-    coroutineScope {
-      async { zoom.animateTo(ZOOM_TO, tween(ZOOM_MS, easing = FastOutSlowInEasing)) }
-      delay((ZOOM_MS + HOLD_MS).toLong())
-      alpha.animateTo(0f, tween(FADE_MS, easing = FastOutSlowInEasing))
-    }
-    onDone()
+    withTimeoutOrNull(MAX_ANIMATION_MS) { ended.await() }
+    delay(HOLD_MS)
+    alpha.animateTo(0f, tween(FADE_MS, easing = FastOutSlowInEasing))
+    done()
   }
 
   BoxWithConstraints(
@@ -55,22 +58,36 @@ fun StartupLogo(onDone: () -> Unit) {
       .clickable(
         interactionSource = remember { MutableInteractionSource() },
         indication = null,
-        onClick = onDone,
+        onClick = { done() },
       ),
   ) {
-    // Portrait screens: crop so the artwork always fills the screen. Wider screens (tablet, landscape):
-    // fill the height; the artwork's navy edges blend into the background.
-    val portrait = maxWidth / maxHeight <= LOGO_ASPECT * 1.25f
-    Image(
-      painter = painterResource(R.drawable.ata_splash),
-      contentDescription = null,
-      contentScale = if (portrait) ContentScale.Crop else ContentScale.FillHeight,
-      modifier = Modifier
-        .fillMaxSize()
-        .graphicsLayer {
-          scaleX = zoom.value
-          scaleY = zoom.value
-        },
+    // Portrait screens: crop so the animation always fills the screen. Wider screens (tablet, landscape):
+    // show it whole; its navy edges blend into the background.
+    val portrait = maxWidth / maxHeight <= ANIMATION_ASPECT * 1.25f
+    AndroidView(
+      factory = { context ->
+        ImageView(context).apply {
+          scaleType = if (portrait) ImageView.ScaleType.CENTER_CROP else ImageView.ScaleType.FIT_CENTER
+          val drawable = runCatching {
+            ImageDecoder.decodeDrawable(ImageDecoder.createSource(context.resources, R.drawable.ata_start))
+          }.getOrNull()
+          setImageDrawable(drawable)
+          if (drawable is AnimatedImageDrawable) {
+            drawable.repeatCount = 0
+            drawable.registerAnimationCallback(
+              object : Animatable2.AnimationCallback() {
+                override fun onAnimationEnd(d: Drawable?) {
+                  ended.complete(Unit)
+                }
+              },
+            )
+            drawable.start()
+          } else {
+            ended.complete(Unit)
+          }
+        }
+      },
+      modifier = Modifier.fillMaxSize(),
     )
   }
 }

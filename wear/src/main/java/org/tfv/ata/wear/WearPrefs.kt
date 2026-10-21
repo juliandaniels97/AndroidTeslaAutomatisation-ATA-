@@ -8,6 +8,7 @@ object WearPrefs {
   private const val KEY_VIN = "vin"
   private const val KEY_VEHICLE = "vehicle"
   private const val KEY_DIRECT = "direct"
+  private const val KEY_KEYCARD = "keycard"
 
   private fun prefs(context: Context) = context.getSharedPreferences(NAME, Context.MODE_PRIVATE)
 
@@ -23,5 +24,13 @@ object WearPrefs {
 
   fun setDirectMode(context: Context, value: Boolean) {
     prefs(context).edit().putBoolean(KEY_DIRECT, value).apply()
+  }
+
+  /** The watch answers the car's card reader as an NFC key card. */
+  fun keyCard(context: Context): Boolean = prefs(context).getBoolean(KEY_KEYCARD, false)
+
+  fun setKeyCard(context: Context, value: Boolean) {
+    prefs(context).edit().putBoolean(KEY_KEYCARD, value).apply()
+    WatchKeyCardService.apply(context)
   }
 }

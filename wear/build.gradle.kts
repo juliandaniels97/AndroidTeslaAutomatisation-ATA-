@@ -90,6 +90,7 @@ dependencies {
   implementation(libs.wear.protolayout.expression)
   implementation(libs.watchface.complications.data.source.ktx)
   implementation(libs.play.services.wearable)
+  implementation(libs.wear.remote.interactions)
   implementation(libs.kotlinx.coroutines.play.services)
   implementation(libs.concurrent.futures)
   implementation(libs.kotlinx.coroutines.android)

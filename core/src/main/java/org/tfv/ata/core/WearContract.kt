@@ -21,6 +21,13 @@ object WearContract {
   const val WATCH_CMD_PAIR = "pair"
   const val WATCH_CMD_DIRECT_ON = "direct_on"
   const val WATCH_CMD_DIRECT_OFF = "direct_off"
+  const val WATCH_CMD_KEYCARD_ON = "keycard_on"
+  const val WATCH_CMD_KEYCARD_OFF = "keycard_off"
+
+  /** Watch → phone: open the watch-pairing assistant (fallback when the watch can't open it directly). */
+  const val MSG_OPEN_WEAR_PAIR = "/ata/phone/open_wear_pair"
+  /** Deep link the watch opens on the phone (RemoteActivityHelper) to show the watch-pairing assistant. */
+  const val DEEP_LINK_WEAR_PAIR = "ata://wear-pair"
 
   const val KEY_ACTION_IDS = "action_ids"
   const val KEY_ACTION_LABELS = "action_labels"

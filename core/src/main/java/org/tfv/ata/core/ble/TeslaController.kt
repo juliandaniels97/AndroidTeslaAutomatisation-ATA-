@@ -89,6 +89,7 @@ object TeslaController {
           session = handshakeWithRetry(conn, vin, command.domain, routing, 1)
           execute(conn, session, command.payload, routing, command.domain)
         }
+        PairedKeys.set(context, vin, true)
         CommandResult.Success
       }
     }
@@ -99,17 +100,33 @@ object TeslaController {
    */
   suspend fun readStatus(context: Context, vin: String, wake: Boolean = false): VehicleSnapshot? =
     mutex.withLock {
+      BleLog.add("--- status read (wake=$wake) ---")
       withVehicle<VehicleSnapshot?>(context, vin, onError = { _, _ -> null }) { conn ->
         val routing = newId()
         val vcsec = vcsecStatus(conn, routing)
+        BleLog.add("status: locked=${vcsec?.locked} asleep=${vcsec?.asleep}")
         if (!wake && vcsec?.asleep == true) {
           return@withVehicle VehicleSnapshot(locked = vcsec.locked, asleep = true, updatedAt = System.currentTimeMillis())
         }
         if (wake) ensureAwake(conn, vin, routing)
         val session = handshakeWithRetry(conn, vin, Domain.INFOTAINMENT, routing, if (wake) 3 else 1)
+        PairedKeys.set(context, vin, true)
+        BleLog.add("infotainment session ok")
         val bytes = execute(conn, session, Commands.vehicleData().payload, routing, Domain.INFOTAINMENT)
-          ?: return@withVehicle null
-        val snapshot = StatusParser.parse(bytes) ?: return@withVehicle null
+        if (bytes == null) {
+          BleLog.add("vehicle data: no payload")
+          return@withVehicle null
+        }
+        BleLog.add("vehicle data: ${bytes.size} bytes ${bytes.hexPrefix(32)}")
+        val snapshot = StatusParser.parse(bytes)
+        if (snapshot == null) {
+          BleLog.add("vehicle data could not be parsed")
+          return@withVehicle null
+        }
+        BleLog.add(
+          "parsed: battery=${snapshot.batteryPercent}% range=${snapshot.rangeKm}km inside=${snapshot.insideTempC} " +
+            "outside=${snapshot.outsideTempC} charging=${snapshot.charging} locked=${snapshot.locked}",
+        )
         if (vcsec != null) snapshot.copy(locked = vcsec.locked) else snapshot
       }
     }
@@ -130,6 +147,7 @@ object TeslaController {
           BleLog.add("status reply: locked=${status.locked} asleep=${status.asleep}")
           val paired = runCatching { keyAccepted(conn, vin) }.getOrNull()
           BleLog.add("key paired: $paired")
+          if (paired != null) PairedKeys.set(context, vin, paired)
           ProbeResult(true, locked = status.locked, asleep = status.asleep, paired = paired)
         }
       }
@@ -187,6 +205,7 @@ object TeslaController {
         // Confirm with a handshake: it only succeeds once the key is on the car's key list.
         if (keyAccepted(conn, vin)) {
           BleLog.add("key accepted by the car")
+          PairedKeys.set(context, vin, true)
           return@withVehicle PairResult(PairOutcome.ADDED)
         }
         if (alreadyListed) {
@@ -253,6 +272,7 @@ object TeslaController {
       throw e
     } catch (e: BleException) {
       BleLog.add("failed: ${e.code} ${e.message}")
+      if (e.code == FailureCode.KEY_NOT_PAIRED) PairedKeys.set(context, vin, false)
       onError(e.code, e.message ?: "error")
     } catch (e: SecurityException) {
       onError(FailureCode.PERMISSION, "Bluetooth permission missing")

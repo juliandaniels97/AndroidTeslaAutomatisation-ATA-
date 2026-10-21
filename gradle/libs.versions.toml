@@ -15,6 +15,7 @@ wearComposeMaterial = "1.4.1"
 wearComposeFoundation = "1.4.1"
 wearTiles = "1.4.1"
 wearProtolayout = "1.2.1"
+wearRemoteInteractions = "1.1.0"
 watchface = "1.2.1"
 concurrentFutures = "1.2.0"
 playServicesWearable = "19.0.0"
@@ -58,6 +59,7 @@ wear-protolayout = { group = "androidx.wear.protolayout", name = "protolayout", 
 wear-protolayout-material = { group = "androidx.wear.protolayout", name = "protolayout-material", version.ref = "wearProtolayout" }
 wear-protolayout-expression = { group = "androidx.wear.protolayout", name = "protolayout-expression", version.ref = "wearProtolayout" }
 watchface-complications-data-source-ktx = { group = "androidx.wear.watchface", name = "watchface-complications-data-source-ktx", version.ref = "watchface" }
+wear-remote-interactions = { group = "androidx.wear", name = "wear-remote-interactions", version.ref = "wearRemoteInteractions" }
 play-services-wearable = { group = "com.google.android.gms", name = "play-services-wearable", version.ref = "playServicesWearable" }
 concurrent-futures = { group = "androidx.concurrent", name = "concurrent-futures", version.ref = "concurrentFutures" }
 

@@ -73,6 +73,7 @@ data class GuideTargets(
   val menu: () -> Unit,
   val wear: () -> Unit,
   val automation: () -> Unit,
+  val keyCard: () -> Unit,
 )
 
 /** Interactive guide: one card per feature with live status, the steps and buttons that do them. */
@@ -176,6 +177,7 @@ fun GuideScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit, go: Gui
         done = null,
         steps = stringResource(if (teslaApp) R.string.guide_keycard_steps_tesla else R.string.guide_keycard_steps),
         actions = listOf(
+          stringResource(R.string.keycard_title) to go.keyCard,
           stringResource(R.string.nfc_settings_open) to { openNfcSettings(context) },
         ),
       )
@@ -243,7 +245,7 @@ private fun GuideCard(
 }
 
 @Composable
-private fun NumberedStep(n: Int, text: String) {
+internal fun NumberedStep(n: Int, text: String) {
   val palette = AtaColors.current
   Row(verticalAlignment = Alignment.Top) {
     Box(

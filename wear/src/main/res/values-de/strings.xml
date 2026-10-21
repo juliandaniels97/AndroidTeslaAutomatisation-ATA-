@@ -26,4 +26,13 @@
     <string name="a_navigate_home">Nach Hause navigieren</string>
     <string name="a_navigate_work">Zur Arbeit navigieren</string>
     <string name="a_share_location">Ziel teilen</string>
+    <string name="wear_paired_state">✓ Mit dem Auto gekoppelt</string>
+    <string name="wear_paired_state_hint">Assistent auf dem Handy</string>
+    <string name="wear_pair_on_phone">Assistent öffnet sich auf dem Handy</string>
+    <string name="wear_continue_on_phone">Weiter auf dem Handy</string>
+    <string name="wear_phone_unreachable">Handy nicht erreichbar. ATA auf dem Handy öffnen → Wear OS Uhr → Uhr koppeln.</string>
+    <string name="wear_keycard">ATA NFC-Schlüsselkarte</string>
+    <string name="wear_keycard_on">NFC-Schlüsselkarte: an</string>
+    <string name="wear_keycard_off">NFC-Schlüsselkarte: aus</string>
+    <string name="wear_keycard_setup_on_phone">Einrichten: Handy → Wear OS Uhr</string>
 </resources>

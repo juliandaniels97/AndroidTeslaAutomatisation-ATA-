@@ -104,6 +104,19 @@ object Notifier {
     post(context, NOTIF_OPEN_BASE + action.ordinal, builder)
   }
 
+  /** Tap-to-open notification for a screen another device asked to show (e.g. the watch-pairing assistant). */
+  fun openScreen(context: Context, title: String, target: Intent) {
+    val pending = PendingIntent.getActivity(
+      context, NOTIF_OPEN_SCREEN, target.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+      PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+    )
+    val builder = base(context, CHANNEL_CONFIRM, title, context.getString(R.string.open_prompt_text))
+      .setPriority(NotificationCompat.PRIORITY_HIGH)
+      .setAutoCancel(true)
+      .setContentIntent(pending)
+    post(context, NOTIF_OPEN_SCREEN, builder)
+  }
+
   /** Something ATA needs before automations can run (e.g. Bluetooth permission). */
   fun needsSetup(context: Context, text: String) {
     post(context, NOTIF_SETUP, base(context, CHANNEL_RESULTS, context.getString(R.string.app_name), text).setContentIntent(openApp(context)))
@@ -160,6 +173,7 @@ object Notifier {
 
   const val NOTIF_RUNNING = 42
   private const val NOTIF_SETUP = 43
+  private const val NOTIF_OPEN_SCREEN = 44
   private const val NOTIF_RESULT_BASE = 1_000
   private const val NOTIF_CONFIRM_BASE = 2_000
   private const val NOTIF_OPEN_BASE = 3_000

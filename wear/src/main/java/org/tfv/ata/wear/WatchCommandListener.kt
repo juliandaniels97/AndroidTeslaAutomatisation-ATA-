@@ -17,6 +17,7 @@ import org.tfv.ata.core.WearContract
 import org.tfv.ata.core.ble.BleLog
 import org.tfv.ata.core.ble.BleTransport
 import org.tfv.ata.core.ble.PairOutcome
+import org.tfv.ata.core.ble.PairedKeys
 import org.tfv.ata.core.ble.TeslaController
 
 /**
@@ -49,6 +50,14 @@ class WatchCommandListener : WearableListenerService() {
         }
         WearContract.WATCH_CMD_DIRECT_OFF -> {
           WearPrefs.setDirectMode(context, false)
+          send(context, phone, state(context))
+        }
+        WearContract.WATCH_CMD_KEYCARD_ON -> {
+          if (org.tfv.ata.core.nfc.NfcInfo.hasCardEmulation(context)) WearPrefs.setKeyCard(context, true)
+          send(context, phone, state(context))
+        }
+        WearContract.WATCH_CMD_KEYCARD_OFF -> {
+          WearPrefs.setKeyCard(context, false)
           send(context, phone, state(context))
         }
         WearContract.WATCH_CMD_PROBE -> probe(context, phone)
@@ -132,7 +141,16 @@ class WatchCommandListener : WearableListenerService() {
     locationOn = BleTransport.isLocationOn(context),
     vin = WearPrefs.vin(context),
     directMode = WearPrefs.directMode(context),
+    paired = WearPrefs.vin(context).isNotBlank() && PairedKeys.isPaired(context, WearPrefs.vin(context)),
     log = BleLog.text(),
+    nfc = org.tfv.ata.core.nfc.NfcInfo.hasNfc(context),
+    nfcOn = org.tfv.ata.core.nfc.NfcInfo.isEnabled(context),
+    cardEmulation = org.tfv.ata.core.nfc.NfcInfo.hasCardEmulation(context),
+    keyCard = WearPrefs.keyCard(context),
+    nfcContactAgeSec = org.tfv.ata.core.nfc.NfcLog.lastContact.value.let {
+      if (it == 0L) -1 else (System.currentTimeMillis() - it) / 1000
+    },
+    nfcLog = org.tfv.ata.core.nfc.NfcLog.text(context),
   )
 
   private suspend fun send(context: Context, phone: String, state: WatchState) {

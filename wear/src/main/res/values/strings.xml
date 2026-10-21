@@ -26,4 +26,13 @@
     <string name="a_navigate_home">Navigate home</string>
     <string name="a_navigate_work">Navigate to work</string>
     <string name="a_share_location">Share destination</string>
+    <string name="wear_paired_state">✓ Paired with the car</string>
+    <string name="wear_paired_state_hint">Assistant on the phone</string>
+    <string name="wear_pair_on_phone">Assistant opens on the phone</string>
+    <string name="wear_continue_on_phone">Continue on the phone</string>
+    <string name="wear_phone_unreachable">Phone not reachable. Open ATA on the phone → Wear OS watch → Pair watch.</string>
+    <string name="wear_keycard">ATA NFC key card</string>
+    <string name="wear_keycard_on">NFC key card: on</string>
+    <string name="wear_keycard_off">NFC key card: off</string>
+    <string name="wear_keycard_setup_on_phone">Set up: phone → Wear OS watch</string>
 </resources>

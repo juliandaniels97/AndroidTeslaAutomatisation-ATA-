@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -38,7 +39,6 @@ import com.google.android.gms.wearable.DataEventBuffer
 import com.google.android.gms.wearable.DataItem
 import com.google.android.gms.wearable.DataMapItem
 import com.google.android.gms.wearable.MessageClient
-import org.tfv.ata.core.ble.PairOutcome
 import com.google.android.gms.wearable.Wearable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -71,6 +71,9 @@ private fun WearApp() {
   var status by remember { mutableStateOf<WearStatus?>(null) }
   var vin by remember { mutableStateOf(WearPrefs.vin(context)) }
   var directMode by remember { mutableStateOf(WearPrefs.directMode(context)) }
+  var keyCard by remember { mutableStateOf(WearPrefs.keyCard(context)) }
+  val pairedVins by remember { org.tfv.ata.core.ble.PairedKeys.vins(context) }.collectAsState()
+  val paired = vin.isNotBlank() && org.tfv.ata.core.Vin.normalize(vin) in pairedVins.orEmpty()
   // Critical actions (unlock, trunk …) need a second tap within a few seconds.
   var armed by remember { mutableStateOf<String?>(null) }
   var armedAt by remember { mutableStateOf(0L) }
@@ -231,26 +234,36 @@ private fun WearApp() {
             },
           )
         }
-        if (vin.isNotBlank()) {
+        if (org.tfv.ata.core.nfc.NfcInfo.hasCardEmulation(context)) {
           item {
             Chip(
               modifier = Modifier.fillMaxWidth(),
-              label = { Text(stringResource(R.string.wear_pair)) },
-              colors = ChipDefaults.secondaryChipColors(),
+              label = { Text(stringResource(if (keyCard) R.string.wear_keycard_on else R.string.wear_keycard_off)) },
+              secondaryLabel = { Text(stringResource(R.string.wear_keycard_setup_on_phone)) },
+              colors = if (keyCard) ChipDefaults.primaryChipColors() else ChipDefaults.secondaryChipColors(),
               onClick = {
-                withBle {
-                  scope.launch {
-                    val result = WearControl.pair(context)
-                    Toast.makeText(
-                      context,
-                      when (result.outcome) {
-                        PairOutcome.ADDED -> R.string.wear_paired_ok
-                        PairOutcome.AWAITING_CONFIRMATION -> R.string.wear_pair_awaiting
-                        PairOutcome.FAILED -> R.string.wear_pair_failed
-                      },
-                      Toast.LENGTH_LONG,
-                    ).show()
-                  }
+                keyCard = !keyCard
+                WearPrefs.setKeyCard(context, keyCard)
+              },
+            )
+          }
+        }
+        if (vin.isNotBlank()) {
+          item {
+            // Pairing runs from the phone's assistant (it guides through the steps and shows the log).
+            Chip(
+              modifier = Modifier.fillMaxWidth(),
+              label = { Text(stringResource(if (paired) R.string.wear_paired_state else R.string.wear_pair)) },
+              secondaryLabel = { Text(stringResource(if (paired) R.string.wear_paired_state_hint else R.string.wear_pair_on_phone)) },
+              colors = if (paired) ChipDefaults.primaryChipColors() else ChipDefaults.secondaryChipColors(),
+              onClick = {
+                scope.launch {
+                  val ok = WearSync.openPairingOnPhone(context)
+                  Toast.makeText(
+                    context,
+                    if (ok) R.string.wear_continue_on_phone else R.string.wear_phone_unreachable,
+                    Toast.LENGTH_LONG,
+                  ).show()
                 }
               },
             )

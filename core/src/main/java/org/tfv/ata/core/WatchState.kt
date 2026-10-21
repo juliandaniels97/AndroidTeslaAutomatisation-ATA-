@@ -16,6 +16,8 @@ data class WatchState(
   val locationOn: Boolean = false,
   val vin: String = "",
   val directMode: Boolean = false,
+  /** The watch's own key works with the car (a session was established). */
+  val paired: Boolean = false,
   /** "pair" or "probe" while one runs, else empty. */
   val running: String = "",
   /** PairStep name while pairing. */
@@ -27,6 +29,14 @@ data class WatchState(
   /** Result of the last connection test: "ok", "fail" or empty. */
   val probe: String = "",
   val log: String = "",
+  val nfc: Boolean = false,
+  val nfcOn: Boolean = false,
+  val cardEmulation: Boolean = false,
+  /** The watch's NFC key card is turned on. */
+  val keyCard: Boolean = false,
+  /** Seconds since the last card reader contact, -1 if none. */
+  val nfcContactAgeSec: Long = -1,
+  val nfcLog: String = "",
 ) {
   fun encode(): String = buildString {
     fun kv(k: String, v: Any) = append(k).append('=').append(v.toString().replace('\n', ' ')).append('\n')
@@ -40,19 +50,31 @@ data class WatchState(
     kv("locon", locationOn)
     kv("vin", vin)
     kv("direct", directMode)
+    kv("paired", paired)
     kv("running", running)
     kv("step", step)
     kv("outcome", outcome)
     kv("code", code)
     kv("probe", probe)
+    kv("nfc", nfc)
+    kv("nfcon", nfcOn)
+    kv("hce", cardEmulation)
+    kv("keycard", keyCard)
+    kv("nfcage", nfcContactAgeSec)
     append('\n')
     append(log)
+    append(NFC_LOG_MARKER)
+    append(nfcLog)
   }
 
   companion object {
+    private const val NFC_LOG_MARKER = "\n--- nfc ---\n"
+
     fun decode(text: String): WatchState {
       val head = text.substringBefore("\n\n")
-      val log = if (text.contains("\n\n")) text.substringAfter("\n\n") else ""
+      val logs = if (text.contains("\n\n")) text.substringAfter("\n\n") else ""
+      val log = logs.substringBefore(NFC_LOG_MARKER)
+      val nfcLog = if (logs.contains(NFC_LOG_MARKER)) logs.substringAfter(NFC_LOG_MARKER) else ""
       val map = head.lines().filter { '=' in it }.associate { it.substringBefore('=') to it.substringAfter('=') }
       fun b(k: String) = map[k] == "true"
       return WatchState(
@@ -66,12 +88,19 @@ data class WatchState(
         locationOn = b("locon"),
         vin = map["vin"].orEmpty(),
         directMode = b("direct"),
+        paired = b("paired"),
         running = map["running"].orEmpty(),
         step = map["step"].orEmpty(),
         outcome = map["outcome"].orEmpty(),
         code = map["code"].orEmpty(),
         probe = map["probe"].orEmpty(),
         log = log,
+        nfc = b("nfc"),
+        nfcOn = b("nfcon"),
+        cardEmulation = b("hce"),
+        keyCard = b("keycard"),
+        nfcContactAgeSec = map["nfcage"]?.toLongOrNull() ?: -1,
+        nfcLog = nfcLog,
       )
     }
   }

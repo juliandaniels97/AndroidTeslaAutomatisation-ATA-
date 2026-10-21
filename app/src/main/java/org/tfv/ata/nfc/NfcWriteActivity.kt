@@ -180,6 +180,7 @@ private fun NfcScreen(
           )
         }
       }
+      org.tfv.ata.ui.screens.NfcOffCard()
       Text(stringResource(R.string.nfc_desc), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
       if (armedLabel != null) {
         Card(

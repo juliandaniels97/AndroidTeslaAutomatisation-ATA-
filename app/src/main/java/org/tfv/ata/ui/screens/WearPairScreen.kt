@@ -87,6 +87,10 @@ fun WearPairScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit, onRe
   val vinOnWatch = w != null && vehicle != null && Vin.normalize(w.vin) == Vin.normalize(vehicle.vin)
   val ready = w != null && w.supported && w.permission && w.locationPermission && w.locationOn && w.bluetoothOn && vinOnWatch
   val running = w?.running.orEmpty()
+  // Already paired: no pairing steps, only the result and the connection test (re-pairing on request).
+  val alreadyPaired = w != null && (w.paired || w.probe == "paired")
+  var repair by rememberSaveable { mutableStateOf(false) }
+  val showPairing = !alreadyPaired || repair || running == "pair"
   var nearCar by rememberSaveable { mutableStateOf(false) }
   var cardReady by rememberSaveable { mutableStateOf(false) }
 
@@ -108,6 +112,34 @@ fun WearPairScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit, onRe
       verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
       Text(stringResource(R.string.wear_pair_intro), style = MaterialTheme.typography.bodyMedium)
+
+      if (alreadyPaired) {
+        androidx.compose.material3.Card(
+          colors = androidx.compose.material3.CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+          modifier = Modifier.fillMaxWidth(),
+        ) {
+          Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(
+              stringResource(R.string.wear_pair_done_title),
+              style = MaterialTheme.typography.titleSmall,
+              color = MaterialTheme.colorScheme.onPrimaryContainer,
+            )
+            Text(
+              stringResource(if (w.directMode) R.string.wear_pair_done_direct_on else R.string.wear_pair_done_direct_off),
+              style = MaterialTheme.typography.bodySmall,
+              color = MaterialTheme.colorScheme.onPrimaryContainer,
+            )
+            if (!w.directMode) {
+              Button(onClick = { command(WearContract.WATCH_CMD_DIRECT_ON) }) {
+                Text(stringResource(R.string.wear_pair_direct_enable))
+              }
+            }
+            if (!repair) {
+              androidx.compose.material3.TextButton(onClick = { repair = true }) { Text(stringResource(R.string.pair_repair)) }
+            }
+          }
+        }
+      }
 
       GuideSection(stringResource(R.string.wear_pair_section_watch))
       StatusRow(
@@ -165,9 +197,11 @@ fun WearPairScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit, onRe
         )
       }
 
-      GuideSection(stringResource(R.string.pair_section_car))
-      TickRow(stringResource(R.string.wear_pair_tick_near), nearCar) { nearCar = it }
-      TickRow(stringResource(R.string.pair_tick_card), cardReady) { cardReady = it }
+      if (showPairing) {
+        GuideSection(stringResource(R.string.pair_section_car))
+        TickRow(stringResource(R.string.wear_pair_tick_near), nearCar) { nearCar = it }
+        TickRow(stringResource(R.string.pair_tick_card), cardReady) { cardReady = it }
+      }
 
       GuideSection(stringResource(R.string.pair_section_test))
       Text(stringResource(R.string.wear_pair_test_desc), style = MaterialTheme.typography.bodySmall)
@@ -190,25 +224,27 @@ fun WearPairScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit, onRe
         )
       }
 
-      GuideSection(stringResource(R.string.pair_section_pair))
-      Button(
-        onClick = { command(WearContract.WATCH_CMD_PAIR) },
-        enabled = ready && nearCar && cardReady && running.isEmpty(),
-        modifier = Modifier.fillMaxWidth(),
-      ) {
-        if (running == "pair") CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
-        else Icon(Icons.Filled.Key, contentDescription = null)
-        Text(
-          stringResource(if (running == "pair") R.string.pair_in_progress else R.string.wear_pair_start),
-          modifier = Modifier.padding(start = 8.dp),
-        )
-      }
-      if (w != null && started == WearContract.WATCH_CMD_PAIR) {
-        PairProgress(
-          pairState = pairUiState(w),
-          onRetry = { started = "" },
-          addedNext = stringResource(R.string.wear_paired_next),
-        )
+      if (showPairing) {
+        GuideSection(stringResource(R.string.pair_section_pair))
+        Button(
+          onClick = { command(WearContract.WATCH_CMD_PAIR) },
+          enabled = ready && nearCar && cardReady && running.isEmpty(),
+          modifier = Modifier.fillMaxWidth(),
+        ) {
+          if (running == "pair") CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+          else Icon(Icons.Filled.Key, contentDescription = null)
+          Text(
+            stringResource(if (running == "pair") R.string.pair_in_progress else R.string.wear_pair_start),
+            modifier = Modifier.padding(start = 8.dp),
+          )
+        }
+        if (w != null && started == WearContract.WATCH_CMD_PAIR) {
+          PairProgress(
+            pairState = pairUiState(w),
+            onRetry = { started = "" },
+            addedNext = stringResource(R.string.wear_paired_next),
+          )
+        }
       }
 
       DiagnosticsCard(w?.log?.lines()?.filter { it.isNotBlank() }.orEmpty(), onReport)

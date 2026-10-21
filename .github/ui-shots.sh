@@ -47,6 +47,7 @@ for THEME in Dark Light; do
   tap "Open pairing assistant"; shot "$t-12-pair"; scroll; shot "$t-13-pair-2"; scroll; shot "$t-14-pair-3"
   restart; tap "Settings"; tap "Wear OS watch"; tap "Start"; sleep 5; shot "$t-15-wear-pair"; scroll; shot "$t-16-wear-pair-2"
   restart; tap "Settings"; scroll; scroll; scroll; scroll; tap "Send bug report"; sleep 6; shot "$t-17-report"; scroll; shot "$t-18-report-2"
+  restart; tap "Settings"; scroll; scroll; scroll; tap "Set up NFC key card"; sleep 3; shot "$t-19-keycard"; scroll; shot "$t-20-keycard-2"
   adb shell am start -S -W -n org.tfv.ata/.shortcut.CreateShortcutActivity >/dev/null; sleep 3; shot "$t-9-create-shortcut"
 done
 ls -la "$OUT"

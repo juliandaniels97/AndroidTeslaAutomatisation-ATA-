@@ -66,9 +66,13 @@ object DebugReport {
         "Location: permission=${BleTransport.hasLocationPermission(context)} on=${BleTransport.isLocationOn(context)}",
       )
       appendLine("Notifications=${Notifier.canNotify(context)} overlay=${BackgroundLaunch.allowed(context)}")
+      appendLine("NFC: ${org.tfv.ata.nfc.NfcStatus.summary(context)}")
       appendLine()
       appendLine("--- Phone Bluetooth log ---")
       appendLine(tail(BleLog.text(), maxLogLines).ifBlank { "(empty: run \"Test connection\" or pairing first)" })
+      appendLine()
+      appendLine("--- NFC key card log ---")
+      appendLine(tail(org.tfv.ata.core.nfc.NfcLog.text(context), maxLogLines).ifBlank { "(empty: no card reader contact yet)" })
       appendLine()
       appendLine("--- Watch ---")
       when {
@@ -83,6 +87,12 @@ object DebugReport {
           appendLine("last: running=${watch.running} step=${watch.step} outcome=${watch.outcome} code=${watch.code} probe=${watch.probe}")
           appendLine("--- Watch Bluetooth log ---")
           appendLine(tail(watch.log, maxLogLines).ifBlank { "(empty)" })
+          appendLine(
+            "Watch NFC: nfc=${watch.nfc} on=${watch.nfcOn} hce=${watch.cardEmulation} keyCard=${watch.keyCard} " +
+              "lastContact=${watch.nfcContactAgeSec}s",
+          )
+          appendLine("--- Watch NFC key card log ---")
+          appendLine(tail(watch.nfcLog, maxLogLines).ifBlank { "(empty)" })
         }
       }
     }

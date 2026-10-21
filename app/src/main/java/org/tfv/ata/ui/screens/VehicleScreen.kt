@@ -1,5 +1,7 @@
 package org.tfv.ata.ui.screens
 
+import android.widget.Toast
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -41,6 +43,8 @@ import kotlinx.coroutines.launch
 import org.tfv.ata.R
 import org.tfv.ata.core.AtaAction
 import org.tfv.ata.core.AtaCategory
+import org.tfv.ata.core.Vin
+import org.tfv.ata.core.ble.PairedKeys
 import org.tfv.ata.ui.ActionHost
 import org.tfv.ata.ui.AtaUiState
 import org.tfv.ata.ui.AtaViewModel
@@ -55,6 +59,19 @@ fun VehicleScreen(vm: AtaViewModel, state: AtaUiState, onAddVehicle: () -> Unit 
   val snapshot = state.snapshot
   val experimental = state.settings.experimentalBle
   val refreshing by vm.refreshing.collectAsStateWithLifecycle()
+  val pairedVins by remember { PairedKeys.vins(context) }.collectAsStateWithLifecycle()
+  val paired = state.selected?.let { Vin.normalize(it.vin) in pairedVins.orEmpty() } == true
+  val reportRefresh: (Boolean) -> Unit = { ok ->
+    if (!ok) Toast.makeText(context, R.string.status_read_failed, Toast.LENGTH_LONG).show()
+  }
+  // Read the status when the tab opens (without waking the car; ↻ wakes it). A successful read also records
+  // that this phone's key works, which hides the pairing card.
+  LaunchedEffect(state.selected?.vin, experimental) {
+    if (experimental && state.selected != null && org.tfv.ata.core.ble.TeslaController.hasBlePermission(context)) {
+      vm.refreshStatus(wake = false)
+    }
+  }
+
   val allBle = remember { AtaAction.entries.filter { it.category == AtaCategory.FUNCTION_A && it.enabled } }
   val savedBle = remember(state.settings.vehicleActionIds) {
     val ids = state.settings.vehicleActionIds
@@ -80,7 +97,7 @@ fun VehicleScreen(vm: AtaViewModel, state: AtaUiState, onAddVehicle: () -> Unit 
                 Text(stringResource(R.string.save_layout))
               }
               experimental -> {
-                IconButton(onClick = { if (!refreshing) vm.refreshStatus() }, enabled = !refreshing) {
+                IconButton(onClick = { if (!refreshing) vm.refreshStatus(wake = true, onDone = reportRefresh) }, enabled = !refreshing) {
                   if (refreshing) CircularProgressIndicator(modifier = Modifier.padding(4.dp), strokeWidth = 2.dp)
                   else Icon(Icons.Filled.Refresh, contentDescription = stringResource(R.string.refresh))
                 }
@@ -134,7 +151,7 @@ fun VehicleScreen(vm: AtaViewModel, state: AtaUiState, onAddVehicle: () -> Unit 
               )
             } else if (state.selected == null) {
               AddVehicleCard(onAdd = onAddVehicle, modifier = Modifier.padding(top = 10.dp))
-            } else {
+            } else if (!paired) {
               PairCard(onPair = onPair, modifier = Modifier.padding(top = 10.dp))
             }
           }

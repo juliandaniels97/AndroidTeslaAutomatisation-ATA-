@@ -117,14 +117,16 @@ class AtaViewModel(app: Application) : AndroidViewModel(app) {
     }
   }
 
-  fun refreshStatus() = viewModelScope.launch {
+  /** Reads the car status over BLE; [onDone] gets false if it couldn't be read (details in the BLE log). */
+  fun refreshStatus(wake: Boolean = true, onDone: (Boolean) -> Unit = {}) = viewModelScope.launch {
     if (_refreshing.value) return@launch
     _refreshing.value = true
     val snap = runCatching {
-      kotlinx.coroutines.withContext(Dispatchers.IO) { StatusPoller.pollNow(getApplication(), wake = true) }
+      kotlinx.coroutines.withContext(Dispatchers.IO) { StatusPoller.pollNow(getApplication(), wake = wake) }
     }.getOrNull()
     if (snap != null) runCatching { StatusWidget().updateAll(getApplication()) }
     _refreshing.value = false
+    onDone(snap != null)
   }
 
   /** Renews the automation token and re-issues shortcuts / widgets so ATA's own triggers keep working. */

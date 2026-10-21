@@ -17,6 +17,10 @@ import org.tfv.ata.core.WearContract
  */
 class PhoneWearListener : WearableListenerService() {
   override fun onMessageReceived(event: MessageEvent) {
+    if (event.path == WearContract.MSG_OPEN_WEAR_PAIR) {
+      openWearPairing()
+      return
+    }
     if (event.path == WearContract.MSG_WATCH_STATE) {
       WatchLink.onState(event.data)
       return
@@ -31,5 +35,14 @@ class PhoneWearListener : WearableListenerService() {
     } else {
       ActionLauncher.runNow(this, request)
     }
+  }
+
+  /** Fallback when the watch couldn't open the assistant itself: open it here, or offer it as a notification. */
+  private fun openWearPairing() {
+    val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(WearContract.DEEP_LINK_WEAR_PAIR))
+      .setClass(this, org.tfv.ata.ui.MainActivity::class.java)
+      .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+    val started = org.tfv.ata.automation.BackgroundLaunch.allowed(this) && runCatching { startActivity(intent) }.isSuccess
+    if (!started) org.tfv.ata.automation.Notifier.openScreen(this, getString(org.tfv.ata.R.string.wear_pair_title), intent)
   }
 }
