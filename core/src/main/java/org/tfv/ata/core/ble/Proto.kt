@@ -61,26 +61,31 @@ internal class ProtoReader(private val data: ByteArray) {
 
   init {
     var pos = 0
-    while (pos < data.size) {
-      val (key, k1) = readVarint(pos); pos = k1
+    loop@ while (pos < data.size) {
+      val (key, k1) = readVarint(pos) ?: break
+      pos = k1
       val field = (key ushr 3).toInt()
       when ((key and 0x7).toInt()) {
         0 -> {
-          val (v, p) = readVarint(pos); pos = p
+          val (v, p) = readVarint(pos) ?: break@loop
+          pos = p
           add(field, ProtoField(0, null, v, 0))
         }
         1 -> {
+          if (pos + 8 > data.size) break@loop
           pos += 8
           add(field, ProtoField(1, null, 0, 0))
         }
         2 -> {
-          val (len, p) = readVarint(pos); pos = p
+          val (len, p) = readVarint(pos) ?: break@loop
+          if (len < 0 || len > data.size - p) break@loop
+          pos = p
           val end = pos + len.toInt()
-          val slice = data.copyOfRange(pos, end.coerceAtMost(data.size))
+          add(field, ProtoField(2, data.copyOfRange(pos, end), 0, 0))
           pos = end
-          add(field, ProtoField(2, slice, 0, 0))
         }
         5 -> {
+          if (pos + 4 > data.size) break@loop
           val v = (data[pos].toInt() and 0xFF) or
             ((data[pos + 1].toInt() and 0xFF) shl 8) or
             ((data[pos + 2].toInt() and 0xFF) shl 16) or
@@ -88,11 +93,12 @@ internal class ProtoReader(private val data: ByteArray) {
           pos += 4
           add(field, ProtoField(5, null, 0, v))
         }
-        else -> break
+        else -> break@loop
       }
     }
   }
 
+  fun has(field: Int): Boolean = fields.containsKey(field)
   fun bytes(field: Int): ByteArray? = fields[field]?.firstOrNull()?.bytesValue
   fun varint(field: Int): Long? = fields[field]?.firstOrNull()?.varintValue
   fun fixed32(field: Int): Int? = fields[field]?.firstOrNull()?.fixed32Value
@@ -102,17 +108,18 @@ internal class ProtoReader(private val data: ByteArray) {
     fields.getOrPut(field) { mutableListOf() }.add(f)
   }
 
-  private fun readVarint(start: Int): Pair<Long, Int> {
+  /** Returns (value, nextPos), or null when the varint is truncated or longer than 10 bytes. */
+  private fun readVarint(start: Int): Pair<Long, Int>? {
     var pos = start
     var result = 0L
     var shift = 0
-    while (pos < data.size) {
+    while (pos < data.size && shift < 64) {
       val b = data[pos].toInt() and 0xFF
       result = result or ((b and 0x7F).toLong() shl shift)
       pos++
-      if (b and 0x80 == 0) break
+      if (b and 0x80 == 0) return result to pos
       shift += 7
     }
-    return result to pos
+    return null
   }
 }

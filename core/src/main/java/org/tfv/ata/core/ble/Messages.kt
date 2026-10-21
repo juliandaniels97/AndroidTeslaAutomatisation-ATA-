@@ -62,6 +62,15 @@ internal object HmacTagF {
 
 const val FLAG_ENCRYPT_RESPONSE_MASK = 1 shl 1
 
+/** An unauthenticated request, e.g. VCSEC GET_STATUS (doesn't need a session and doesn't wake the car). */
+internal fun unsignedRequest(domain: Int, payload: ByteArray, uuid: ByteArray, routingAddress: ByteArray): ByteArray =
+  buildProto {
+    message(Rm.TO_DESTINATION, buildProto { enum(DestF.DOMAIN, domain) })
+    message(Rm.FROM_DESTINATION, buildProto { bytes(DestF.ROUTING_ADDRESS, routingAddress) })
+    bytes(Rm.PROTOBUF_BYTES, payload)
+    bytes(Rm.UUID, uuid)
+  }
+
 internal fun sessionInfoRequest(domain: Int, publicKey: ByteArray, uuid: ByteArray, routingAddress: ByteArray): ByteArray =
   buildProto {
     message(Rm.TO_DESTINATION, buildProto { enum(DestF.DOMAIN, domain) })
@@ -80,6 +89,8 @@ internal class ParsedResponse(data: ByteArray) {
   val flags: Int = reader.varint(Rm.FLAGS)?.toInt() ?: 0
   private val status = reader.message(Rm.SIGNED_MESSAGE_STATUS)
   val fault: Int = status?.varint(2)?.toInt() ?: 0
+  /** UniversalMessage.OperationStatus_E: 0 OK, 1 WAIT, 2 ERROR. */
+  val operationStatus: Int = status?.varint(1)?.toInt() ?: 0
   private val sig = reader.message(Rm.SIGNATURE_DATA)
   val sessionInfoTag: ByteArray? = sig?.message(SigF.SESSION_INFO_TAG)?.bytes(HmacTagF.TAG)
   private val gcmResponse = sig?.message(SigF.AES_GCM_RESPONSE)
@@ -94,4 +105,10 @@ internal class SessionInfo(data: ByteArray) {
   val publicKey: ByteArray = r.bytes(SiF.PUBLIC_KEY) ?: ByteArray(0)
   val epoch: ByteArray = r.bytes(SiF.EPOCH) ?: ByteArray(0)
   val clockTime: Int = r.fixed32(SiF.CLOCK_TIME) ?: 0
+  /** Session_Info_Status: 0 OK, 1 KEY_NOT_ON_WHITELIST. */
+  val status: Int = r.varint(SiF.STATUS)?.toInt() ?: 0
 }
+
+internal const val FAULT_UNKNOWN_KEY_ID = 3
+internal const val SESSION_STATUS_KEY_NOT_ON_WHITELIST = 1
+internal const val OPERATION_STATUS_WAIT = 1

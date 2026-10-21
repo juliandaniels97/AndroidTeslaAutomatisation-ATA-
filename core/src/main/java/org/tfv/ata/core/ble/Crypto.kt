@@ -2,6 +2,7 @@ package org.tfv.ata.core.ble
 
 import java.io.ByteArrayOutputStream
 import java.security.MessageDigest
+import java.security.NoSuchProviderException
 import java.security.PrivateKey
 import javax.crypto.Cipher
 import javax.crypto.KeyAgreement
@@ -32,13 +33,25 @@ internal object SignatureType {
 internal object Crypto {
 
   fun sharedKey(privateKey: PrivateKey, vehiclePublicKey: ByteArray): ByteArray {
-    val agreement = KeyAgreement.getInstance("ECDH")
+    val agreement = keyAgreement()
     agreement.init(privateKey)
     agreement.doPhase(Ec.publicKeyFromUncompressed(vehiclePublicKey), true)
-    val secret = agreement.generateSecret()
-    val x = if (secret.size > 32) secret.copyOfRange(secret.size - 32, secret.size) else secret
+    return deriveKey(agreement.generateSecret())
+  }
+
+  /** K = SHA1(BIG_ENDIAN(Sx, 32))[:16], see protocol.md "Key Agreement". */
+  fun deriveKey(sharedSecretX: ByteArray): ByteArray {
+    val x = if (sharedSecretX.size > 32) sharedSecretX.copyOfRange(sharedSecretX.size - 32, sharedSecretX.size) else sharedSecretX
     return MessageDigest.getInstance("SHA-1").digest(x).copyOf(16)
   }
+
+  /** The Android Keystore provider on devices; the default provider on the JVM (unit tests). */
+  fun keyAgreement(): KeyAgreement =
+    try {
+      KeyAgreement.getInstance("ECDH", "AndroidKeyStore")
+    } catch (e: NoSuchProviderException) {
+      KeyAgreement.getInstance("ECDH")
+    }
 
   fun hmacSha256(key: ByteArray, data: ByteArray): ByteArray {
     val mac = Mac.getInstance("HmacSHA256")
@@ -78,7 +91,7 @@ internal class Metadata {
   private var lastTag = -1
 
   fun add(tag: Int, value: ByteArray): Metadata {
-    require(tag >= lastTag) { "metadata out of order" }
+    require(tag > lastTag) { "metadata out of order or duplicate" }
     require(value.size <= 255)
     lastTag = tag
     out.write(tag)

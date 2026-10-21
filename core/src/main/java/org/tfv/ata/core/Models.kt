@@ -16,11 +16,14 @@ data class VehicleSnapshot(
   val batteryPercent: Int = 0,
   val rangeKm: Int = 0,
   val charging: Boolean = false,
-  val locked: Boolean = true,
+  /** null = unknown (not reported by the car). */
+  val locked: Boolean? = null,
   val climateOn: Boolean = false,
   val insideTempC: Float = 0f,
   val outsideTempC: Float = 0f,
   val sentry: Boolean = false,
+  /** True when only VCSEC answered (car asleep): battery/range/temperatures are from an earlier reading. */
+  val asleep: Boolean = false,
   val updatedAt: Long = 0,
 )
 
@@ -42,7 +45,17 @@ data class AtaSettings(
   val onboarded: Boolean = false,
   val directionFx: Boolean = false,
   val nfcKeyCard: Boolean = false,
-  val nfcKeyCardRequireUnlock: Boolean = true,
+  // Automation (Samsung Routines, Tasker, shortcuts, widgets, NFC tags, watch). See ActionPolicy.
+  /** Run non-critical BLE actions from ATA shortcuts/widgets/watch while the phone is locked. */
+  val automationWhenLocked: Boolean = true,
+  /** Critical actions that ATA shortcuts/widgets may run without a confirmation tap (phone unlocked). */
+  val criticalDirectIds: List<String> = emptyList(),
+  /** Also run [criticalDirectIds] while the phone is locked. */
+  val criticalDirectWhenLocked: Boolean = false,
+  /** Non-critical BLE actions that other apps may trigger without ATA's token. */
+  val externalActionIds: List<String> = emptyList(),
+  /** Send the org.tfv.ata.action.STATUS broadcast (readable by every app) after each status poll. */
+  val statusBroadcast: Boolean = false,
   val carLat: Double = 0.0,
   val carLng: Double = 0.0,
   val carLocAt: Long = 0,

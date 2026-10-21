@@ -21,6 +21,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Require release signing key
+        run: |
+          if [ -z "${ATA_KEYSTORE_BASE64}" ]; then
+            echo "::error::Secret ATA_KEYSTORE_BASE64 is not set. Release builds are never signed with a debug key."
+            exit 1
+          fi
+
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
@@ -36,19 +43,28 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Decode release keystore
-        if: ${{ env.ATA_KEYSTORE_BASE64 != '' }}
+        env:
+          ATA_KEYSTORE_PASSWORD: ${{ secrets.ATA_KEYSTORE_PASSWORD }}
+          ATA_KEY_ALIAS: ${{ secrets.ATA_KEY_ALIAS }}
+          ATA_KEY_PASSWORD: ${{ secrets.ATA_KEY_PASSWORD }}
         run: |
-          echo "${{ secrets.ATA_KEYSTORE_BASE64 }}" | base64 -d > "${RUNNER_TEMP}/ata-release.keystore"
-          echo "ATA_KEYSTORE_FILE=${RUNNER_TEMP}/ata-release.keystore" >> "$GITHUB_ENV"
-          echo "ATA_KEYSTORE_PASSWORD=${{ secrets.ATA_KEYSTORE_PASSWORD }}" >> "$GITHUB_ENV"
-          echo "ATA_KEY_ALIAS=${{ secrets.ATA_KEY_ALIAS }}" >> "$GITHUB_ENV"
-          echo "ATA_KEY_PASSWORD=${{ secrets.ATA_KEY_PASSWORD }}" >> "$GITHUB_ENV"
+          echo "${ATA_KEYSTORE_BASE64}" | base64 -d > "${RUNNER_TEMP}/ata-release.keystore"
+          {
+            echo "ATA_KEYSTORE_FILE=${RUNNER_TEMP}/ata-release.keystore"
+            echo "ATA_KEYSTORE_PASSWORD=${ATA_KEYSTORE_PASSWORD}"
+            echo "ATA_KEY_ALIAS=${ATA_KEY_ALIAS}"
+            echo "ATA_KEY_PASSWORD=${ATA_KEY_PASSWORD}"
+          } >> "$GITHUB_ENV"
 
-      - name: Build phone + wear APKs (arm64-v8a)
-        id: build
+      - name: Unit tests
         run: |
           set -o pipefail
-          ./gradlew --no-daemon --stacktrace :app:assembleRelease :wear:assembleRelease 2>&1 | tee build.log
+          ./gradlew --no-daemon --stacktrace :core:testDebugUnitTest 2>&1 | tee -a build.log
+
+      - name: Build phone + wear APKs (arm64-v8a)
+        run: |
+          set -o pipefail
+          ./gradlew --no-daemon --stacktrace :app:assembleRelease :wear:assembleRelease 2>&1 | tee -a build.log
 
       - name: Report build errors
         if: failure()
@@ -58,7 +74,7 @@ jobs:
           {
             echo '### Build failed'
             echo '```'
-            grep -nE "e: file|e: |error:|Unresolved reference|Compilation error|> Task .*FAILED|FAILURE:|What went wrong|Caused by:|Could not" build.log | grep -viE "warning:|is deprecated" | head -120
+            grep -nE "e: file|e: |error:|Error:|Unresolved reference|Compilation error|> Task .*FAILED|FAILURE:|What went wrong|Caused by:|Could not|Test.*FAILED|AssertionError|expected:" build.log | grep -viE "warning:|is deprecated" | head -150
             echo '```'
           } > errors.md
           gh api "repos/${GITHUB_REPOSITORY}/commits/${GITHUB_SHA}/comments" -F body=@errors.md >/dev/null || true
@@ -70,6 +86,12 @@ jobs:
           cp app/build/outputs/apk/release/*.apk "dist/ATA-phone-v${VERSION}-arm64-v8a.apk"
           cp wear/build/outputs/apk/release/*.apk "dist/ATA-wear-v${VERSION}-arm64-v8a.apk"
           ls -la dist
+
+      - name: Move rolling tag to this commit
+        if: github.ref == 'refs/heads/main'
+        run: |
+          git tag -f "apk-${GITHUB_REF_NAME}"
+          git push -f origin "refs/tags/apk-${GITHUB_REF_NAME}"
 
       - name: Publish APKs as pre-release
         if: github.ref == 'refs/heads/main'
@@ -88,6 +110,7 @@ jobs:
         with:
           tag_name: ${{ github.ref_name }}
           name: ATA ${{ github.ref_name }}
+          body_path: RELEASE_NOTES.md
           prerelease: false
           files: dist/*.apk
         env:

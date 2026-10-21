@@ -19,7 +19,7 @@ object KeyCardCrypto {
 
   /**
    * @param readerPublicKey 65-byte uncompressed EC public key from the car's reader.
-   * @param challenge16 the 16-byte challenge block (4 local random bytes + 12 reader bytes).
+   * @param challenge16 the 16-byte challenge sent by the reader (after its 65-byte ephemeral key).
    * @return 16-byte AES-ECB ciphertext.
    */
   fun authenticate(readerPublicKey: ByteArray, challenge16: ByteArray): ByteArray {

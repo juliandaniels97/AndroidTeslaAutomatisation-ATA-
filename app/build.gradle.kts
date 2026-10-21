@@ -27,13 +27,9 @@ android {
 
   val releaseStoreFile = System.getenv("ATA_KEYSTORE_FILE")
 
+  // Release builds are signed only with the real key (CI secrets). Without it the APK stays unsigned —
+  // never fall back to a debug key, so nobody can ship an update that inherits ATA's vehicle key.
   signingConfigs {
-    getByName("debug") {
-      storeFile = file("ata-shared-debug.keystore")
-      storePassword = "android"
-      keyAlias = "androiddebugkey"
-      keyPassword = "android"
-    }
     if (!releaseStoreFile.isNullOrBlank()) {
       create("release") {
         storeFile = file(releaseStoreFile)
@@ -51,7 +47,7 @@ android {
 
   buildTypes {
     release {
-      signingConfig = signingConfigs.getByName(if (!releaseStoreFile.isNullOrBlank()) "release" else "debug")
+      if (!releaseStoreFile.isNullOrBlank()) signingConfig = signingConfigs.getByName("release")
       isMinifyEnabled = true
       isShrinkResources = true
       proguardFiles(
@@ -66,7 +62,7 @@ android {
     targetCompatibility = JavaVersion.VERSION_17
   }
   kotlinOptions { jvmTarget = "17" }
-  lint { abortOnError = false }
+  lint { abortOnError = true }
 }
 
 dependencies {

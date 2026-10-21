@@ -9,5 +9,3 @@
 .cxx
 local.properties
 *.keystore
-!app/ata-shared-debug.keystore
-!wear/ata-shared-debug.keystore

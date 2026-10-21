@@ -19,11 +19,14 @@ android {
     targetCompatibility = JavaVersion.VERSION_17
   }
   kotlinOptions { jvmTarget = "17" }
-  lint { abortOnError = false }
+  lint { abortOnError = true }
+  testOptions { unitTests.isReturnDefaultValues = true }
 }
 
 dependencies {
   implementation(libs.androidx.core.ktx)
   implementation(libs.kotlinx.serialization.json)
   implementation(libs.kotlinx.coroutines.android)
+
+  testImplementation(libs.junit)
 }
