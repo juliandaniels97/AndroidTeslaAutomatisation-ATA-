@@ -36,6 +36,8 @@ import com.google.android.gms.wearable.DataEvent
 import com.google.android.gms.wearable.DataEventBuffer
 import com.google.android.gms.wearable.DataItem
 import com.google.android.gms.wearable.DataMapItem
+import com.google.android.gms.wearable.MessageClient
+import org.tfv.ata.core.ble.PairOutcome
 import com.google.android.gms.wearable.Wearable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -46,9 +48,12 @@ private data class WearStatus(
   val battery: Int,
   val range: Int,
   val charging: Boolean,
-  val locked: Boolean,
+  /** null = unknown. */
+  val locked: Boolean?,
   val updatedAt: Long,
 )
+
+private const val CONFIRM_WINDOW_MS = 5_000L
 
 class WearMainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -65,6 +70,9 @@ private fun WearApp() {
   var status by remember { mutableStateOf<WearStatus?>(null) }
   var vin by remember { mutableStateOf(WearPrefs.vin(context)) }
   var directMode by remember { mutableStateOf(WearPrefs.directMode(context)) }
+  // Critical actions (unlock, trunk …) need a second tap within a few seconds.
+  var armed by remember { mutableStateOf<String?>(null) }
+  var armedAt by remember { mutableStateOf(0L) }
 
   var pendingAfterPerm by remember { mutableStateOf<(() -> Unit)?>(null) }
   val blePermLauncher = rememberLauncherForActivityResult(
@@ -101,6 +109,15 @@ private fun WearApp() {
       }
     }
     client.addListener(listener)
+    val messages = Wearable.getMessageClient(context)
+    val resultListener = MessageClient.OnMessageReceivedListener { event ->
+      if (event.path == WearContract.MSG_RESULT) {
+        val text = String(event.data, Charsets.UTF_8)
+        val ok = text.startsWith("1|")
+        Toast.makeText(context, (if (ok) "✓ " else "✗ ") + text.substringAfter('|'), Toast.LENGTH_LONG).show()
+      }
+    }
+    messages.addListener(resultListener)
     scope.launch {
       runCatching {
         val buffer = client.dataItems.await()
@@ -113,7 +130,10 @@ private fun WearApp() {
         buffer.release()
       }
     }
-    onDispose { client.removeListener(listener) }
+    onDispose {
+      client.removeListener(listener)
+      messages.removeListener(resultListener)
+    }
   }
 
   MaterialTheme {
@@ -132,7 +152,7 @@ private fun WearApp() {
                 textAlign = TextAlign.Center,
               )
               Text(
-                text = "${s.battery}%  ·  ${s.range} km  ·  ${if (s.locked) "🔒" else "🔓"}${if (s.charging) "  ⚡" else ""}",
+                text = "${s.battery}%  ·  ${s.range} km  ·  ${when (s.locked) { true -> "🔒"; false -> "🔓"; null -> "?" }}${if (s.charging) "  ⚡" else ""}",
                 style = MaterialTheme.typography.caption2,
                 color = MaterialTheme.colors.primary,
                 modifier = Modifier.fillMaxWidth(),
@@ -155,16 +175,25 @@ private fun WearApp() {
           items(actions) { (id, label) ->
             Chip(
               modifier = Modifier.fillMaxWidth(),
-              label = { Text(label) },
+              label = { Text(if (armed == id) stringResource(R.string.wear_confirm_label, label) else label) },
               colors = ChipDefaults.primaryChipColors(),
               onClick = {
-                scope.launch {
-                  val msg = when (WearControl.run(context, id)) {
-                    WearResult.DIRECT -> R.string.wear_sent_car
-                    WearResult.RELAYED -> R.string.sent_to_phone
-                    WearResult.FAILED -> R.string.phone_unreachable
+                val now = System.currentTimeMillis()
+                if (WearControl.isCritical(id) && (armed != id || now - armedAt > CONFIRM_WINDOW_MS)) {
+                  armed = id
+                  armedAt = now
+                  Toast.makeText(context, R.string.wear_tap_again, Toast.LENGTH_SHORT).show()
+                } else {
+                  armed = null
+                  scope.launch {
+                    val msg = when (WearControl.run(context, id)) {
+                      WearResult.DIRECT -> R.string.wear_sent_car
+                      WearResult.RELAYED -> R.string.sent_to_phone
+                      WearResult.FAILED -> R.string.wear_failed
+                      WearResult.WATCH_LOCKED -> R.string.wear_locked
+                    }
+                    Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
                   }
-                  Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
                 }
               },
             )
@@ -181,6 +210,8 @@ private fun WearApp() {
               if (directMode) {
                 WearPrefs.setDirectMode(context, false)
                 directMode = false
+              } else if (!WearControl.directSupported) {
+                Toast.makeText(context, R.string.wear_direct_unsupported, Toast.LENGTH_LONG).show()
               } else {
                 withBle {
                   WearPrefs.setDirectMode(context, true)
@@ -199,11 +230,15 @@ private fun WearApp() {
               onClick = {
                 withBle {
                   scope.launch {
-                    val ok = WearControl.pair(context)
+                    val result = WearControl.pair(context)
                     Toast.makeText(
                       context,
-                      if (ok) R.string.wear_paired_ok else R.string.wear_pair_failed,
-                      Toast.LENGTH_SHORT,
+                      when (result.outcome) {
+                        PairOutcome.ADDED -> R.string.wear_paired_ok
+                        PairOutcome.AWAITING_CONFIRMATION -> R.string.wear_pair_awaiting
+                        PairOutcome.FAILED -> R.string.wear_pair_failed
+                      },
+                      Toast.LENGTH_LONG,
                     ).show()
                   }
                 }
@@ -239,7 +274,7 @@ private fun parseStatus(item: DataItem): WearStatus {
     battery = map.getInt(WearContract.KEY_BATTERY, 0),
     range = map.getInt(WearContract.KEY_RANGE, 0),
     charging = map.getBoolean(WearContract.KEY_CHARGING, false),
-    locked = map.getBoolean(WearContract.KEY_LOCKED, true),
+    locked = if (map.containsKey(WearContract.KEY_LOCKED)) map.getBoolean(WearContract.KEY_LOCKED) else null,
     updatedAt = map.getLong(WearContract.KEY_UPDATED, 0),
   )
 }
