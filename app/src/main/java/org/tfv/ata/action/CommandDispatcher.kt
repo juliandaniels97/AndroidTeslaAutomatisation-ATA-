@@ -10,6 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.tfv.ata.R
 import org.tfv.ata.automation.ActionRequest
+import org.tfv.ata.automation.BackgroundLaunch
 import org.tfv.ata.automation.Notifier
 import org.tfv.ata.core.ActionPolicy
 import org.tfv.ata.core.AtaAction
@@ -58,7 +59,9 @@ object CommandDispatcher {
     }
 
     if (action.category == AtaCategory.FUNCTION_B) {
-      return ActionExecutor.run(context, action, vehicle, settings, value, foreground = inForeground || source == TriggerSource.IN_APP)
+      // Opening another app from the background needs "Display over other apps" (Android's BAL rules).
+      val canOpen = inForeground || source == TriggerSource.IN_APP || BackgroundLaunch.allowed(context)
+      return ActionExecutor.run(context, action, vehicle, settings, value, foreground = canOpen)
     }
 
     val vin = vehicle?.vin

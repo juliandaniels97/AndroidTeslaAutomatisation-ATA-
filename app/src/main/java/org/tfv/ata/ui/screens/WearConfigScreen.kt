@@ -59,6 +59,7 @@ fun WearConfigScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit) {
       verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
       Text(stringResource(R.string.settings_wear_desc), style = MaterialTheme.typography.bodyMedium)
+      OverlayPermissionCard()
       funcB.forEach { action -> WearCheck(stringResource(ActionInfo.labelRes(action)), action.id in current) { toggle(action) } }
       Text(
         stringResource(R.string.menu_group_direct),

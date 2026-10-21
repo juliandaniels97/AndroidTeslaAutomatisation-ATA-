@@ -2,6 +2,8 @@ package org.tfv.ata.action
 
 import android.content.Context
 import android.content.Intent
+import android.os.Handler
+import android.os.Looper
 import android.widget.Toast
 import org.tfv.ata.R
 import org.tfv.ata.automation.Notifier
@@ -37,7 +39,7 @@ object ActionExecutor {
     }
     if (!foreground) {
       Notifier.openPrompt(context, action, intent)
-      return CommandResult.Success
+      return CommandResult.Failure("tap the notification to open", FailureCode.OPEN_ON_PHONE)
     }
     return try {
       context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
@@ -48,7 +50,12 @@ object ActionExecutor {
     }
   }
 
-  private fun toast(context: Context, res: Int) = Toast.makeText(context, res, Toast.LENGTH_SHORT).show()
+  /** Toasts only work on the main thread; background callers (watch, workers) reach this from elsewhere. */
+  private fun toast(context: Context, res: Int) {
+    val app = context.applicationContext
+    val show = { Toast.makeText(app, res, Toast.LENGTH_SHORT).show() }
+    if (Looper.myLooper() == Looper.getMainLooper()) show() else Handler(Looper.getMainLooper()).post { show() }
+  }
 
   private fun buildIntent(
     context: Context,

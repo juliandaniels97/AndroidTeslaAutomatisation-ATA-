@@ -225,4 +225,10 @@
     <string name="menu_routines_desc">Extra actions for routines (up to %1$d more on this device). The launcher menu keeps showing only the 4 actions above.</string>
     <string name="routines_hint_title">⚠️ Samsung Routines: which actions are available?</string>
     <string name="routines_hint_text">Routines can only start actions that ATA publishes as app shortcuts: the up to 4 actions of the icon menu, plus the extra routine actions chosen under Settings → Menu &amp; widgets → Samsung Routines. Actions with a value (address, charge limit …) can\'t be used there. If an extra action doesn\'t show up in Routines on your device, only the 4 icon-menu actions work: put the ones you need into the icon menu.</string>
+    <string name="overlay_title">Open apps on the phone (watch &amp; automations)</string>
+    <string name="overlay_desc">Android only lets ATA open the Tesla app or navigation from the background (e.g. after a tap on the watch) if you allow \"Display over other apps\". Without it, ATA shows a notification you have to tap.</string>
+    <string name="overlay_granted">Allowed: taps on the watch and automations open the Tesla app / navigation directly on the phone.</string>
+    <string name="overlay_button">Allow \"Display over other apps\"</string>
+    <string name="overlay_restricted_hint">Switch greyed out? Open App info → ATA → ⋮ → \"Allow restricted settings\", then try again.</string>
+    <string name="fail_open_on_phone">Tap the notification on the phone to open it — or allow \"Display over other apps\" for ATA (Settings → Wear OS watch).</string>
 </resources>

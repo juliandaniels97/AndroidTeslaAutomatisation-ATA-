@@ -9,9 +9,21 @@ FAILED=0
   adb install -r "$APK" 2>&1
   for START in "$@"; do
     adb logcat -c
-    echo "== am start $START"
-    adb shell am start -W $START 2>&1 | grep -E "Status|Error|Activity"
+    case "$START" in
+      grant-overlay)
+        echo "== appops SYSTEM_ALERT_WINDOW allow"
+        adb shell appops set org.tfv.ata SYSTEM_ALERT_WINDOW allow
+        continue ;;
+      broadcast:*)
+        echo "== background: am broadcast ${START#broadcast:}"
+        adb shell input keyevent KEYCODE_HOME
+        adb shell am broadcast ${START#broadcast:} 2>&1 | tail -1 ;;
+      *)
+        echo "== am start $START"
+        adb shell am start -W $START 2>&1 | grep -E "Status|Error|Activity" ;;
+    esac
     sleep 8
+    echo "   foreground: $(adb shell dumpsys activity activities | grep -m1 -E 'topResumedActivity|mResumedActivity' | sed 's/^ *//')"
     CRASH=$(adb logcat -d -b crash 2>&1 | grep -v "beginning of crash")
     if [ -n "$CRASH" ]; then
       echo "!! CRASH"; echo "$CRASH"; FAILED=1

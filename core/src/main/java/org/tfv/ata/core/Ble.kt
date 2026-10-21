@@ -14,6 +14,8 @@ enum class FailureCode {
   NO_RESPONSE,
   UNSUPPORTED_DEVICE,
   INVALID_VALUE,
+  /** A Basic action couldn't open its app from the background; ATA posted a tap-to-open notification. */
+  OPEN_ON_PHONE,
   OTHER,
 }
 

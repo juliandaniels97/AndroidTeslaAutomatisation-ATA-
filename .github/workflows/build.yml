@@ -149,7 +149,7 @@ jobs:
           arch: x86_64
           disable-animations: true
           script: |
-            if [ "${{ matrix.name }}" = phone ]; then bash .github/smoke.sh "$(ls app/build/outputs/apk/release/*.apk | head -1)" phone "-n org.tfv.ata/.ui.MainActivity" "-n org.tfv.ata/.shortcut.CreateShortcutActivity" "-a org.tfv.ata.action.RUN -n org.tfv.ata/.automation.RunActionActivity --es action_id open_tesla_app" "-a org.tfv.ata.action.RUN -n org.tfv.ata/.automation.RunActionActivity --es action_id climate_on"; else bash .github/smoke.sh "$(ls wear/build/outputs/apk/release/*.apk | head -1)" wear "-n org.tfv.ata/.wear.WearMainActivity"; fi
+            if [ "${{ matrix.name }}" = phone ]; then bash .github/smoke.sh "$(ls app/build/outputs/apk/release/*.apk | head -1)" phone "-n org.tfv.ata/.ui.MainActivity" "-n org.tfv.ata/.shortcut.CreateShortcutActivity" "-a org.tfv.ata.action.RUN -n org.tfv.ata/.automation.RunActionActivity --es action_id open_tesla_app" "-a org.tfv.ata.action.RUN -n org.tfv.ata/.automation.RunActionActivity --es action_id climate_on" "broadcast:-n org.tfv.ata/.automation.AutomationReceiver -a org.tfv.ata.action.RUN --es action_id open_tesla_app" grant-overlay "broadcast:-n org.tfv.ata/.automation.AutomationReceiver -a org.tfv.ata.action.RUN --es action_id open_tesla_app"; else bash .github/smoke.sh "$(ls wear/build/outputs/apk/release/*.apk | head -1)" wear "-n org.tfv.ata/.wear.WearMainActivity"; fi
       - name: Post result
         if: failure()
         env:

@@ -15,10 +15,10 @@ tap — or an automation — triggers exactly the action you want.
 
 ## Downloads
 
-Latest release **v1.3.3** — phone APK for **64‑bit ARM (arm64‑v8a)**, watch APK for **64‑ and 32‑bit ARM (arm64‑v8a + armeabi‑v7a)**:
+Latest release **v1.3.4** — phone APK for **64‑bit ARM (arm64‑v8a)**, watch APK for **64‑ and 32‑bit ARM (arm64‑v8a + armeabi‑v7a)**:
 
-- 📱 Phone APK: **[ATA-phone-v1.3.3-arm64-v8a.apk](https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-/releases/download/v1.3.3/ATA-phone-v1.3.3-arm64-v8a.apk)**
-- ⌚ Wear OS APK: **[ATA-wear-v1.3.3.apk](https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-/releases/download/v1.3.3/ATA-wear-v1.3.3.apk)**
+- 📱 Phone APK: **[ATA-phone-v1.3.4-arm64-v8a.apk](https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-/releases/download/v1.3.4/ATA-phone-v1.3.4-arm64-v8a.apk)**
+- ⌚ Wear OS APK: **[ATA-wear-v1.3.4.apk](https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-/releases/download/v1.3.4/ATA-wear-v1.3.4.apk)**
 
 All releases are listed under [Releases](https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-/releases).
 All release builds are signed with the same release key, so new versions install as an update over
@@ -180,6 +180,13 @@ chips. Includes a **tile** and a tappable **complication**.
 
 - **Relay mode (default):** tapping a chip sends the action to the phone running ATA, which performs
   it (Basic *and* BLE) and reports the result back to the watch.
+- **Opening apps on the phone** (e.g. *Open Tesla app*, *Navigate home* from the watch): Android only
+  lets ATA open another app from the background if you allow **"Display over other apps"** for ATA
+  (Settings → *Wear OS watch* has a button). Without it, the phone shows a notification you tap to
+  open the app, and the watch tells you so. If the switch is greyed out: App info → ATA → ⋮ →
+  *Allow restricted settings*.
+- In **direct control**, if the watch can't reach the car or isn't paired, it hands the command to
+  the phone instead.
 - **Critical actions** (unlock, trunk …) need a **second tap** to confirm and never run from a locked
   watch.
 - **Direct control (BLE, Wear OS 4 / Android 12 or newer):** the watch can also talk to the car

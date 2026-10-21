@@ -1,6 +1,8 @@
-## ATA v1.3.3 — Uhr-App für 32-Bit-Uhren
+## ATA v1.3.4 — Uhr öffnet Apps auf dem Handy
 
-- **Wear OS:** Das Uhr-APK enthält jetzt neben **arm64-v8a** auch **armeabi-v7a (32 Bit)**. Damit lässt es sich auch auf Uhren mit 32-Bit-System installieren, z. B. der **Galaxy Watch 6**. Ein APK für alle Uhren: `ATA-wear-v1.3.3.apk`.
-- Telefon-APK unverändert (arm64-v8a).
+- **Behoben:** Ein Tipp auf der Uhr auf *Tesla-App öffnen*, *Nach Hause navigieren* usw. hat auf dem Handy die App nicht geöffnet, die Uhr meldete aber trotzdem „✓“. Android verbietet Apps im Hintergrund, andere Apps zu öffnen. ATA hat deshalb nur eine Benachrichtigung gezeigt, ohne Benachrichtigungsrecht passierte gar nichts.
+- **Neu:** Unter *Einstellungen → Wear OS Uhr* (und *Automation*) kannst du **„Über anderen Apps einblenden“** erlauben. Dann öffnen Uhr-Tipps und Automationen die Tesla-App bzw. Navigation **direkt auf dem Handy**. Ohne diese Berechtigung erscheint weiterhin eine Benachrichtigung zum Antippen, und die Uhr sagt das jetzt auch ehrlich.
+- **Behoben:** Ein Absturz, wenn eine Basis-Aktion im Hintergrund keine passende App fand (Toast aus einem Hintergrund-Thread).
+- **Uhr-Direktsteuerung:** Findet die Uhr das Auto nicht oder ist sie nicht gekoppelt, übernimmt automatisch das Handy.
 
 BLE-Funktionen, NFC-Schlüsselkarte und Uhr-Direktsteuerung bleiben **BETA**.

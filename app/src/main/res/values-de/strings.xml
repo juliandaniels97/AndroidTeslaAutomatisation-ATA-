@@ -225,4 +225,10 @@
     <string name="menu_routines_desc">Zusätzliche Aktionen für Routinen (auf diesem Gerät bis zu %1$d weitere). Das Icon-Menü zeigt weiterhin nur die 4 Aktionen oben.</string>
     <string name="routines_hint_title">⚠️ Samsung Routinen: welche Aktionen gehen?</string>
     <string name="routines_hint_text">Routinen können nur Aktionen starten, die ATA als App-Shortcut veröffentlicht: die bis zu 4 Aktionen des Icon-Menüs plus die zusätzlichen Routine-Aktionen unter Einstellungen → Menü &amp; Widgets → Samsung Routinen. Aktionen mit Wert (Adresse, Ladelimit …) gehen dort nicht. Erscheint eine zusätzliche Aktion auf deinem Gerät nicht in den Routinen, funktionieren nur die 4 Icon-Menü-Aktionen: lege die benötigten ins Icon-Menü.</string>
+    <string name="overlay_title">Apps auf dem Handy öffnen (Uhr &amp; Automationen)</string>
+    <string name="overlay_desc">Android erlaubt ATA nur dann, die Tesla-App oder Navigation aus dem Hintergrund zu öffnen (z. B. nach einem Tipp auf der Uhr), wenn du „Über anderen Apps einblenden“ erlaubst. Ohne diese Berechtigung zeigt ATA eine Benachrichtigung, die du antippen musst.</string>
+    <string name="overlay_granted">Erlaubt: Tipps auf der Uhr und Automationen öffnen die Tesla-App bzw. Navigation direkt auf dem Handy.</string>
+    <string name="overlay_button">„Über anderen Apps einblenden“ erlauben</string>
+    <string name="overlay_restricted_hint">Schalter ausgegraut? App-Info → ATA → ⋮ → „Eingeschränkte Einstellungen zulassen“, dann erneut versuchen.</string>
+    <string name="fail_open_on_phone">Auf dem Handy die Benachrichtigung antippen – oder für ATA „Über anderen Apps einblenden“ erlauben (Einstellungen → Wear OS Uhr).</string>
 </resources>

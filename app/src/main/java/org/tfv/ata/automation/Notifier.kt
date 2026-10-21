@@ -127,6 +127,7 @@ object Notifier {
         FailureCode.NO_RESPONSE -> R.string.fail_no_response
         FailureCode.UNSUPPORTED_DEVICE -> R.string.fail_unsupported
         FailureCode.INVALID_VALUE -> R.string.fail_invalid_value
+        FailureCode.OPEN_ON_PHONE -> R.string.fail_open_on_phone
         FailureCode.OTHER -> R.string.fail_other
       },
     ) + if (failure.code == FailureCode.VEHICLE_REJECTED || failure.code == FailureCode.OTHER) " (${failure.reason})" else ""

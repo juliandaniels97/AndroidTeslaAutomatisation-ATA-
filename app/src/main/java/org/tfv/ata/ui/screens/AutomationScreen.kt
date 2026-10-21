@@ -91,6 +91,7 @@ fun AutomationScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit) {
       verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
       RoutinesHint()
+      OverlayPermissionCard()
       Text(stringResource(R.string.automation_intro), style = MaterialTheme.typography.bodyMedium)
 
       if (!notifyAllowed) {

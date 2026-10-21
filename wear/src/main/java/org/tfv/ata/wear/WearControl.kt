@@ -11,6 +11,7 @@ import org.tfv.ata.core.ActionPolicy
 import org.tfv.ata.core.AtaAction
 import org.tfv.ata.core.AtaCategory
 import org.tfv.ata.core.CommandResult
+import org.tfv.ata.core.FailureCode
 import org.tfv.ata.core.ble.PairOutcome
 import org.tfv.ata.core.ble.PairResult
 import org.tfv.ata.core.ble.TeslaController
@@ -25,6 +26,13 @@ enum class WearResult { DIRECT, RELAYED, FAILED, WATCH_LOCKED }
  * direct control needs the watch paired with the car once.
  */
 object WearControl {
+
+  private val RELAY_ON = setOf(
+    FailureCode.NOT_REACHABLE,
+    FailureCode.KEY_NOT_PAIRED,
+    FailureCode.PERMISSION,
+    FailureCode.UNSUPPORTED_DEVICE,
+  )
 
   fun hasBlePermission(context: Context): Boolean =
     ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED &&
@@ -48,7 +56,11 @@ object WearControl {
     if (isCritical(actionId) && watchLocked(context)) return WearResult.WATCH_LOCKED
     if (action != null && action.category == AtaCategory.FUNCTION_A && canRunDirect(context)) {
       val result = withContext(Dispatchers.IO) { TeslaController.sendCommand(context, WearPrefs.vin(context), action) }
-      return if (result is CommandResult.Success) WearResult.DIRECT else WearResult.FAILED
+      if (result is CommandResult.Success) return WearResult.DIRECT
+      // Nothing reached the car (not found / not paired / no permission): let the phone try instead.
+      // Other failures (car rejected, no answer) are not retried, so a command never runs twice.
+      val code = (result as? CommandResult.Failure)?.code
+      if (code == null || code !in RELAY_ON) return WearResult.FAILED
     }
     // Basic actions, or no direct setup → relay to the phone, which runs the command and reports back.
     return if (WearSync.sendId(context, actionId)) WearResult.RELAYED else WearResult.FAILED
