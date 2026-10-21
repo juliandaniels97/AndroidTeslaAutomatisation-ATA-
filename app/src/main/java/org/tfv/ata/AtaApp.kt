@@ -8,5 +8,6 @@ class AtaApp : Application() {
     super.onCreate()
     org.tfv.ata.automation.Notifier.ensureChannels(this)
     ShortcutSync.refresh(this)
+    org.tfv.ata.nfc.KeyCardRegistration.start(this)
   }
 }

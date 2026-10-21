@@ -121,6 +121,7 @@ object Notifier {
     context.getString(
       when (failure.code) {
         FailureCode.NOT_REACHABLE -> R.string.fail_not_reachable
+        FailureCode.BLUETOOTH_OFF -> R.string.fail_bluetooth_off
         FailureCode.PERMISSION -> R.string.fail_permission
         FailureCode.KEY_NOT_PAIRED -> R.string.fail_key_not_paired
         FailureCode.VEHICLE_REJECTED -> R.string.fail_rejected

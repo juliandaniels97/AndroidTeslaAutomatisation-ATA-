@@ -8,6 +8,7 @@ object Ble {
 
 enum class FailureCode {
   NOT_REACHABLE,
+  BLUETOOTH_OFF,
   PERMISSION,
   KEY_NOT_PAIRED,
   VEHICLE_REJECTED,

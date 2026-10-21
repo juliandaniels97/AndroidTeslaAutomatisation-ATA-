@@ -29,6 +29,7 @@ object WearControl {
 
   private val RELAY_ON = setOf(
     FailureCode.NOT_REACHABLE,
+    FailureCode.BLUETOOTH_OFF,
     FailureCode.KEY_NOT_PAIRED,
     FailureCode.PERMISSION,
     FailureCode.UNSUPPORTED_DEVICE,

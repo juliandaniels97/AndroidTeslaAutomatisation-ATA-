@@ -1,16 +1,11 @@
 package org.tfv.ata.ui.screens
 
-import android.Manifest
-import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Key
@@ -31,7 +26,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -43,18 +37,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.tfv.ata.R
 import org.tfv.ata.core.AtaAction
 import org.tfv.ata.core.AtaCategory
-import org.tfv.ata.automation.Notifier
-import org.tfv.ata.core.CommandResult
-import org.tfv.ata.core.FailureCode
-import org.tfv.ata.core.ble.PairOutcome
-import org.tfv.ata.core.ble.TeslaController
-import org.tfv.ata.core.ble.VehicleKey
 import org.tfv.ata.ui.ActionHost
 import org.tfv.ata.ui.AtaUiState
 import org.tfv.ata.ui.AtaViewModel
@@ -63,31 +49,12 @@ import org.tfv.ata.ui.components.VehicleArt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun VehicleScreen(vm: AtaViewModel, state: AtaUiState, onAddVehicle: () -> Unit = {}) {
+fun VehicleScreen(vm: AtaViewModel, state: AtaUiState, onAddVehicle: () -> Unit = {}, onPair: () -> Unit = {}) {
   val context = LocalContext.current
   val scope = rememberCoroutineScope()
   val snapshot = state.snapshot
   val experimental = state.settings.experimentalBle
   val refreshing by vm.refreshing.collectAsStateWithLifecycle()
-  val pairing by vm.pairing.collectAsStateWithLifecycle()
-
-  fun startPair() {
-    val vin = state.selected?.vin ?: return
-    vm.pairKey(vin) { result ->
-      val text = when (result.outcome) {
-        PairOutcome.ADDED -> context.getString(R.string.pair_added)
-        PairOutcome.AWAITING_CONFIRMATION -> context.getString(R.string.pair_awaiting)
-        PairOutcome.FAILED -> context.getString(R.string.pair_failed) + ": " +
-          Notifier.failureText(context, CommandResult.Failure(result.detail, result.code ?: FailureCode.OTHER))
-      }
-      Toast.makeText(context, text, Toast.LENGTH_LONG).show()
-    }
-  }
-  val pairPermissions = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { granted ->
-    if (granted.values.isNotEmpty() && granted.values.all { it }) startPair()
-    else Toast.makeText(context, R.string.fail_permission, Toast.LENGTH_LONG).show()
-  }
-
   val allBle = remember { AtaAction.entries.filter { it.category == AtaCategory.FUNCTION_A && it.enabled } }
   val savedBle = remember(state.settings.vehicleActionIds) {
     val ids = state.settings.vehicleActionIds
@@ -168,14 +135,7 @@ fun VehicleScreen(vm: AtaViewModel, state: AtaUiState, onAddVehicle: () -> Unit 
             } else if (state.selected == null) {
               AddVehicleCard(onAdd = onAddVehicle, modifier = Modifier.padding(top = 10.dp))
             } else {
-              PairCard(
-                busy = pairing,
-                onPair = {
-                  if (TeslaController.hasBlePermission(context)) startPair()
-                  else pairPermissions.launch(arrayOf(Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT))
-                },
-                modifier = Modifier.padding(top = 10.dp),
-              )
+              PairCard(onPair = onPair, modifier = Modifier.padding(top = 10.dp))
             }
           }
         },
@@ -241,23 +201,18 @@ private fun AddVehicleCard(onAdd: () -> Unit, modifier: Modifier = Modifier) {
   }
 }
 
+/** Entry to the pairing assistant. */
 @Composable
-private fun PairCard(busy: Boolean, onPair: () -> Unit, modifier: Modifier = Modifier) {
-  val unsupported = stringResource(R.string.fail_unsupported)
-  val fingerprint by produceState<String?>(initialValue = null) {
-    value = if (!VehicleKey.isSupported) unsupported
-    else withContext(Dispatchers.IO) { runCatching { VehicleKey.publicKeyFingerprint() }.getOrNull() }
-  }
+private fun PairCard(onPair: () -> Unit, modifier: Modifier = Modifier) {
   Card(modifier = modifier.fillMaxWidth()) {
-    Column(Modifier.padding(14.dp)) {
-      Text(stringResource(R.string.ble_pair_desc), style = MaterialTheme.typography.bodySmall)
-      SelectionContainer {
-        Text(fingerprint ?: "…", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
+    Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
+      Column(Modifier.weight(1f)) {
+        Text(stringResource(R.string.ble_pair), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+        Text(stringResource(R.string.ble_pair_desc), style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(top = 4.dp))
       }
-      Button(onClick = onPair, enabled = !busy && VehicleKey.isSupported, modifier = Modifier.padding(top = 8.dp)) {
-        if (busy) CircularProgressIndicator(modifier = Modifier.padding(end = 4.dp), strokeWidth = 2.dp)
-        else Icon(Icons.Filled.Key, contentDescription = null)
-        Text(stringResource(if (busy) R.string.pair_in_progress else R.string.ble_pair), modifier = Modifier.padding(start = 8.dp))
+      Button(onClick = onPair, modifier = Modifier.padding(start = 10.dp)) {
+        Icon(Icons.Filled.Key, contentDescription = null)
+        Text(stringResource(R.string.pair_open_assistant_short), modifier = Modifier.padding(start = 6.dp))
       }
     }
   }

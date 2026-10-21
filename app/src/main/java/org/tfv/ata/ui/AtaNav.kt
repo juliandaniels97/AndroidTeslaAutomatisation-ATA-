@@ -23,8 +23,11 @@ import androidx.navigation.compose.rememberNavController
 import org.tfv.ata.R
 import org.tfv.ata.ui.screens.AboutScreen
 import org.tfv.ata.ui.screens.AutomationScreen
+import org.tfv.ata.ui.screens.GuideScreen
+import org.tfv.ata.ui.screens.GuideTargets
 import org.tfv.ata.ui.screens.HomeScreen
 import org.tfv.ata.ui.screens.MenuConfigScreen
+import org.tfv.ata.ui.screens.PairScreen
 import org.tfv.ata.ui.screens.SettingsScreen
 import org.tfv.ata.ui.screens.VehicleScreen
 import org.tfv.ata.ui.screens.VehiclesScreen
@@ -80,7 +83,9 @@ fun AtaNavHost(vm: AtaViewModel, state: AtaUiState) {
       modifier = Modifier.padding(padding),
     ) {
       composable(Tab.HOME.route) { HomeScreen(vm, state, onAddVehicle = { nav.navigate("vehicles") }) }
-      composable(Tab.VEHICLE.route) { VehicleScreen(vm, state, onAddVehicle = { nav.navigate("vehicles") }) }
+      composable(Tab.VEHICLE.route) {
+        VehicleScreen(vm, state, onAddVehicle = { nav.navigate("vehicles") }, onPair = { nav.navigate("pair") })
+      }
       composable(Tab.SETTINGS.route) {
         SettingsScreen(
           vm, state,
@@ -89,6 +94,7 @@ fun AtaNavHost(vm: AtaViewModel, state: AtaUiState) {
           onWear = { nav.navigate("wear") },
           onAutomation = { nav.navigate("automation") },
           onAbout = { nav.navigate("about") },
+          onGuide = { nav.navigate("guide") },
         )
       }
       composable("vehicles") { VehiclesScreen(vm, state, onBack = { nav.popBackStack() }) }
@@ -96,6 +102,22 @@ fun AtaNavHost(vm: AtaViewModel, state: AtaUiState) {
       composable("wear") { WearConfigScreen(vm, state, onBack = { nav.popBackStack() }) }
       composable("automation") { AutomationScreen(vm, state, onBack = { nav.popBackStack() }) }
       composable("about") { AboutScreen(onBack = { nav.popBackStack() }) }
+      composable("pair") {
+        PairScreen(vm, state, onBack = { nav.popBackStack() }, onVehicles = { nav.navigate("vehicles") })
+      }
+      composable("guide") {
+        GuideScreen(
+          vm, state,
+          onBack = { nav.popBackStack() },
+          go = GuideTargets(
+            vehicles = { nav.navigate("vehicles") },
+            pair = { nav.navigate("pair") },
+            menu = { nav.navigate("menu") },
+            wear = { nav.navigate("wear") },
+            automation = { nav.navigate("automation") },
+          ),
+        )
+      }
     }
   }
 }

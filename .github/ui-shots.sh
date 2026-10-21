@@ -23,7 +23,12 @@ shot() { adb exec-out screencap -p > "$OUT/$1.png"; echo "shot $1"; }
 scroll() { adb shell input swipe 540 1800 540 700 400; sleep 1; }
 restart() { adb shell am start -S -W -n org.tfv.ata/.ui.MainActivity >/dev/null; sleep 6; }
 
-restart
+# Start animation: needs real animation speed (the emulator runs with animations off).
+adb shell settings put global animator_duration_scale 1
+adb shell am start -S -n org.tfv.ata/.ui.MainActivity >/dev/null
+for n in 01 02 03 04 05 06 07 08 09 10 11 12 13 14; do shot "00-splash-$n"; done
+adb shell settings put global animator_duration_scale 0
+sleep 4
 shot 00-onboarding
 tap "Let's go"
 
@@ -37,6 +42,9 @@ for THEME in Dark Light; do
   for ITEM in "NFC tags" "Automation (Routines, Tasker)" "Menu & widgets" "Wear OS watch" "Vehicles"; do
     restart; tap "Settings"; tap "$ITEM"; shot "$t-$i-$(echo "$ITEM" | tr -cd 'a-zA-Z' | tr A-Z a-z)"; i=$((i+1))
   done
+  restart; tap "Settings"; tap "Guide & setup"; shot "$t-10-guide"
+  scroll; tap "Bluetooth control (BETA)"; scroll; shot "$t-11-guide-ble"
+  tap "Open pairing assistant"; shot "$t-12-pair"; scroll; shot "$t-13-pair-2"
   adb shell am start -S -W -n org.tfv.ata/.shortcut.CreateShortcutActivity >/dev/null; sleep 3; shot "$t-9-create-shortcut"
 done
 ls -la "$OUT"

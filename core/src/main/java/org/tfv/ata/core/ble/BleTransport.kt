@@ -173,16 +173,36 @@ class BleConnection internal constructor(private val context: Context) : Bluetoo
 
 @SuppressLint("MissingPermission")
 object BleTransport {
-  suspend fun scanAddress(context: Context, localName: String, timeoutMs: Long): String? {
+  fun isBluetoothOn(context: Context): Boolean {
+    val manager = context.getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager
+    return manager?.adapter?.isEnabled == true
+  }
+
+  /**
+   * Finds the car by its BLE local name. First with a hardware name filter; some phones don't match names in
+   * the controller, so the rest of the time is spent on an unfiltered scan that compares names in software.
+   * Returns the device from the scan result (keeps the car's random address type for connecting).
+   */
+  suspend fun scanDevice(context: Context, localName: String, timeoutMs: Long): BluetoothDevice? {
+    val filtered = scan(context, localName, timeoutMs / 2, useFilter = true)
+    return filtered ?: scan(context, localName, timeoutMs - timeoutMs / 2, useFilter = false)
+  }
+
+  private suspend fun scan(context: Context, localName: String, timeoutMs: Long, useFilter: Boolean): BluetoothDevice? {
     val manager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
     val scanner = manager.adapter?.takeIf { it.isEnabled }?.bluetoothLeScanner ?: return null
-    val found = CompletableDeferred<String?>()
+    val found = CompletableDeferred<BluetoothDevice?>()
     val cb = object : ScanCallback() {
       override fun onScanResult(callbackType: Int, result: ScanResult) {
-        if (!found.isCompleted) found.complete(result.device.address)
+        val name = result.scanRecord?.deviceName
+        if (name == localName && !found.isCompleted) found.complete(result.device)
+      }
+
+      override fun onBatchScanResults(results: MutableList<ScanResult>) {
+        results.forEach { onScanResult(ScanSettings.CALLBACK_TYPE_ALL_MATCHES, it) }
       }
     }
-    val filters = listOf(ScanFilter.Builder().setDeviceName(localName).build())
+    val filters = if (useFilter) listOf(ScanFilter.Builder().setDeviceName(localName).build()) else emptyList()
     val settings = ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build()
     scanner.startScan(filters, settings, cb)
     return try {
@@ -192,9 +212,7 @@ object BleTransport {
     }
   }
 
-  suspend fun connect(context: Context, address: String, timeoutMs: Long): BleConnection? {
-    val manager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
-    val device = manager.adapter?.getRemoteDevice(address) ?: return null
+  suspend fun connect(context: Context, device: BluetoothDevice, timeoutMs: Long): BleConnection? {
     val connection = BleConnection(context)
     return if (connection.open(device, timeoutMs)) connection else null
   }

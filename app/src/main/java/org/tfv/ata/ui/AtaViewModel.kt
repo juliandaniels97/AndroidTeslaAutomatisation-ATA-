@@ -138,17 +138,25 @@ class AtaViewModel(app: Application) : AndroidViewModel(app) {
   /** Invalidates every NFC tag written so far. */
   fun rotateNfcToken() = viewModelScope.launch { store.rotateNfcToken() }
 
-  private val _pairing = MutableStateFlow(false)
-  val pairing = _pairing.asStateFlow()
+  private val _pairState = MutableStateFlow<PairUiState>(PairUiState.Idle)
+  /** Progress of the pairing assistant. */
+  val pairState = _pairState.asStateFlow()
 
-  fun pairKey(vin: String, onResult: (org.tfv.ata.core.ble.PairResult) -> Unit) = viewModelScope.launch {
-    if (_pairing.value) return@launch
-    _pairing.value = true
+  fun pairKey(vin: String) = viewModelScope.launch {
+    if (_pairState.value is PairUiState.Running) return@launch
+    _pairState.value = PairUiState.Running(org.tfv.ata.core.ble.PairStep.SEARCHING)
+    var reached: org.tfv.ata.core.ble.PairStep? = null
     val result = kotlinx.coroutines.withContext(Dispatchers.IO) {
-      org.tfv.ata.core.ble.TeslaController.pairKey(getApplication(), vin)
+      org.tfv.ata.core.ble.TeslaController.pairKey(getApplication(), vin) { step ->
+        reached = step
+        _pairState.value = PairUiState.Running(step)
+      }
     }
-    _pairing.value = false
-    onResult(result)
+    _pairState.value = PairUiState.Finished(result, reached)
+  }
+
+  fun resetPairing() {
+    if (_pairState.value !is PairUiState.Running) _pairState.value = PairUiState.Idle
   }
 
   fun saveVehicle(vehicle: Vehicle) = viewModelScope.launch {
@@ -198,4 +206,11 @@ class AtaViewModel(app: Application) : AndroidViewModel(app) {
     val updated = if (action.id in current) current - action.id else current + action.id
     s.copy(homeActionIds = updated)
   }
+}
+
+sealed interface PairUiState {
+  data object Idle : PairUiState
+  data class Running(val step: org.tfv.ata.core.ble.PairStep) : PairUiState
+  /** [reached] is the last step that started (null: stopped before searching, e.g. Bluetooth off). */
+  data class Finished(val result: org.tfv.ata.core.ble.PairResult, val reached: org.tfv.ata.core.ble.PairStep?) : PairUiState
 }

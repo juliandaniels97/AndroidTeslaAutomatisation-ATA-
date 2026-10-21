@@ -18,14 +18,18 @@ import java.security.SecureRandom
 
 enum class PairOutcome { ADDED, AWAITING_CONFIRMATION, FAILED }
 
+/** Progress of [TeslaController.pairKey], for the pairing assistant. */
+enum class PairStep { SEARCHING, CONNECTING, WAITING_FOR_CARD }
+
 data class PairResult(val outcome: PairOutcome, val code: FailureCode? = null, val detail: String = "")
 
 object TeslaController {
-  private const val SCAN_TIMEOUT = 15_000L
+  private const val SCAN_TIMEOUT = 20_000L
   private const val CONNECT_TIMEOUT = 20_000L
   private const val REPLY_TIMEOUT = 10_000L
   private const val STATUS_TIMEOUT = 5_000L
-  private const val PAIR_TIMEOUT = 45_000L
+  private const val PAIR_TIMEOUT = 60_000L
+  private const val PAIR_POLL = 4_000L
   private const val MAX_BUSY_RETRIES = 3
   private const val WAKE_POLLS = 10
 
@@ -92,41 +96,73 @@ object TeslaController {
       }
     }
 
-  /** Asks the car to add this device's key. The owner confirms in the car with a key card tap. */
-  suspend fun pairKey(context: Context, vin: String, owner: Boolean = false): PairResult =
+  /**
+   * Asks the car to add this device's key. The car then shows a prompt and the owner confirms by tapping an
+   * already-paired key card on the card reader. While waiting, a VCSEC handshake is tried every few seconds:
+   * it only succeeds once the key is on the car's key list, so [PairOutcome.ADDED] is never a guess.
+   */
+  suspend fun pairKey(
+    context: Context,
+    vin: String,
+    owner: Boolean = false,
+    onStep: (PairStep) -> Unit = {},
+  ): PairResult =
     mutex.withLock {
-      withVehicle<PairResult>(context, vin, onError = { code, msg -> PairResult(PairOutcome.FAILED, code, msg) }) { conn ->
-        if (!conn.send(addKeyEnvelope(owner))) {
+      withVehicle<PairResult>(context, vin, onError = { code, msg -> PairResult(PairOutcome.FAILED, code, msg) }, onStep = onStep) { conn ->
+        val routing = newId()
+        // Same envelope as Tesla's vehicle-command: an unsigned RoutableMessage to the VCSEC domain.
+        if (!conn.send(unsignedRequest(Domain.VEHICLE_SECURITY, addKeyEnvelope(owner), newId(), routing))) {
           return@withVehicle PairResult(PairOutcome.FAILED, FailureCode.NOT_REACHABLE, "send failed")
         }
+        onStep(PairStep.WAITING_FOR_CARD)
         val deadline = System.currentTimeMillis() + PAIR_TIMEOUT
         while (System.currentTimeMillis() < deadline) {
-          val raw = receive(conn, deadline - System.currentTimeMillis()) ?: break
-          // Replies may come as a RoutableMessage or as a bare FromVCSECMessage.
-          val payload = runCatching { ParsedResponse(raw).protobufBytes }.getOrNull() ?: raw
-          when (val reply = VcsecReply.forWhitelist(payload)) {
-            AppReply.Done -> return@withVehicle PairResult(PairOutcome.ADDED)
-            is AppReply.Error -> return@withVehicle PairResult(PairOutcome.FAILED, FailureCode.VEHICLE_REJECTED, reply.detail)
-            else -> Unit
+          val pollUntil = minOf(deadline, System.currentTimeMillis() + PAIR_POLL)
+          while (System.currentTimeMillis() < pollUntil) {
+            val raw = receive(conn, pollUntil - System.currentTimeMillis()) ?: break
+            val parsed = runCatching { ParsedResponse(raw) }.getOrNull()
+            if (parsed != null && parsed.toRoutingAddress != null && !parsed.isFor(routing)) continue
+            if (parsed != null && parsed.fault != 0 && parsed.fault != FAULT_UNKNOWN_KEY_ID) {
+              return@withVehicle PairResult(PairOutcome.FAILED, FailureCode.VEHICLE_REJECTED, "vehicle fault ${parsed.fault}")
+            }
+            // Replies may come as a RoutableMessage or as a bare FromVCSECMessage.
+            val payload = parsed?.protobufBytes ?: raw
+            val reply = VcsecReply.forWhitelist(payload)
+            if (reply is AppReply.Error) {
+              return@withVehicle PairResult(PairOutcome.FAILED, FailureCode.VEHICLE_REJECTED, reply.detail)
+            }
           }
+          if (keyAccepted(conn, vin)) return@withVehicle PairResult(PairOutcome.ADDED)
         }
         PairResult(PairOutcome.AWAITING_CONFIRMATION)
       }
+    }
+
+  /** True once the car knows this key: a VCSEC session can be established. */
+  private suspend fun keyAccepted(conn: BleConnection, vin: String): Boolean =
+    try {
+      handshake(conn, vin, Domain.VEHICLE_SECURITY, newId()) != null
+    } catch (e: BleException) {
+      if (e.code == FailureCode.KEY_NOT_PAIRED) false else throw e
     }
 
   private suspend fun <T> withVehicle(
     context: Context,
     vin: String,
     onError: (FailureCode, String) -> T,
+    onStep: (PairStep) -> Unit = {},
     block: suspend (BleConnection) -> T,
   ): T {
     if (!VehicleKey.isSupported) return onError(FailureCode.UNSUPPORTED_DEVICE, "Android 12 or newer required")
     if (!hasBlePermission(context)) return onError(FailureCode.PERMISSION, "Bluetooth permission missing")
+    if (!BleTransport.isBluetoothOn(context)) return onError(FailureCode.BLUETOOTH_OFF, "Bluetooth is off")
     var connection: BleConnection? = null
     return try {
-      val address = BleTransport.scanAddress(context, Vin.bleLocalName(Vin.normalize(vin)), SCAN_TIMEOUT)
+      onStep(PairStep.SEARCHING)
+      val device = BleTransport.scanDevice(context, Vin.bleLocalName(Vin.normalize(vin)), SCAN_TIMEOUT)
         ?: return onError(FailureCode.NOT_REACHABLE, "vehicle not found")
-      val conn = BleTransport.connect(context, address, CONNECT_TIMEOUT)
+      onStep(PairStep.CONNECTING)
+      val conn = BleTransport.connect(context, device, CONNECT_TIMEOUT)
         ?: return onError(FailureCode.NOT_REACHABLE, "connection failed")
       connection = conn
       block(conn)

@@ -10,7 +10,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -24,11 +23,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import org.tfv.ata.R
-import org.tfv.ata.action.ActionInfo
 import org.tfv.ata.core.AtaAction
 import org.tfv.ata.core.AtaCategory
 import org.tfv.ata.ui.AtaUiState
 import org.tfv.ata.ui.AtaViewModel
+import org.tfv.ata.ui.components.ActionCheckRow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -60,22 +59,14 @@ fun WearConfigScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit) {
     ) {
       Text(stringResource(R.string.settings_wear_desc), style = MaterialTheme.typography.bodyMedium)
       OverlayPermissionCard()
-      funcB.forEach { action -> WearCheck(stringResource(ActionInfo.labelRes(action)), action.id in current) { toggle(action) } }
+      funcB.forEach { action -> ActionCheckRow(action, action.id in current) { toggle(action) } }
       Text(
         stringResource(R.string.menu_group_direct),
         style = MaterialTheme.typography.labelLarge,
         color = MaterialTheme.colorScheme.secondary,
         modifier = Modifier.padding(top = 10.dp, bottom = 2.dp),
       )
-      funcA.forEach { action -> WearCheck(stringResource(ActionInfo.labelRes(action)), action.id in current) { toggle(action) } }
+      funcA.forEach { action -> ActionCheckRow(action, action.id in current) { toggle(action) } }
     }
-  }
-}
-
-@Composable
-private fun WearCheck(label: String, checked: Boolean, onToggle: () -> Unit) {
-  Row(Modifier.fillMaxWidth().padding(vertical = 2.dp), verticalAlignment = Alignment.CenterVertically) {
-    Checkbox(checked = checked, onCheckedChange = { onToggle() })
-    Text(label, Modifier.padding(start = 6.dp))
   }
 }

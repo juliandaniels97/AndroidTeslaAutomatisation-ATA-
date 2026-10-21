@@ -10,7 +10,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -24,11 +23,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import org.tfv.ata.R
-import org.tfv.ata.action.ActionInfo
 import org.tfv.ata.core.AtaAction
 import org.tfv.ata.core.AtaCategory
 import org.tfv.ata.ui.AtaUiState
 import org.tfv.ata.ui.AtaViewModel
+import org.tfv.ata.ui.components.ActionCheckRow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -60,14 +59,14 @@ fun MenuConfigScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit) {
       Text(stringResource(R.string.menu_launcher_desc), style = MaterialTheme.typography.bodySmall)
       funcB.forEach { action ->
         val checked = action.id in menu
-        CheckRow(stringResource(ActionInfo.labelRes(action)), checked, enabled = checked || menu.size < 4) {
+        ActionCheckRow(action, checked, enabled = checked || menu.size < 4) {
           toggleMenu(vm, action, checked)
         }
       }
       GroupLabel(stringResource(R.string.menu_group_direct))
       funcA.forEach { action ->
         val checked = action.id in menu
-        CheckRow(stringResource(ActionInfo.labelRes(action)), checked, enabled = checked || menu.size < 4) {
+        ActionCheckRow(action, checked, enabled = checked || menu.size < 4) {
           toggleMenu(vm, action, checked)
         }
       }
@@ -77,7 +76,7 @@ fun MenuConfigScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit) {
       Text(stringResource(R.string.menu_routines_desc, maxExtra), style = MaterialTheme.typography.bodySmall)
       routineChoices.forEach { action ->
         val checked = action.id in routine
-        CheckRow(stringResource(ActionInfo.labelRes(action)), checked, enabled = checked || routine.count { it !in menu } < maxExtra) {
+        ActionCheckRow(action, checked, enabled = checked || routine.count { it !in menu } < maxExtra) {
           vm.updateSettings { s ->
             s.copy(routineActionIds = if (checked) s.routineActionIds - action.id else s.routineActionIds + action.id)
           }
@@ -88,14 +87,14 @@ fun MenuConfigScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit) {
       Text(stringResource(R.string.menu_widget_desc), style = MaterialTheme.typography.bodySmall)
       funcB.forEach { action ->
         val checked = action.id in widget
-        CheckRow(stringResource(ActionInfo.labelRes(action)), checked, enabled = checked || widget.size < 8) {
+        ActionCheckRow(action, checked, enabled = checked || widget.size < 8) {
           toggleWidget(vm, action, checked)
         }
       }
       GroupLabel(stringResource(R.string.menu_group_direct))
       funcA.forEach { action ->
         val checked = action.id in widget
-        CheckRow(stringResource(ActionInfo.labelRes(action)), checked, enabled = checked || widget.size < 8) {
+        ActionCheckRow(action, checked, enabled = checked || widget.size < 8) {
           toggleWidget(vm, action, checked)
         }
       }
@@ -151,10 +150,3 @@ private fun GroupLabel(text: String) {
   )
 }
 
-@Composable
-private fun CheckRow(label: String, checked: Boolean, enabled: Boolean, onToggle: () -> Unit) {
-  Row(Modifier.fillMaxWidth().padding(vertical = 2.dp), verticalAlignment = Alignment.CenterVertically) {
-    Checkbox(checked = checked, onCheckedChange = { onToggle() }, enabled = enabled)
-    Text(label, Modifier.padding(start = 6.dp))
-  }
-}

@@ -15,7 +15,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -44,7 +43,6 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import android.widget.Toast
 import org.tfv.ata.R
-import org.tfv.ata.action.ActionInfo
 import org.tfv.ata.automation.Notifier
 import org.tfv.ata.core.ActionPolicy
 import org.tfv.ata.core.AtaAction
@@ -52,6 +50,7 @@ import org.tfv.ata.core.AtaCategory
 import org.tfv.ata.data.AtaStore
 import org.tfv.ata.ui.AtaUiState
 import org.tfv.ata.ui.AtaViewModel
+import org.tfv.ata.ui.components.ActionCheckRow
 
 /** Settings → Automation: what Samsung Routines, Tasker, widgets, NFC tags and other apps may do. */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -111,7 +110,7 @@ fun AutomationScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit) {
       Title(stringResource(R.string.automation_section_critical))
       Hint(stringResource(R.string.automation_critical_desc))
       critical.forEach { action ->
-        Check(stringResource(ActionInfo.labelRes(action)), action.id in s.criticalDirectIds) {
+        ActionCheckRow(action, action.id in s.criticalDirectIds) {
           vm.updateSettings {
             val ids = if (action.id in it.criticalDirectIds) it.criticalDirectIds - action.id else it.criticalDirectIds + action.id
             it.copy(criticalDirectIds = ids, criticalDirectWhenLocked = it.criticalDirectWhenLocked && ids.isNotEmpty())
@@ -128,7 +127,7 @@ fun AutomationScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit) {
       Title(stringResource(R.string.automation_section_external))
       Hint(stringResource(R.string.automation_external_desc))
       nonCritical.forEach { action ->
-        Check(stringResource(ActionInfo.labelRes(action)), action.id in s.externalActionIds) {
+        ActionCheckRow(action, action.id in s.externalActionIds) {
           vm.updateSettings {
             val ids = if (action.id in it.externalActionIds) it.externalActionIds - action.id else it.externalActionIds + action.id
             it.copy(externalActionIds = ids)
@@ -210,13 +209,5 @@ private fun Toggle(title: String, desc: String?, checked: Boolean, onToggle: () 
       if (desc != null) Hint(desc)
     }
     Switch(checked = checked, onCheckedChange = { onToggle() })
-  }
-}
-
-@Composable
-private fun Check(label: String, checked: Boolean, onToggle: () -> Unit) {
-  Row(Modifier.fillMaxWidth().padding(vertical = 2.dp), verticalAlignment = Alignment.CenterVertically) {
-    Checkbox(checked = checked, onCheckedChange = { onToggle() })
-    Text(label, Modifier.padding(start = 6.dp))
   }
 }

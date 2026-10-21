@@ -15,6 +15,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.AutoMode
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.Info
@@ -66,6 +67,7 @@ fun SettingsScreen(
   onWear: () -> Unit,
   onAutomation: () -> Unit,
   onAbout: () -> Unit,
+  onGuide: () -> Unit,
 ) {
   val s = state.settings
   val context = LocalContext.current
@@ -81,6 +83,8 @@ fun SettingsScreen(
       Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(16.dp),
       verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
+      LinkRow(stringResource(R.string.guide_title), Icons.AutoMirrored.Filled.MenuBook, onGuide)
+      HorizontalDivider()
       SectionTitle(stringResource(R.string.section_general))
       LinkRow(stringResource(R.string.settings_vehicles), Icons.Filled.DirectionsCar, onVehicles)
       LinkRow(stringResource(R.string.settings_menu), Icons.Filled.Widgets, onMenu)
@@ -200,6 +204,7 @@ fun SettingsScreen(
       SwitchRow(stringResource(R.string.nfc_keycard), stringResource(R.string.nfc_keycard_desc), s.nfcKeyCard) {
         vm.updateSettings { it.copy(nfcKeyCard = it.nfcKeyCard.not()) }
       }
+      if (s.nfcKeyCard) KeyCardHint()
 
       HorizontalDivider()
       SectionTitle(stringResource(R.string.section_proximity))
@@ -270,5 +275,27 @@ private fun SwitchRow(title: String, desc: String?, checked: Boolean, onToggle: 
       if (desc != null) Text(desc, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
     Switch(checked = checked, onCheckedChange = { onToggle() })
+  }
+}
+
+/** Explains how the key card and the Tesla app share the car's card reader. */
+@Composable
+private fun KeyCardHint() {
+  val context = LocalContext.current
+  val teslaApp = remember { org.tfv.ata.nfc.KeyCardRegistration.teslaAppInstalled(context) }
+  androidx.compose.material3.Card(
+    colors = androidx.compose.material3.CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
+    modifier = Modifier.fillMaxWidth(),
+  ) {
+    Column(Modifier.padding(12.dp)) {
+      Text(
+        stringResource(if (teslaApp) R.string.nfc_keycard_tesla_hint else R.string.nfc_keycard_hint),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSecondaryContainer,
+      )
+      androidx.compose.material3.TextButton(onClick = { openNfcSettings(context) }) {
+        Text(stringResource(R.string.nfc_settings_open))
+      }
+    }
   }
 }

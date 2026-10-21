@@ -7,13 +7,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import org.tfv.ata.nfc.KeyCardRegistration
 import org.tfv.ata.ui.components.ActivationOverlay
 import org.tfv.ata.ui.components.OnboardingSheet
 import org.tfv.ata.ui.components.StartupLogo
@@ -33,7 +34,8 @@ class MainActivity : FragmentActivity() {
         dynamicColor = state.settings.dynamicColor,
       ) {
         SystemBarsForTheme()
-        var splashDone by remember { mutableStateOf(false) }
+        // Survives rotation, so the start animation only plays once per launch.
+        var splashDone by rememberSaveable { mutableStateOf(false) }
         Box(Modifier.fillMaxSize()) {
           AtaNavHost(vm, state)
           ActivationOverlay(vm)
@@ -45,5 +47,15 @@ class MainActivity : FragmentActivity() {
         }
       }
     }
+  }
+
+  override fun onResume() {
+    super.onResume()
+    KeyCardRegistration.setForeground(this, resumed = true)
+  }
+
+  override fun onPause() {
+    KeyCardRegistration.setForeground(this, resumed = false)
+    super.onPause()
   }
 }
