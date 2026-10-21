@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ATA</string>
+    <string name="sent_to_phone">Ans Handy gesendet</string>
+    <string name="phone_unreachable">Handy nicht erreichbar</string>
+    <string name="wear_configure_on_phone">Aktionen in der Handy-App wählen → Einstellungen → Wear OS Uhr.</string>
+    <string name="a_open_tesla_app">Tesla-App öffnen</string>
+    <string name="a_open_charging">Laden</string>
+    <string name="a_open_climate">Klima</string>
+    <string name="a_open_controls">Steuerung</string>
+    <string name="a_open_location">Standort</string>
+    <string name="a_navigate_home">Nach Hause navigieren</string>
+    <string name="a_navigate_work">Zur Arbeit navigieren</string>
+    <string name="a_share_location">Ziel teilen</string>
+</resources>

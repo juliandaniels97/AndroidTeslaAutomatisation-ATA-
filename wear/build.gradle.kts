@@ -1,0 +1,97 @@
+import java.util.Properties
+
+plugins {
+  alias(libs.plugins.android.application)
+  alias(libs.plugins.kotlin.android)
+  alias(libs.plugins.kotlin.compose)
+  alias(libs.plugins.kotlin.serialization)
+}
+
+val versionProps = Properties().apply {
+  load(rootProject.file("version.properties").inputStream())
+}
+
+android {
+  namespace = "org.tfv.ata.wear"
+  compileSdk = 35
+
+  defaultConfig {
+    applicationId = "org.tfv.ata"
+    minSdk = 30
+    targetSdk = 35
+    versionCode = (System.getenv("ATA_VERSION_CODE")?.toIntOrNull()) ?: versionProps.getProperty("versionCode").toInt()
+    versionName = versionProps.getProperty("versionName")
+    ndk { abiFilters += listOf("arm64-v8a") }
+  }
+
+  val releaseStoreFile = System.getenv("ATA_KEYSTORE_FILE")
+
+  signingConfigs {
+    getByName("debug") {
+      storeFile = file("ata-shared-debug.keystore")
+      storePassword = "android"
+      keyAlias = "androiddebugkey"
+      keyPassword = "android"
+    }
+    if (!releaseStoreFile.isNullOrBlank()) {
+      create("release") {
+        storeFile = file(releaseStoreFile)
+        storePassword = System.getenv("ATA_KEYSTORE_PASSWORD")
+        keyAlias = System.getenv("ATA_KEY_ALIAS")
+        keyPassword = System.getenv("ATA_KEY_PASSWORD")
+      }
+    }
+  }
+
+  buildFeatures {
+    compose = true
+    buildConfig = true
+  }
+
+  buildTypes {
+    release {
+      signingConfig = signingConfigs.getByName(if (!releaseStoreFile.isNullOrBlank()) "release" else "debug")
+      isMinifyEnabled = true
+      isShrinkResources = true
+      proguardFiles(
+        getDefaultProguardFile("proguard-android-optimize.txt"),
+        "proguard-rules.pro",
+      )
+    }
+  }
+
+  compileOptions {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+  }
+  kotlinOptions { jvmTarget = "17" }
+  lint { abortOnError = false }
+}
+
+dependencies {
+  implementation(project(":core"))
+
+  implementation(libs.androidx.core.ktx)
+  implementation(libs.androidx.lifecycle.runtime.ktx)
+  implementation(libs.androidx.activity.compose)
+  implementation(platform(libs.androidx.compose.bom))
+  implementation(libs.androidx.ui)
+  implementation(libs.androidx.ui.graphics)
+  implementation(libs.androidx.ui.tooling.preview)
+  implementation(libs.wear.compose.material)
+  implementation(libs.wear.compose.foundation)
+  implementation(libs.wear.compose.navigation)
+  implementation(libs.wear.tiles)
+  implementation(libs.wear.tiles.material)
+  implementation(libs.wear.protolayout)
+  implementation(libs.wear.protolayout.material)
+  implementation(libs.wear.protolayout.expression)
+  implementation(libs.watchface.complications.data.source.ktx)
+  implementation(libs.play.services.wearable)
+  implementation(libs.kotlinx.coroutines.play.services)
+  implementation(libs.concurrent.futures)
+  implementation(libs.kotlinx.coroutines.android)
+  implementation(libs.kotlinx.serialization.json)
+
+  debugImplementation(libs.androidx.ui.tooling)
+}

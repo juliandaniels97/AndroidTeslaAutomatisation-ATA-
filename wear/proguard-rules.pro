@@ -1,0 +1,3 @@
+-keep class org.tfv.ata.core.** { *; }
+-keepclassmembers class * { @kotlinx.serialization.* <fields>; }
+-keepclasseswithmembers class * { kotlinx.serialization.KSerializer serializer(...); }

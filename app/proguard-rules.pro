@@ -1,0 +1,4 @@
+-keep class org.tfv.ata.core.** { *; }
+-keep class * extends androidx.work.ListenableWorker { <init>(...); }
+-keepclassmembers class * { @kotlinx.serialization.* <fields>; }
+-keepclasseswithmembers class * { kotlinx.serialization.KSerializer serializer(...); }

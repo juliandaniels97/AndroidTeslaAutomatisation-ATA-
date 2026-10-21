@@ -1,0 +1,15 @@
+ATA - Android Tesla Automatisation
+
+Copyright (c) 2026 juliandaniels97
+Licensed under the ATA License (Source-Available, Non-Commercial) — see LICENSE.
+Commercial use requires prior written permission from the copyright holder.
+
+This product is not affiliated with, endorsed by, or sponsored by Tesla, Inc.
+"Tesla" and related marks are trademarks of Tesla, Inc. They are used here only
+to describe interoperability.
+
+The BLE features (direct Bluetooth Low Energy vehicle control) follow the publicly
+documented Tesla vehicle command protocol:
+  https://github.com/teslamotors/vehicle-command  (Apache License 2.0)
+Any Protocol Buffer definitions or protocol details derived from that project
+remain under the Apache License 2.0.

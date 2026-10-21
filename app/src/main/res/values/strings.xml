@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ATA</string>
+    <string name="app_label">ATA — Android Tesla Automatisation</string>
+    <string name="app_subtitle">Android Tesla Automatisation</string>
+    <string name="in_development">This feature is in development.</string>
+    <string name="error_no_app">No matching app installed.</string>
+    <string name="onboarding_title">Welcome to ATA</string>
+    <string name="onboarding_body">ATA controls and automates your Tesla — no account, no Fleet API, no cloud.\n\n▸ BASIC FEATURES\nOpen the Tesla app; jump to Charging/Climate/Controls/Location (BETA — may just open the app). Navigate Home/Work or any address (sent to the Tesla app, or Google Maps/Waze). Share a destination.\n\n▸ BLE FEATURES (BETA)\nEnable under Settings → Experimental, add your vehicle (VIN) and pair the phone key. Then lock/unlock, climate, charging, trunk/frunk, windows, sentry and more over Bluetooth, plus live status (battery, range, temperatures).\n\n▸ MAKE IT YOURS\nOn the Actions tab, long-press a tile to edit: drag to reorder, delete, re-add with +, then Save layout. Add vehicle actions via the star on the Vehicle tab or the + list. Pin any action as a shortcut, app-icon menu entry or widget (up to 8 tiles).\n\n▸ AUTOMATION\nTrigger actions from Samsung Routines or Tasker, and react to the car status (battery, charging, locked…) via ATA broadcasts.\n\nTip: set Home/Work addresses under Settings → Addresses — navigation works even without a saved vehicle.</string>
+    <string name="onboarding_cta">Let\'s go</string>
+
+    <string name="tab_home">Actions</string>
+    <string name="tab_vehicle">Vehicle</string>
+    <string name="tab_settings">Settings</string>
+
+    <string name="no_vehicle">No vehicle</string>
+    <string name="no_vehicle_title">Vehicle required</string>
+    <string name="no_vehicle_message">Add a vehicle first to use the BLE actions.</string>
+    <string name="add_now">Add now</string>
+    <string name="add_shortcut">Add to home screen</string>
+    <string name="edit_layout_title">Edit layout</string>
+    <string name="save_layout">Save layout</string>
+    <string name="add_action">Add action</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">OK</string>
+    <string name="save">Save</string>
+    <string name="delete">Delete</string>
+    <string name="address_or_place">Address or place</string>
+
+    <string name="stat_battery">Battery</string>
+    <string name="stat_range">Range</string>
+    <string name="stat_inside">Inside</string>
+    <string name="stat_outside">Outside</string>
+    <string name="refresh">Refresh status</string>
+    <string name="last_updated">Updated %1$s ago</string>
+    <string name="function_a_in_development">The BLE features are in development and currently disabled. The basic features (navigation and opening the Tesla app) work now.</string>
+
+    <string name="section_general">General</string>
+    <string name="settings_vehicles">Vehicles</string>
+    <string name="settings_menu">Menu &amp; widgets</string>
+    <string name="settings_active">App active</string>
+    <string name="settings_active_desc">Turn off to make the app passive (e.g. via a Samsung routine). Actions are ignored while inactive.</string>
+
+    <string name="section_appearance">Appearance</string>
+    <string name="settings_theme">Theme</string>
+    <string name="theme_system">System</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="settings_dynamic_color">Dynamic color (Material You)</string>
+
+    <string name="section_navigation">Navigation</string>
+    <string name="nav_tesla">Tesla · BETA</string>
+    <string name="nav_gmaps">Google Maps</string>
+    <string name="nav_waze">Waze</string>
+
+    <string name="section_behavior">Behavior</string>
+    <string name="settings_confirm">Confirm critical actions</string>
+    <string name="settings_confirm_desc">Ask before actions like unlock.</string>
+    <string name="settings_haptics">Haptic feedback</string>
+    <string name="settings_biometric">Biometric lock</string>
+    <string name="settings_biometric_desc">Require fingerprint/face before sensitive actions.</string>
+    <string name="nfc_keycard">NFC key card (phone as card)</string>
+    <string name="nfc_keycard_desc">Emulate a Tesla key card over NFC using the phone\'s key (same key as the BLE phone key). Enrol it like a card: in the car, Controls → Locks → Add key, tap an already-paired key/phone, then hold this phone flat on the center-console card reader. BETA — needs testing on a real car.</string>
+    <string name="nfc_keycard_unlock">Only when phone unlocked</string>
+    <string name="nfc_keycard_unlock_desc">Require the phone to be unlocked before it acts as a key card.</string>
+    <string name="settings_wear">Wear OS watch</string>
+    <string name="settings_wear_desc">Choose which actions appear on the watch.</string>
+    <string name="settings_nfc">NFC tags</string>
+    <string name="nfc_desc">Write an action to an NFC tag or sticker. Tapping your phone on it runs the action — e.g. stick an "Unlock" tag near your car and use the phone like a key card (unlocks over BLE).</string>
+    <string name="nfc_unavailable">This phone has no NFC.</string>
+    <string name="nfc_hold_tag">Hold a tag to the phone to write \"%1$s\"…</string>
+    <string name="nfc_written">Tag written.</string>
+    <string name="nfc_write_failed">Could not write the tag. Try again.</string>
+    <string name="settings_direction_fx">Point animation to car</string>
+    <string name="settings_direction_fx_desc">Uses your location to aim the activation animation toward the car\'s last known spot. Needs location permission.</string>
+    <string name="settings_poll">Status interval: %1$d min</string>
+    <string name="settings_poll_desc">Requires the BLE features. 0 turns off background status; the effective minimum is 15 min to save battery.</string>
+
+    <string name="section_proximity">Proximity unlock</string>
+    <string name="settings_proximity">Unlock when approaching</string>
+    <string name="settings_proximity_desc">Experimental. Disabled by default. Requires direct BLE (in development).</string>
+    <string name="settings_proximity_meters">Trigger distance: %1$d m</string>
+
+    <string name="settings_about">About</string>
+    <string name="about_version">Version %1$s</string>
+    <string name="about_description">ATA sends commands to your Tesla and automates them via shortcuts, Samsung routines, widgets and Wear OS.</string>
+    <string name="about_disclaimer">Not affiliated with, endorsed by or sponsored by Tesla, Inc. \"Tesla\" is a trademark of Tesla, Inc. Use at your own risk.</string>
+    <string name="about_license">Source-available, non-commercial license. Commercial use requires prior written permission from the author.</string>
+
+    <string name="vehicle_add">Add vehicle</string>
+    <string name="vehicle_edit">Edit vehicle</string>
+    <string name="vehicle_empty">No vehicles yet. Add one to get started.</string>
+    <string name="vehicle_name">Name</string>
+    <string name="vehicle_vin">VIN (17 characters)</string>
+    <string name="vehicle_vin_invalid">VIN must be 17 valid characters.</string>
+    <string name="vehicle_ble_name">BLE name: %1$s</string>
+    <string name="vehicle_home">Home address (navigation)</string>
+    <string name="vehicle_work">Work address (navigation)</string>
+
+    <string name="menu_launcher_title">Launcher menu (long-press icon)</string>
+    <string name="menu_launcher_desc">Up to 4 actions shown when long-pressing the app icon.</string>
+    <string name="menu_widget_title">Actions widget</string>
+    <string name="menu_widget_desc">Actions shown in the actions widget.</string>
+    <string name="menu_group_direct">BLE features</string>
+
+    <string name="widget_status">ATA Status</string>
+    <string name="widget_actions">ATA Actions</string>
+    <string name="widget_actions_desc">Up to 8 ATA actions, directly tappable. Configure under Settings → Menu &amp; widgets.</string>
+
+    <string name="a_open_tesla_app">Open Tesla app</string>
+    <string name="a_open_charging">Charging</string>
+    <string name="a_open_climate">Climate</string>
+    <string name="a_open_controls">Controls</string>
+    <string name="a_open_location">Location</string>
+    <string name="a_navigate_home">Navigate home</string>
+    <string name="a_navigate_work">Navigate to work</string>
+    <string name="a_navigate_address">Navigate to…</string>
+    <string name="a_share_location">Share destination</string>
+    <string name="a_wake">Wake up</string>
+    <string name="a_lock">Lock</string>
+    <string name="a_unlock">Unlock</string>
+    <string name="a_climate_on">Climate on</string>
+    <string name="a_climate_off">Climate off</string>
+    <string name="a_set_temperature">Set temperature</string>
+    <string name="a_seat_heater">Seat heater</string>
+    <string name="a_steering_wheel_heater">Steering wheel heater</string>
+    <string name="a_defrost">Defrost</string>
+    <string name="a_charge_start">Start charging</string>
+    <string name="a_charge_stop">Stop charging</string>
+    <string name="a_charge_limit">Charge limit</string>
+    <string name="a_charging_amps">Charging amps</string>
+    <string name="a_charge_port_open">Open charge port</string>
+    <string name="a_charge_port_close">Close charge port</string>
+    <string name="a_trunk">Trunk</string>
+    <string name="a_frunk">Frunk</string>
+    <string name="a_vent_windows">Vent windows</string>
+    <string name="a_close_windows">Close windows</string>
+    <string name="a_honk">Honk</string>
+    <string name="a_flash_lights">Flash lights</string>
+    <string name="a_sentry_on">Sentry on</string>
+    <string name="a_sentry_off">Sentry off</string>
+    <string name="a_climate_keep">Keep climate</string>
+    <string name="a_dog_mode">Dog mode</string>
+    <string name="a_camp_mode">Camp mode</string>
+    <string name="cmd_ok">Command sent</string>
+    <string name="cmd_failed">Command failed</string>
+    <string name="ble_pair">Pair this device</string>
+    <string name="ble_pair_desc">On the first connection the car will ask to trust this key. Tap your key card on the console and confirm. Fingerprint:</string>
+    <string name="section_experimental">Experimental</string>
+    <string name="settings_experimental_ble">Direct BLE control</string>
+    <string name="settings_experimental_ble_desc">Enable the in-development BLE features (direct Bluetooth control). Unverified; use at your own risk.</string>
+    <string name="ble_enable_title">Enable BLE features</string>
+    <string name="ble_enable_desc">Direct Bluetooth control of your Tesla. You can turn it off again under Settings → Experimental.</string>
+    <string name="activate">Activate</string>
+    <string name="section_places">Addresses</string>
+    <string name="settings_places_desc">Saved separately from vehicles, so navigation shortcuts (e.g. Navigate home) work even without a vehicle added.</string>
+    <string name="settings_home_address">Home address</string>
+    <string name="settings_work_address">Work address</string>
+    <string name="blocked_locked">Unlock your phone to run this command.</string>
+    <string name="cmd_running">Sending command…</string>
+    <string name="confirm_critical_message">Run this command now?</string>
+    <string name="address_missing">Address missing. Set a home/work address in the vehicle settings.</string>
+</resources>

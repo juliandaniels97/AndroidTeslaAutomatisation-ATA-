@@ -1,0 +1,97 @@
+package org.tfv.ata.core.ble
+
+object Domain {
+  const val VEHICLE_SECURITY = 2
+  const val INFOTAINMENT = 3
+}
+
+internal object Rm {
+  const val TO_DESTINATION = 6
+  const val FROM_DESTINATION = 7
+  const val PROTOBUF_BYTES = 10
+  const val SIGNED_MESSAGE_STATUS = 12
+  const val SIGNATURE_DATA = 13
+  const val SESSION_INFO_REQUEST = 14
+  const val SESSION_INFO = 15
+  const val REQUEST_UUID = 50
+  const val UUID = 51
+  const val FLAGS = 52
+}
+
+internal object DestF {
+  const val DOMAIN = 1
+  const val ROUTING_ADDRESS = 2
+}
+
+internal object SigF {
+  const val SIGNER_IDENTITY = 1
+  const val AES_GCM_PERSONALIZED = 5
+  const val SESSION_INFO_TAG = 6
+  const val AES_GCM_RESPONSE = 9
+}
+
+internal object GcmF {
+  const val EPOCH = 1
+  const val NONCE = 2
+  const val COUNTER = 3
+  const val EXPIRES_AT = 4
+  const val TAG = 5
+}
+
+internal object RespF {
+  const val NONCE = 1
+  const val COUNTER = 2
+  const val TAG = 3
+}
+
+internal object SiF {
+  const val COUNTER = 1
+  const val PUBLIC_KEY = 2
+  const val EPOCH = 3
+  const val CLOCK_TIME = 4
+  const val STATUS = 5
+}
+
+internal object KeyIdF {
+  const val PUBLIC_KEY = 1
+}
+
+internal object HmacTagF {
+  const val TAG = 1
+}
+
+const val FLAG_ENCRYPT_RESPONSE_MASK = 1 shl 1
+
+internal fun sessionInfoRequest(domain: Int, publicKey: ByteArray, uuid: ByteArray, routingAddress: ByteArray): ByteArray =
+  buildProto {
+    message(Rm.TO_DESTINATION, buildProto { enum(DestF.DOMAIN, domain) })
+    message(Rm.FROM_DESTINATION, buildProto { bytes(DestF.ROUTING_ADDRESS, routingAddress) })
+    message(Rm.SESSION_INFO_REQUEST, buildProto { bytes(1, publicKey) })
+    bytes(Rm.UUID, uuid)
+  }
+
+internal class ParsedResponse(data: ByteArray) {
+  private val reader = ProtoReader(data)
+  val fromDomain: Int = reader.message(Rm.FROM_DESTINATION)?.varint(DestF.DOMAIN)?.toInt() ?: 0
+  val toRoutingAddress: ByteArray? = reader.message(Rm.TO_DESTINATION)?.bytes(DestF.ROUTING_ADDRESS)
+  val sessionInfo: ByteArray? = reader.bytes(Rm.SESSION_INFO)
+  val protobufBytes: ByteArray? = reader.bytes(Rm.PROTOBUF_BYTES)
+  val requestUuid: ByteArray? = reader.bytes(Rm.REQUEST_UUID)
+  val flags: Int = reader.varint(Rm.FLAGS)?.toInt() ?: 0
+  private val status = reader.message(Rm.SIGNED_MESSAGE_STATUS)
+  val fault: Int = status?.varint(2)?.toInt() ?: 0
+  private val sig = reader.message(Rm.SIGNATURE_DATA)
+  val sessionInfoTag: ByteArray? = sig?.message(SigF.SESSION_INFO_TAG)?.bytes(HmacTagF.TAG)
+  private val gcmResponse = sig?.message(SigF.AES_GCM_RESPONSE)
+  val responseNonce: ByteArray? = gcmResponse?.bytes(RespF.NONCE)
+  val responseCounter: Int = gcmResponse?.varint(RespF.COUNTER)?.toInt() ?: 0
+  val responseTag: ByteArray? = gcmResponse?.bytes(RespF.TAG)
+}
+
+internal class SessionInfo(data: ByteArray) {
+  private val r = ProtoReader(data)
+  val counter: Int = r.varint(SiF.COUNTER)?.toInt() ?: 0
+  val publicKey: ByteArray = r.bytes(SiF.PUBLIC_KEY) ?: ByteArray(0)
+  val epoch: ByteArray = r.bytes(SiF.EPOCH) ?: ByteArray(0)
+  val clockTime: Int = r.fixed32(SiF.CLOCK_TIME) ?: 0
+}
