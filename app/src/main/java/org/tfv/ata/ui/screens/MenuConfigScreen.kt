@@ -122,19 +122,19 @@ private fun toggleWidget(vm: AtaViewModel, action: AtaAction, checked: Boolean) 
 @Composable
 fun RoutinesHint(modifier: Modifier = Modifier) {
   androidx.compose.material3.Card(
-    colors = androidx.compose.material3.CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer),
+    colors = androidx.compose.material3.CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
     modifier = modifier.fillMaxWidth().padding(vertical = 6.dp),
   ) {
     Column(Modifier.padding(12.dp)) {
       Text(
         stringResource(R.string.routines_hint_title),
         style = MaterialTheme.typography.titleSmall,
-        color = MaterialTheme.colorScheme.onTertiaryContainer,
+        color = MaterialTheme.colorScheme.onSecondaryContainer,
       )
       Text(
         stringResource(R.string.routines_hint_text),
         style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onTertiaryContainer,
+        color = MaterialTheme.colorScheme.onSecondaryContainer,
         modifier = Modifier.padding(top = 4.dp),
       )
     }

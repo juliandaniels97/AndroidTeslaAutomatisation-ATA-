@@ -28,8 +28,7 @@ import androidx.compose.ui.res.stringResource
 import org.tfv.ata.action.ActionInfo
 import org.tfv.ata.action.CommandDispatcher
 import org.tfv.ata.core.AtaAction
-import org.tfv.ata.ui.theme.NeonBlue
-import org.tfv.ata.ui.theme.NeonRed
+import org.tfv.ata.ui.theme.AtaColors
 
 @Composable
 fun ActionTile(
@@ -40,20 +39,21 @@ fun ActionTile(
   interactive: Boolean = true,
 ) {
   val shape = RoundedCornerShape(20.dp)
-  val accent = if (action in CommandDispatcher.criticalActions) NeonRed else NeonBlue
+  val palette = AtaColors.current
+  val accent = if (action in CommandDispatcher.criticalActions) palette.critical else palette.accent
   val alpha = if (enabled) 1f else 0.45f
   val tile = modifier
     .aspectRatio(1f)
     .clip(shape)
     .background(
       Brush.verticalGradient(
-        listOf(Color(0xFF1C2230).copy(alpha = alpha), Color(0xFF0C0F15).copy(alpha = alpha)),
+        listOf(palette.tileTop.copy(alpha = alpha), palette.tileBottom.copy(alpha = alpha)),
       ),
     )
     .border(
       width = 1.dp,
       brush = Brush.verticalGradient(
-        listOf(accent.copy(alpha = 0.55f * alpha), Color(0xFF2A3446).copy(alpha = 0.25f)),
+        listOf(accent.copy(alpha = (if (palette.isDark) 0.55f else 0.45f) * alpha), palette.tileEdge.copy(alpha = if (palette.isDark) 0.25f else 0.9f)),
       ),
       shape = shape,
     )
@@ -75,7 +75,7 @@ private fun ActionTileContent(action: AtaAction, accent: Color, enabled: Boolean
         Box(
           Modifier
             .size(46.dp)
-            .background(Brush.radialGradient(listOf(accent.copy(alpha = if (enabled) 0.28f else 0.08f), Color.Transparent))),
+            .background(Brush.radialGradient(listOf(accent.copy(alpha = if (enabled) 0.22f else 0.06f), Color.Transparent))),
         )
         Icon(
           imageVector = iconFor(action),
@@ -87,7 +87,7 @@ private fun ActionTileContent(action: AtaAction, accent: Color, enabled: Boolean
       Text(
         text = stringResource(ActionInfo.labelRes(action)),
         style = MaterialTheme.typography.labelMedium,
-        color = Color(0xFFE6ECF5).copy(alpha = if (enabled) 1f else 0.5f),
+        color = AtaColors.current.tileText.copy(alpha = if (enabled) 1f else 0.55f),
         textAlign = TextAlign.Center,
         maxLines = 2,
         overflow = TextOverflow.Ellipsis,

@@ -88,7 +88,7 @@
             android:name=".shortcut.CreateShortcutActivity"
             android:exported="true"
             android:label="@string/create_shortcut_title"
-            android:theme="@style/Theme.ATA.Starting">
+            android:theme="@style/Theme.ATA">
             <intent-filter>
                 <action android:name="android.intent.action.CREATE_SHORTCUT" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -99,7 +99,7 @@
             android:name=".nfc.NfcWriteActivity"
             android:exported="false"
             android:label="@string/settings_nfc"
-            android:theme="@style/Theme.ATA.Starting" />
+            android:theme="@style/Theme.ATA" />
 
         <service
             android:name=".nfc.TeslaKeyCardService"

@@ -18,6 +18,7 @@ import org.tfv.ata.ui.components.ActivationOverlay
 import org.tfv.ata.ui.components.OnboardingSheet
 import org.tfv.ata.ui.components.StartupLogo
 import org.tfv.ata.ui.theme.AtaTheme
+import org.tfv.ata.ui.theme.SystemBarsForTheme
 
 class MainActivity : FragmentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,6 +32,7 @@ class MainActivity : FragmentActivity() {
         themeMode = state.settings.theme,
         dynamicColor = state.settings.dynamicColor,
       ) {
+        SystemBarsForTheme()
         var splashDone by remember { mutableStateOf(false) }
         Box(Modifier.fillMaxSize()) {
           AtaNavHost(vm, state)

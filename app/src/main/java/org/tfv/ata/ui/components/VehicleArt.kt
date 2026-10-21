@@ -27,14 +27,16 @@ import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.unit.dp
 import org.tfv.ata.core.VehicleSnapshot
 import kotlin.math.min
+import org.tfv.ata.ui.theme.AtaColors
 
 @Composable
 fun VehicleArt(snapshot: VehicleSnapshot?, modifier: Modifier = Modifier) {
   val battery = snapshot?.batteryPercent ?: 0
   val charging = snapshot?.charging == true
   val climate = snapshot?.climateOn == true
-  val lockedKnown = snapshot != null
+  val lockedKnown = snapshot?.locked != null
   val locked = snapshot?.locked == true
+  val palette = AtaColors.current
 
   val transition = rememberInfiniteTransition(label = "vehicle")
   val pulse by transition.animateFloat(
@@ -56,9 +58,9 @@ fun VehicleArt(snapshot: VehicleSnapshot?, modifier: Modifier = Modifier) {
   )
   val ringColor by animateColorAsState(
     targetValue = when {
-      charging -> Color(0xFF2ECC71)
-      battery <= 15 -> Color(0xFFE74C3C)
-      else -> Color(0xFF3FA7FF)
+      charging -> palette.success
+      snapshot != null && battery <= 15 -> palette.danger
+      else -> palette.accent
     },
     animationSpec = tween(600),
     label = "ring",
@@ -90,7 +92,7 @@ fun VehicleArt(snapshot: VehicleSnapshot?, modifier: Modifier = Modifier) {
 
       if (charging) {
         drawArc(
-          color = Color(0xFF2ECC71).copy(alpha = 0.5f),
+          color = palette.success.copy(alpha = 0.5f),
           startAngle = sweep,
           sweepAngle = 40f,
           useCenter = false,
@@ -101,9 +103,9 @@ fun VehicleArt(snapshot: VehicleSnapshot?, modifier: Modifier = Modifier) {
       }
 
       val bodyColor = if (climate) {
-        lerp(Color(0xFF4A5560), Color(0xFF3FA7FF), pulse * 0.6f)
+        lerp(palette.carBody, palette.accent, pulse * 0.6f)
       } else {
-        Color(0xFF53606D)
+        palette.carBody
       }
       val carW = radius * 0.9f
       val carH = radius * 1.5f
@@ -114,16 +116,16 @@ fun VehicleArt(snapshot: VehicleSnapshot?, modifier: Modifier = Modifier) {
         cornerRadius = androidx.compose.ui.geometry.CornerRadius(carW * 0.4f, carW * 0.4f),
       )
       drawRoundRect(
-        color = Color(0xFF2B333B),
+        color = palette.carGlass,
         topLeft = Offset(cx - carW * 0.32f, cy - carH * 0.22f),
         size = Size(carW * 0.64f, carH * 0.4f),
         cornerRadius = androidx.compose.ui.geometry.CornerRadius(carW * 0.2f, carW * 0.2f),
       )
 
       val glow = when {
-        !lockedKnown -> Color(0xFF8A929E)
-        locked -> Color(0xFF2ECC71)
-        else -> Color(0xFFF1C40F)
+        !lockedKnown -> palette.muted
+        locked -> palette.success
+        else -> palette.warning
       }
       drawCircle(
         color = glow.copy(alpha = 0.25f + 0.35f * pulse),

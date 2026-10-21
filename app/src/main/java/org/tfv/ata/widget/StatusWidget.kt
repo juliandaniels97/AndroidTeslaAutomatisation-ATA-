@@ -19,6 +19,7 @@ import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
+import androidx.glance.color.ColorProvider as DayNight
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -38,31 +39,31 @@ class StatusWidget : GlanceAppWidget() {
     provideContent {
       Column(
         modifier = GlanceModifier.fillMaxSize()
-          .background(Color(0xFF1C1F24)).padding(12.dp)
+          .background(DayNight(day = Color(0xFFF4F6F9), night = Color(0xFF1C1F24))).padding(12.dp)
           .clickable(actionStartActivity(Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))),
         verticalAlignment = Alignment.CenterVertically,
         horizontalAlignment = Alignment.CenterHorizontally,
       ) {
         Text(
           text = vehicle?.name ?: "ATA",
-          style = TextStyle(color = ColorProvider(Color.White), fontWeight = FontWeight.Medium),
+          style = TextStyle(color = DayNight(day = Color(0xFF161B22), night = Color.White), fontWeight = FontWeight.Medium),
         )
         Row(verticalAlignment = Alignment.CenterVertically) {
           Text(
             text = snapshot?.let { "${it.batteryPercent}%" } ?: "--",
             style = TextStyle(
-              color = ColorProvider(Color(0xFF4FB4FF)),
+              color = DayNight(day = Color(0xFF0B63BD), night = Color(0xFF4FB4FF)),
               fontWeight = FontWeight.Bold,
               fontSize = 22.sp,
             ),
           )
           if (snapshot?.charging == true) {
-            Text(text = "  ⚡", style = TextStyle(color = ColorProvider(Color(0xFFFF4D40))))
+            Text(text = "  ⚡", style = TextStyle(color = DayNight(day = Color(0xFFC62828), night = Color(0xFFFF4D40))))
           }
         }
         Text(
           text = snapshot?.let { "${it.rangeKm} km  ·  ${when (it.locked) { true -> "🔒"; false -> "🔓"; null -> "?" }}" } ?: "--",
-          style = TextStyle(color = ColorProvider(Color(0xFFABB6C4)), fontSize = 12.sp),
+          style = TextStyle(color = DayNight(day = Color(0xFF45505C), night = Color(0xFFABB6C4)), fontSize = 12.sp),
         )
       }
     }

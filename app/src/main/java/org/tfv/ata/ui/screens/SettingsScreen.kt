@@ -14,6 +14,14 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.AutoMode
+import androidx.compose.material.icons.filled.DirectionsCar
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Nfc
+import androidx.compose.material.icons.filled.Watch
+import androidx.compose.material.icons.filled.Widgets
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
@@ -74,11 +82,11 @@ fun SettingsScreen(
       verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
       SectionTitle(stringResource(R.string.section_general))
-      LinkRow(stringResource(R.string.settings_vehicles), onVehicles)
-      LinkRow(stringResource(R.string.settings_menu), onMenu)
-      LinkRow(stringResource(R.string.settings_wear), onWear)
-      LinkRow(stringResource(R.string.settings_automation), onAutomation)
-      LinkRow(stringResource(R.string.settings_nfc)) {
+      LinkRow(stringResource(R.string.settings_vehicles), Icons.Filled.DirectionsCar, onVehicles)
+      LinkRow(stringResource(R.string.settings_menu), Icons.Filled.Widgets, onMenu)
+      LinkRow(stringResource(R.string.settings_wear), Icons.Filled.Watch, onWear)
+      LinkRow(stringResource(R.string.settings_automation), Icons.Filled.AutoMode, onAutomation)
+      LinkRow(stringResource(R.string.settings_nfc), Icons.Filled.Nfc) {
         context.startActivity(Intent(context, NfcWriteActivity::class.java))
       }
 
@@ -211,7 +219,7 @@ fun SettingsScreen(
       }
 
       HorizontalDivider()
-      LinkRow(stringResource(R.string.settings_about), onAbout)
+      LinkRow(stringResource(R.string.settings_about), Icons.Filled.Info, onAbout)
     }
   }
 }
@@ -222,12 +230,19 @@ private fun SectionTitle(text: String) {
 }
 
 @Composable
-private fun LinkRow(title: String, onClick: () -> Unit) {
-  Text(
-    title,
-    modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 14.dp),
-    style = MaterialTheme.typography.bodyLarge,
-  )
+private fun LinkRow(title: String, icon: ImageVector, onClick: () -> Unit) {
+  Row(
+    Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 12.dp),
+    verticalAlignment = Alignment.CenterVertically,
+  ) {
+    Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+    Text(title, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f).padding(start = 16.dp))
+    Icon(
+      Icons.AutoMirrored.Filled.KeyboardArrowRight,
+      contentDescription = null,
+      tint = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+  }
 }
 
 @Composable

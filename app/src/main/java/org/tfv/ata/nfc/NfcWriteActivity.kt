@@ -9,6 +9,8 @@ import android.nfc.tech.NdefFormatable
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.clickable
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -34,7 +36,7 @@ import kotlinx.coroutines.launch
 import org.tfv.ata.R
 import org.tfv.ata.core.AtaAction
 import org.tfv.ata.data.AtaStore
-import org.tfv.ata.ui.theme.AtaTheme
+import org.tfv.ata.ui.theme.AtaAppTheme
 
 class NfcWriteActivity : ComponentActivity() {
   private var adapter: NfcAdapter? = null
@@ -49,7 +51,7 @@ class NfcWriteActivity : ComponentActivity() {
     lifecycleScope.launch { token = AtaStore.get(this@NfcWriteActivity).nfcToken() }
 
     setContent {
-      AtaTheme(themeMode = org.tfv.ata.core.ThemeMode.DARK, dynamicColor = false) {
+      AtaAppTheme {
         var status by remember { mutableStateOf<String?>(null) }
         var armedLabel by remember { mutableStateOf<String?>(null) }
 
@@ -77,6 +79,11 @@ class NfcWriteActivity : ComponentActivity() {
           status = status,
           actions = actions,
           onPick = { arm(it, resources.getString(org.tfv.ata.action.ActionInfo.labelRes(it))) },
+          onCancelWrite = {
+            armedActionId = null
+            armedLabel = null
+            disableReader()
+          },
           onBack = { finish() },
         )
       }
@@ -129,6 +136,7 @@ class NfcWriteActivity : ComponentActivity() {
   }.getOrDefault(false)
 }
 
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
 private fun NfcScreen(
   hasNfc: Boolean,
@@ -136,36 +144,105 @@ private fun NfcScreen(
   status: String?,
   actions: List<AtaAction>,
   onPick: (AtaAction) -> Unit,
+  onCancelWrite: () -> Unit,
   onBack: () -> Unit,
 ) {
-  Column(
-    Modifier.fillMaxSize().systemBarsPadding().verticalScroll(rememberScrollState()).padding(16.dp),
-    verticalArrangement = Arrangement.spacedBy(10.dp),
-  ) {
-    Text(stringResource(R.string.settings_nfc), style = MaterialTheme.typography.headlineSmall)
-    if (!hasNfc) {
-      Text(stringResource(R.string.nfc_unavailable), color = MaterialTheme.colorScheme.error)
-    } else {
-      Text(stringResource(R.string.nfc_desc), style = MaterialTheme.typography.bodyMedium)
-      armedLabel?.let {
-        Card(Modifier.fillMaxWidth()) {
+  val palette = org.tfv.ata.ui.theme.AtaColors.current
+  androidx.compose.material3.Scaffold(
+    topBar = {
+      androidx.compose.material3.TopAppBar(
+        title = { Text(stringResource(R.string.settings_nfc)) },
+        navigationIcon = {
+          androidx.compose.material3.IconButton(onClick = onBack) {
+            androidx.compose.material3.Icon(
+              androidx.compose.material.icons.Icons.AutoMirrored.Filled.ArrowBack,
+              contentDescription = stringResource(R.string.back),
+            )
+          }
+        },
+      )
+    },
+  ) { padding ->
+    Column(
+      Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 8.dp),
+      verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+      if (!hasNfc) {
+        Card(
+          colors = androidx.compose.material3.CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
+          modifier = Modifier.fillMaxWidth(),
+        ) {
           Text(
-            stringResource(R.string.nfc_hold_tag, it),
+            stringResource(R.string.nfc_unavailable),
             Modifier.padding(16.dp),
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.primary,
+            color = MaterialTheme.colorScheme.onErrorContainer,
+            style = MaterialTheme.typography.titleSmall,
           )
         }
       }
-      status?.let { Text(it, color = MaterialTheme.colorScheme.primary) }
-      actions.forEach { action ->
-        Button(onClick = { onPick(action) }, modifier = Modifier.fillMaxWidth()) {
-          Text(stringResource(org.tfv.ata.action.ActionInfo.labelRes(action)))
+      Text(stringResource(R.string.nfc_desc), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+      if (armedLabel != null) {
+        Card(
+          colors = androidx.compose.material3.CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+          modifier = Modifier.fillMaxWidth(),
+        ) {
+          Column(Modifier.padding(16.dp)) {
+            androidx.compose.material3.LinearProgressIndicator(Modifier.fillMaxWidth())
+            Text(
+              stringResource(R.string.nfc_hold_tag, armedLabel),
+              Modifier.padding(top = 12.dp),
+              style = MaterialTheme.typography.titleMedium,
+              color = MaterialTheme.colorScheme.onPrimaryContainer,
+            )
+            androidx.compose.material3.TextButton(onClick = onCancelWrite) { Text(stringResource(R.string.cancel)) }
+          }
         }
       }
-    }
-    androidx.compose.material3.TextButton(onClick = onBack, modifier = Modifier.fillMaxWidth()) {
-      Text(stringResource(R.string.cancel))
+      status?.let {
+        Card(
+          colors = androidx.compose.material3.CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
+          modifier = Modifier.fillMaxWidth(),
+        ) {
+          Text(it, Modifier.padding(16.dp), color = MaterialTheme.colorScheme.onSecondaryContainer, style = MaterialTheme.typography.titleSmall)
+        }
+      }
+      val groups = listOf(
+        R.string.nfc_group_basic to actions.filter { it.category == org.tfv.ata.core.AtaCategory.FUNCTION_B },
+        R.string.menu_group_direct to actions.filter { it.category == org.tfv.ata.core.AtaCategory.FUNCTION_A },
+      )
+      groups.forEach { (title, list) ->
+        if (list.isEmpty()) return@forEach
+        Text(
+          stringResource(title),
+          style = MaterialTheme.typography.titleSmall,
+          color = MaterialTheme.colorScheme.primary,
+          modifier = Modifier.padding(top = 8.dp),
+        )
+        Card(
+          colors = androidx.compose.material3.CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+          modifier = Modifier.fillMaxWidth(),
+        ) {
+          list.forEachIndexed { index, action ->
+            val critical = org.tfv.ata.core.ActionPolicy.isCritical(action)
+            androidx.compose.material3.ListItem(
+              headlineContent = { Text(stringResource(org.tfv.ata.action.ActionInfo.labelRes(action))) },
+              supportingContent = if (critical) {
+                { Text(stringResource(R.string.nfc_critical_hint), color = palette.critical) }
+              } else null,
+              leadingContent = {
+                androidx.compose.material3.Icon(
+                  org.tfv.ata.ui.components.iconFor(action),
+                  contentDescription = null,
+                  tint = if (critical) palette.critical else palette.accent,
+                )
+              },
+              colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+              modifier = Modifier.clickable(enabled = hasNfc && armedLabel == null) { onPick(action) },
+            )
+            if (index < list.lastIndex) androidx.compose.material3.HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+          }
+        }
+      }
     }
   }
 }

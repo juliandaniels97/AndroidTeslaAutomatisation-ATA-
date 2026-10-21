@@ -18,8 +18,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.tfv.ata.ui.AtaViewModel
-import org.tfv.ata.ui.theme.NeonBlue
-import org.tfv.ata.ui.theme.NeonRed
+import org.tfv.ata.ui.theme.AtaColors
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -27,6 +26,7 @@ import kotlin.math.sin
 fun ActivationOverlay(vm: AtaViewModel) {
   val connecting by vm.connecting.collectAsStateWithLifecycle()
   val fx by vm.fx.collectAsStateWithLifecycle()
+  val palette = AtaColors.current
 
   if (connecting) {
     val transition = rememberInfiniteTransition(label = "connecting")
@@ -41,7 +41,7 @@ fun ActivationOverlay(vm: AtaViewModel) {
       for (i in 0..2) {
         val fr = (p + i / 3f) % 1f
         drawCircle(
-          color = NeonBlue.copy(alpha = (1f - fr) * 0.45f),
+          color = palette.accent.copy(alpha = (1f - fr) * 0.45f),
           radius = fr * size.minDimension * 0.45f,
           center = center,
           style = Stroke(width = 4f),
@@ -57,7 +57,7 @@ fun ActivationOverlay(vm: AtaViewModel) {
       progress.snapTo(0f)
       progress.animateTo(1f, tween(750))
     }
-    val color = if (event.success) NeonBlue else NeonRed
+    val color = if (event.success) palette.accent else palette.critical
     Canvas(Modifier.fillMaxSize()) {
       val center = Offset(size.width / 2f, size.height * 0.42f)
       val p = progress.value

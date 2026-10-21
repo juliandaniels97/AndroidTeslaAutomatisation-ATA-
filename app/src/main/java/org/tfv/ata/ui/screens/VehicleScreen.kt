@@ -196,7 +196,7 @@ fun VehicleScreen(vm: AtaViewModel, state: AtaUiState, onAddVehicle: () -> Unit 
 @Composable
 private fun BleEnableCard(onEnable: () -> Unit, modifier: Modifier = Modifier) {
   Card(
-    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer),
+    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
     modifier = modifier.fillMaxWidth(),
   ) {
     Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -220,7 +220,7 @@ private fun BleEnableCard(onEnable: () -> Unit, modifier: Modifier = Modifier) {
 @Composable
 private fun AddVehicleCard(onAdd: () -> Unit, modifier: Modifier = Modifier) {
   Card(
-    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer),
+    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
     modifier = modifier.fillMaxWidth(),
   ) {
     Column(Modifier.padding(16.dp)) {

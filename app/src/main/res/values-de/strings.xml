@@ -64,7 +64,7 @@
     <string name="settings_wear">Wear OS Uhr</string>
     <string name="settings_wear_desc">Lege fest, welche Aktionen auf der Uhr erscheinen.</string>
     <string name="settings_nfc">NFC-Tags</string>
-    <string name="nfc_desc">Schreibe eine Aktion auf einen NFC-Tag/Sticker. Tippe das Handy darauf, um die Aktion auszuführen — z. B. einen "Entriegeln"-Tag ans Auto kleben und das Handy wie eine Schlüsselkarte nutzen (entriegelt über BLE).</string>
+    <string name="nfc_desc">Schreibe eine Aktion auf einen NFC-Tag oder Sticker. Hältst du das Handy daran, wird die Aktion ausgeführt. Aktion wählen, dann den Tag an die Rückseite des Handys halten.</string>
     <string name="nfc_unavailable">Dieses Handy hat kein NFC.</string>
     <string name="nfc_hold_tag">Tag ans Handy halten, um \"%1$s\" zu schreiben…</string>
     <string name="nfc_written">Tag geschrieben.</string>
@@ -231,4 +231,7 @@
     <string name="overlay_button">„Über anderen Apps einblenden“ erlauben</string>
     <string name="overlay_restricted_hint">Schalter ausgegraut? App-Info → ATA → ⋮ → „Eingeschränkte Einstellungen zulassen“, dann erneut versuchen.</string>
     <string name="fail_open_on_phone">Auf dem Handy die Benachrichtigung antippen – oder für ATA „Über anderen Apps einblenden“ erlauben (Einstellungen → Wear OS Uhr).</string>
+    <string name="back">Zurück</string>
+    <string name="nfc_group_basic">Basis-Funktionen</string>
+    <string name="nfc_critical_hint">Öffnet das Auto: fragt beim Scannen nach einer Bestätigung</string>
 </resources>

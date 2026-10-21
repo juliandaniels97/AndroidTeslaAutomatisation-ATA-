@@ -49,7 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import android.view.HapticFeedbackConstants
 import org.tfv.ata.core.AtaAction
-import org.tfv.ata.ui.theme.NeonBlue
+import org.tfv.ata.ui.theme.AtaColors
 
 private const val ADD_KEY = "__add__"
 
@@ -175,16 +175,18 @@ fun EditableActionGrid(
         )
         if (!editMode && onToggleFavorite != null) {
           val fav = favorite?.invoke(action) == true
+          val palette = AtaColors.current
           Surface(
             onClick = { onToggleFavorite(action) },
             shape = CircleShape,
-            color = Color(0xAA0B0F16),
+            color = palette.badgeBackground,
+            shadowElevation = if (palette.isDark) 0.dp else 1.dp,
             modifier = Modifier.align(Alignment.TopEnd).padding(4.dp).size(26.dp),
           ) {
             Icon(
               if (fav) Icons.Filled.Star else Icons.Filled.StarBorder,
               contentDescription = null,
-              tint = if (fav) NeonBlue else Color(0xFF9FB2C6),
+              tint = if (fav) palette.accent else palette.badgeIcon,
               modifier = Modifier.padding(4.dp),
             )
           }
@@ -193,7 +195,7 @@ fun EditableActionGrid(
           Surface(
             onClick = { onDelete(action) },
             shape = CircleShape,
-            color = Color(0xFFFF4D40),
+            color = AtaColors.current.critical,
             modifier = Modifier.align(Alignment.TopStart).padding(2.dp).size(24.dp),
           ) {
             Icon(
@@ -222,20 +224,21 @@ private fun AddTile(onClick: () -> Unit) {
     label = "scale",
   )
   val shape = RoundedCornerShape(20.dp)
+  val palette = AtaColors.current
   Box(
     modifier = Modifier
       .aspectRatio(1f)
       .graphicsLayer { scaleX = scale; scaleY = scale }
       .clip(shape)
-      .background(Brush.verticalGradient(listOf(Color(0xFF122133), Color(0xFF0B0F16))))
-      .border(1.dp, NeonBlue.copy(alpha = 0.6f), shape)
+      .background(Brush.verticalGradient(listOf(palette.accent.copy(alpha = 0.10f), palette.tileBottom)))
+      .border(1.dp, palette.accent.copy(alpha = 0.6f), shape)
       .pointerInput(Unit) { detectTapGestures(onTap = { onClick() }) },
     contentAlignment = Alignment.Center,
   ) {
     Icon(
       Icons.Filled.Add,
       contentDescription = null,
-      tint = NeonBlue,
+      tint = palette.accent,
       modifier = Modifier.size(40.dp),
     )
   }

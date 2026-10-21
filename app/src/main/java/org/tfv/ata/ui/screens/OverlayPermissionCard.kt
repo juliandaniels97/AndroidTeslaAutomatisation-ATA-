@@ -35,7 +35,7 @@ fun OverlayPermissionCard(modifier: Modifier = Modifier) {
   }
   Card(
     colors = CardDefaults.cardColors(
-      containerColor = if (granted) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.tertiaryContainer,
+      containerColor = if (granted) MaterialTheme.colorScheme.surfaceContainerHigh else MaterialTheme.colorScheme.primaryContainer,
     ),
     modifier = modifier.fillMaxWidth().padding(vertical = 6.dp),
   ) {

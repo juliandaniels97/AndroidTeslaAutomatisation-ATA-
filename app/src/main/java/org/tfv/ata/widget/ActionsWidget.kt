@@ -29,6 +29,7 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
+import androidx.glance.color.ColorProvider as DayNight
 import kotlinx.coroutines.flow.first
 import org.tfv.ata.action.ActionInfo
 import org.tfv.ata.automation.RunActionActivity
@@ -43,10 +44,10 @@ class ActionsWidget : GlanceAppWidget() {
     val token = store.triggerToken()
     val actions = settings.widgetActionIds.mapNotNull { AtaAction.fromId(it) }.filter { it.enabled && !it.needsValue }.take(8)
     provideContent {
-      Column(GlanceModifier.fillMaxSize().background(Color(0xFF0B0D11)).padding(8.dp)) {
+      Column(GlanceModifier.fillMaxSize().background(DayNight(day = Color(0xFFF4F6F9), night = Color(0xFF0B0D11))).padding(8.dp)) {
         Text(
           "ATA",
-          style = TextStyle(color = ColorProvider(Color(0xFF4FB4FF)), fontWeight = FontWeight.Bold),
+          style = TextStyle(color = DayNight(day = Color(0xFF0B63BD), night = Color(0xFF4FB4FF)), fontWeight = FontWeight.Bold),
           modifier = GlanceModifier.padding(bottom = 6.dp),
         )
         actions.chunked(2).forEach { pair ->
@@ -76,14 +77,14 @@ private fun Tile(context: Context, action: AtaAction, token: String, modifier: G
     modifier = modifier
       .height(54.dp)
       .cornerRadius(14.dp)
-      .background(Color(0xFF1B1F27))
+      .background(DayNight(day = Color.White, night = Color(0xFF1B1F27)))
       .clickable(actionStartActivity(intent))
       .padding(6.dp),
     contentAlignment = Alignment.Center,
   ) {
     Text(
       context.getString(ActionInfo.labelRes(action)),
-      style = TextStyle(color = ColorProvider(Color.White), textAlign = TextAlign.Center),
+      style = TextStyle(color = DayNight(day = Color(0xFF161B22), night = Color.White), textAlign = TextAlign.Center),
       maxLines = 2,
     )
   }

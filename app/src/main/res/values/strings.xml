@@ -64,7 +64,7 @@
     <string name="settings_wear">Wear OS watch</string>
     <string name="settings_wear_desc">Choose which actions appear on the watch.</string>
     <string name="settings_nfc">NFC tags</string>
-    <string name="nfc_desc">Write an action to an NFC tag or sticker. Tapping your phone on it runs the action — e.g. stick an "Unlock" tag near your car and use the phone like a key card (unlocks over BLE).</string>
+    <string name="nfc_desc">Write an action to an NFC tag or sticker. Tapping your phone on it runs the action. Pick an action, then hold the tag to the back of the phone.</string>
     <string name="nfc_unavailable">This phone has no NFC.</string>
     <string name="nfc_hold_tag">Hold a tag to the phone to write \"%1$s\"…</string>
     <string name="nfc_written">Tag written.</string>
@@ -231,4 +231,7 @@
     <string name="overlay_button">Allow \"Display over other apps\"</string>
     <string name="overlay_restricted_hint">Switch greyed out? Open App info → ATA → ⋮ → \"Allow restricted settings\", then try again.</string>
     <string name="fail_open_on_phone">Tap the notification on the phone to open it — or allow \"Display over other apps\" for ATA (Settings → Wear OS watch).</string>
+    <string name="back">Back</string>
+    <string name="nfc_group_basic">Basic features</string>
+    <string name="nfc_critical_hint">Opens the car: asks for confirmation when the tag is scanned</string>
 </resources>

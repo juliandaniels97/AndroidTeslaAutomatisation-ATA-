@@ -5,6 +5,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.clickable
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -29,9 +31,8 @@ import org.tfv.ata.R
 import org.tfv.ata.core.AtaAction
 import org.tfv.ata.core.AtaCategory
 import org.tfv.ata.core.IntentContract
-import org.tfv.ata.core.ThemeMode
 import org.tfv.ata.ui.screens.ValueInputDialog
-import org.tfv.ata.ui.theme.AtaTheme
+import org.tfv.ata.ui.theme.AtaAppTheme
 
 /**
  * Android's "create shortcut" flow (ACTION_CREATE_SHORTCUT): lets Tasker, launchers and automation apps pick
@@ -52,7 +53,7 @@ class CreateShortcutActivity : ComponentActivity() {
       actions.filter { it.category == AtaCategory.FUNCTION_A }.map { it.id }
 
     setContent {
-      AtaTheme(themeMode = ThemeMode.DARK, dynamicColor = false) {
+      AtaAppTheme {
         var valueAction by remember { mutableStateOf<AtaAction?>(null) }
         Surface(Modifier.fillMaxSize()) {
           Column(Modifier.systemBarsPadding().padding(16.dp)) {
@@ -70,17 +71,25 @@ class CreateShortcutActivity : ComponentActivity() {
               style = MaterialTheme.typography.bodySmall,
               modifier = Modifier.padding(vertical = 8.dp),
             )
+            val palette = org.tfv.ata.ui.theme.AtaColors.current
             LazyColumn {
               items(ids) { id ->
-                Text(
-                  ShortcutSync.label(this@CreateShortcutActivity, id, null),
-                  modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable {
-                      val action = AtaAction.fromId(id)
-                      if (action != null && action.needsValue) valueAction = action else finishWith(id, null)
-                    }
-                    .padding(vertical = 14.dp),
+                val action = AtaAction.fromId(id)
+                val critical = action != null && org.tfv.ata.core.ActionPolicy.isCritical(action)
+                val icon = when {
+                  action != null -> org.tfv.ata.ui.components.iconFor(action)
+                  id == IntentContract.ACTION_ID_SET_ACTIVE -> androidx.compose.material.icons.Icons.Filled.PlayArrow
+                  else -> androidx.compose.material.icons.Icons.Filled.Pause
+                }
+                androidx.compose.material3.ListItem(
+                  headlineContent = { Text(ShortcutSync.label(this@CreateShortcutActivity, id, null)) },
+                  leadingContent = {
+                    androidx.compose.material3.Icon(icon, contentDescription = null, tint = if (critical) palette.critical else palette.accent)
+                  },
+                  colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+                  modifier = Modifier.clickable {
+                    if (action != null && action.needsValue) valueAction = action else finishWith(id, null)
+                  },
                 )
               }
             }
