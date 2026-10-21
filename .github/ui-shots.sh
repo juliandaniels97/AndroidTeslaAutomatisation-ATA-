@@ -44,7 +44,9 @@ for THEME in Dark Light; do
   done
   restart; tap "Settings"; tap "Guide & setup"; shot "$t-10-guide"
   scroll; tap "Bluetooth control (BETA)"; scroll; shot "$t-11-guide-ble"
-  tap "Open pairing assistant"; shot "$t-12-pair"; scroll; shot "$t-13-pair-2"
+  tap "Open pairing assistant"; shot "$t-12-pair"; scroll; shot "$t-13-pair-2"; scroll; shot "$t-14-pair-3"
+  restart; tap "Settings"; tap "Wear OS watch"; tap "Start"; sleep 5; shot "$t-15-wear-pair"; scroll; shot "$t-16-wear-pair-2"
+  restart; tap "Settings"; scroll; scroll; scroll; scroll; tap "Send bug report"; sleep 6; shot "$t-17-report"; scroll; shot "$t-18-report-2"
   adb shell am start -S -W -n org.tfv.ata/.shortcut.CreateShortcutActivity >/dev/null; sleep 3; shot "$t-9-create-shortcut"
 done
 ls -la "$OUT"

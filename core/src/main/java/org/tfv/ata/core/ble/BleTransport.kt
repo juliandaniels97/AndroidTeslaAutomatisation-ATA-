@@ -40,6 +40,7 @@ class BleConnection internal constructor(private val context: Context) : Bluetoo
   private var descDef: CompletableDeferred<Boolean>? = null
 
   override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
+    BleLog.add("connection state=$newState status=$status")
     when (newState) {
       BluetoothProfile.STATE_CONNECTED -> if (!connectedDef.isCompleted) connectedDef.complete(true)
       BluetoothProfile.STATE_DISCONNECTED -> {
@@ -50,10 +51,12 @@ class BleConnection internal constructor(private val context: Context) : Bluetoo
   }
 
   override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
+    BleLog.add("services discovered status=$status count=${gatt.services.size}")
     if (!servicesDef.isCompleted) servicesDef.complete(status == BluetoothGatt.GATT_SUCCESS)
   }
 
   override fun onMtuChanged(gatt: BluetoothGatt, mtu: Int, status: Int) {
+    BleLog.add("mtu=$mtu status=$status")
     if (!mtuDef.isCompleted) mtuDef.complete(mtu)
   }
 
@@ -62,6 +65,7 @@ class BleConnection internal constructor(private val context: Context) : Bluetoo
   }
 
   override fun onDescriptorWrite(gatt: BluetoothGatt, d: BluetoothGattDescriptor, status: Int) {
+    BleLog.add("subscribe status=$status")
     descDef?.takeIf { !it.isCompleted }?.complete(status == BluetoothGatt.GATT_SUCCESS)
   }
 
@@ -85,23 +89,42 @@ class BleConnection internal constructor(private val context: Context) : Bluetoo
       if (!connectedDef.await()) return@withTimeoutOrNull false
       if (!g.discoverServices()) return@withTimeoutOrNull false
       if (!servicesDef.await()) return@withTimeoutOrNull false
-      val service = g.getService(SERVICE) ?: return@withTimeoutOrNull false
-      val write = service.getCharacteristic(WRITE) ?: return@withTimeoutOrNull false
-      val read = service.getCharacteristic(READ) ?: return@withTimeoutOrNull false
+      val service = g.getService(SERVICE)
+      if (service == null) {
+        BleLog.add("Tesla service not found on this device")
+        return@withTimeoutOrNull false
+      }
+      val write = service.getCharacteristic(WRITE)
+      val read = service.getCharacteristic(READ)
+      if (write == null || read == null) {
+        BleLog.add("Tesla characteristics missing (write=${write != null} read=${read != null})")
+        return@withTimeoutOrNull false
+      }
       writeChar = write
+      BleLog.add("characteristics ok, read properties=0x${Integer.toHexString(read.properties)}")
       g.setCharacteristicNotification(read, true)
       val cccd = read.getDescriptor(CCCD)
       if (cccd != null) {
+        // The car answers on this characteristic with indications or notifications: subscribe to what it offers.
+        val value = if (read.properties and BluetoothGattCharacteristic.PROPERTY_INDICATE != 0) {
+          BluetoothGattDescriptor.ENABLE_INDICATION_VALUE
+        } else {
+          BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
+        }
         descDef = CompletableDeferred()
-        cccd.value = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
-        g.writeDescriptor(cccd)
-        descDef?.await()
+        writeDescriptor(g, cccd, value)
+        withTimeoutOrNull(5_000) { descDef?.await() } ?: BleLog.add("subscribe timed out")
+      } else {
+        BleLog.add("no CCCD descriptor on read characteristic")
       }
       g.requestMtu(512)
       blockLength = (withTimeoutOrNull(3000) { mtuDef.await() } ?: 23).coerceIn(23, 517) - 3
       true
     } ?: false
-    if (!ok) close()
+    if (!ok) {
+      BleLog.add("connection setup failed")
+      close()
+    }
     return ok
   }
 
@@ -119,11 +142,22 @@ class BleConnection internal constructor(private val context: Context) : Bluetoo
       val def = CompletableDeferred<Boolean>()
       writeDef = def
       val submitted = writeChunk(g, char, chunk)
-      if (!submitted) return false
-      if (withTimeoutOrNull(3000) { def.await() } != true) return false
+      if (!submitted) { BleLog.add("write rejected by Android"); return false }
+      if (withTimeoutOrNull(3000) { def.await() } != true) { BleLog.add("write not confirmed"); return false }
       offset = end
     }
+    BleLog.add("sent ${message.size} bytes")
     true
+  }
+
+  @Suppress("DEPRECATION")
+  private fun writeDescriptor(g: BluetoothGatt, d: BluetoothGattDescriptor, value: ByteArray) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+      g.writeDescriptor(d, value)
+    } else {
+      d.value = value
+      g.writeDescriptor(d)
+    }
   }
 
   @Suppress("DEPRECATION")
@@ -147,6 +181,7 @@ class BleConnection internal constructor(private val context: Context) : Bluetoo
       val len = ((bytes[0].toInt() and 0xFF) shl 8) or (bytes[1].toInt() and 0xFF)
       if (len > 1024) { buffer.reset(); return }
       if (bytes.size < len + 2) break
+      BleLog.add("received $len bytes")
       inbox.trySend(bytes.copyOfRange(2, 2 + len))
       val remaining = bytes.copyOfRange(2 + len, bytes.size)
       buffer.reset()
@@ -173,6 +208,9 @@ class BleConnection internal constructor(private val context: Context) : Bluetoo
 
 @SuppressLint("MissingPermission")
 object BleTransport {
+  /** Tesla BLE names: "S" + 16 hex digits + a letter (C = car). */
+  private val TESLA_NAME = Regex("^S[0-9a-f]{16}[A-Z]$")
+
   fun isBluetoothOn(context: Context): Boolean {
     val manager = context.getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager
     return manager?.adapter?.isEnabled == true
@@ -184,29 +222,54 @@ object BleTransport {
    * Returns the device from the scan result (keeps the car's random address type for connecting).
    */
   suspend fun scanDevice(context: Context, localName: String, timeoutMs: Long): BluetoothDevice? {
+    BleLog.add("looking for $localName")
+    connectedDevice(context, localName)?.let { return it }
     val filtered = scan(context, localName, timeoutMs / 2, useFilter = true)
     return filtered ?: scan(context, localName, timeoutMs - timeoutMs / 2, useFilter = false)
+  }
+
+  /**
+   * The car may already be connected to this phone (e.g. by the Tesla app) and then stop advertising.
+   * Android shares that link: ATA can open its own GATT client on the same device.
+   */
+  private fun connectedDevice(context: Context, localName: String): BluetoothDevice? {
+    val manager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+    val connected = runCatching { manager.getConnectedDevices(BluetoothProfile.GATT) }.getOrDefault(emptyList())
+    BleLog.add("already connected: " + connected.joinToString { it.name ?: "?" }.ifEmpty { "none" })
+    return connected.firstOrNull { it.name == localName }?.also { BleLog.add("using existing connection") }
   }
 
   private suspend fun scan(context: Context, localName: String, timeoutMs: Long, useFilter: Boolean): BluetoothDevice? {
     val manager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
     val scanner = manager.adapter?.takeIf { it.isEnabled }?.bluetoothLeScanner ?: return null
     val found = CompletableDeferred<BluetoothDevice?>()
+    val teslas = mutableSetOf<String>()
+    var seen = 0
     val cb = object : ScanCallback() {
       override fun onScanResult(callbackType: Int, result: ScanResult) {
-        val name = result.scanRecord?.deviceName
+        seen++
+        val name = result.scanRecord?.deviceName ?: result.device.name
+        if (name != null && TESLA_NAME.matches(name) && teslas.add(name)) BleLog.add("Tesla seen: $name rssi=${result.rssi}")
         if (name == localName && !found.isCompleted) found.complete(result.device)
       }
 
       override fun onBatchScanResults(results: MutableList<ScanResult>) {
         results.forEach { onScanResult(ScanSettings.CALLBACK_TYPE_ALL_MATCHES, it) }
       }
+
+      override fun onScanFailed(errorCode: Int) {
+        BleLog.add("scan failed error=$errorCode")
+        if (!found.isCompleted) found.complete(null)
+      }
     }
     val filters = if (useFilter) listOf(ScanFilter.Builder().setDeviceName(localName).build()) else emptyList()
     val settings = ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build()
+    BleLog.add(if (useFilter) "scan with name filter" else "scan without filter")
     scanner.startScan(filters, settings, cb)
     return try {
-      withTimeoutOrNull(timeoutMs) { found.await() }
+      withTimeoutOrNull(timeoutMs) { found.await() }.also {
+        BleLog.add(if (it != null) "car found" else "not found ($seen advertisements seen)")
+      }
     } finally {
       runCatching { scanner.stopScan(cb) }
     }

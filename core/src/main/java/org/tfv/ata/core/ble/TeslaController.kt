@@ -23,13 +23,15 @@ enum class PairStep { SEARCHING, CONNECTING, WAITING_FOR_CARD }
 
 data class PairResult(val outcome: PairOutcome, val code: FailureCode? = null, val detail: String = "")
 
+/** Result of [TeslaController.probe]: whether the car was reached and answered over Bluetooth. */
+data class ProbeResult(val reached: Boolean, val code: FailureCode? = null, val locked: Boolean? = null, val asleep: Boolean? = null)
+
 object TeslaController {
   private const val SCAN_TIMEOUT = 20_000L
   private const val CONNECT_TIMEOUT = 20_000L
   private const val REPLY_TIMEOUT = 10_000L
   private const val STATUS_TIMEOUT = 5_000L
   private const val PAIR_TIMEOUT = 60_000L
-  private const val PAIR_POLL = 4_000L
   private const val MAX_BUSY_RETRIES = 3
   private const val WAKE_POLLS = 10
 
@@ -97,6 +99,25 @@ object TeslaController {
     }
 
   /**
+   * Connection test without a key: finds the car, connects and asks VCSEC for its (unauthenticated) status.
+   * Shows whether scanning, connecting and receiving replies work before pairing.
+   */
+  suspend fun probe(context: Context, vin: String): ProbeResult =
+    mutex.withLock {
+      BleLog.reset()
+      withVehicle<ProbeResult>(context, vin, onError = { code, _ -> ProbeResult(false, code) }) { conn ->
+        val status = vcsecStatus(conn, newId())
+        if (status == null) {
+          BleLog.add("no status reply from the car")
+          ProbeResult(false, FailureCode.NO_RESPONSE)
+        } else {
+          BleLog.add("status reply: locked=${status.locked} asleep=${status.asleep}")
+          ProbeResult(true, locked = status.locked, asleep = status.asleep)
+        }
+      }
+    }
+
+  /**
    * Asks the car to add this device's key. The car then shows a prompt and the owner confirms by tapping an
    * already-paired key card on the card reader. While waiting, a VCSEC handshake is tried every few seconds:
    * it only succeeds once the key is on the car's key list, so [PairOutcome.ADDED] is never a guess.
@@ -108,31 +129,40 @@ object TeslaController {
     onStep: (PairStep) -> Unit = {},
   ): PairResult =
     mutex.withLock {
+      BleLog.reset()
       withVehicle<PairResult>(context, vin, onError = { code, msg -> PairResult(PairOutcome.FAILED, code, msg) }, onStep = onStep) { conn ->
         val routing = newId()
         // Same envelope as Tesla's vehicle-command: an unsigned RoutableMessage to the VCSEC domain.
         if (!conn.send(unsignedRequest(Domain.VEHICLE_SECURITY, addKeyEnvelope(owner), newId(), routing))) {
           return@withVehicle PairResult(PairOutcome.FAILED, FailureCode.NOT_REACHABLE, "send failed")
         }
+        BleLog.add("add-key request sent, waiting for the key card tap")
         onStep(PairStep.WAITING_FOR_CARD)
+        // Wait quietly: the car answers once the owner tapped the key card (or rejected the request).
+        // No other requests meanwhile, so the prompt on the car screen isn't disturbed.
         val deadline = System.currentTimeMillis() + PAIR_TIMEOUT
         while (System.currentTimeMillis() < deadline) {
-          val pollUntil = minOf(deadline, System.currentTimeMillis() + PAIR_POLL)
-          while (System.currentTimeMillis() < pollUntil) {
-            val raw = receive(conn, pollUntil - System.currentTimeMillis()) ?: break
-            val parsed = runCatching { ParsedResponse(raw) }.getOrNull()
-            if (parsed != null && parsed.toRoutingAddress != null && !parsed.isFor(routing)) continue
-            if (parsed != null && parsed.fault != 0 && parsed.fault != FAULT_UNKNOWN_KEY_ID) {
-              return@withVehicle PairResult(PairOutcome.FAILED, FailureCode.VEHICLE_REJECTED, "vehicle fault ${parsed.fault}")
-            }
-            // Replies may come as a RoutableMessage or as a bare FromVCSECMessage.
-            val payload = parsed?.protobufBytes ?: raw
-            val reply = VcsecReply.forWhitelist(payload)
-            if (reply is AppReply.Error) {
-              return@withVehicle PairResult(PairOutcome.FAILED, FailureCode.VEHICLE_REJECTED, reply.detail)
-            }
+          val raw = receive(conn, deadline - System.currentTimeMillis()) ?: break
+          val parsed = runCatching { ParsedResponse(raw) }.getOrNull()
+          if (parsed != null && parsed.toRoutingAddress != null && !parsed.isFor(routing)) {
+            BleLog.add("ignored reply for another app")
+            continue
           }
-          if (keyAccepted(conn, vin)) return@withVehicle PairResult(PairOutcome.ADDED)
+          BleLog.add("reply: domain=${parsed?.fromDomain} fault=${parsed?.fault} payload=${(parsed?.protobufBytes ?: raw).hexPrefix()}")
+          if (parsed != null && parsed.fault != 0) {
+            return@withVehicle PairResult(PairOutcome.FAILED, FailureCode.VEHICLE_REJECTED, "vehicle fault ${parsed.fault}")
+          }
+          // Replies may come as a RoutableMessage or as a bare FromVCSECMessage.
+          when (val reply = VcsecReply.forWhitelist(parsed?.protobufBytes ?: raw)) {
+            is AppReply.Error -> return@withVehicle PairResult(PairOutcome.FAILED, FailureCode.VEHICLE_REJECTED, reply.detail)
+            AppReply.Done -> break
+            else -> Unit
+          }
+        }
+        // Confirm with a handshake: it only succeeds once the key is on the car's key list.
+        if (keyAccepted(conn, vin)) {
+          BleLog.add("key accepted by the car")
+          return@withVehicle PairResult(PairOutcome.ADDED)
         }
         PairResult(PairOutcome.AWAITING_CONFIRMATION)
       }
@@ -143,6 +173,7 @@ object TeslaController {
     try {
       handshake(conn, vin, Domain.VEHICLE_SECURITY, newId()) != null
     } catch (e: BleException) {
+      BleLog.add("key check: ${e.message}")
       if (e.code == FailureCode.KEY_NOT_PAIRED) false else throw e
     }
 
@@ -156,25 +187,30 @@ object TeslaController {
     if (!VehicleKey.isSupported) return onError(FailureCode.UNSUPPORTED_DEVICE, "Android 12 or newer required")
     if (!hasBlePermission(context)) return onError(FailureCode.PERMISSION, "Bluetooth permission missing")
     if (!BleTransport.isBluetoothOn(context)) return onError(FailureCode.BLUETOOTH_OFF, "Bluetooth is off")
+    BleLog.add("Android ${android.os.Build.VERSION.SDK_INT}, ${android.os.Build.MANUFACTURER} ${android.os.Build.MODEL}")
     var connection: BleConnection? = null
     return try {
       onStep(PairStep.SEARCHING)
       val device = BleTransport.scanDevice(context, Vin.bleLocalName(Vin.normalize(vin)), SCAN_TIMEOUT)
         ?: return onError(FailureCode.NOT_REACHABLE, "vehicle not found")
       onStep(PairStep.CONNECTING)
+      // The first GATT connection often fails on Android (status 133): retry once.
       val conn = BleTransport.connect(context, device, CONNECT_TIMEOUT)
+        ?: run { delay(1_500); BleLog.add("retrying connection"); BleTransport.connect(context, device, CONNECT_TIMEOUT) }
         ?: return onError(FailureCode.NOT_REACHABLE, "connection failed")
       connection = conn
       block(conn)
     } catch (e: CancellationException) {
       throw e
     } catch (e: BleException) {
+      BleLog.add("failed: ${e.code} ${e.message}")
       onError(e.code, e.message ?: "error")
     } catch (e: SecurityException) {
       onError(FailureCode.PERMISSION, "Bluetooth permission missing")
     } catch (e: UnsupportedOperationException) {
       onError(FailureCode.UNSUPPORTED_DEVICE, e.message ?: "unsupported")
     } catch (e: Exception) {
+      BleLog.add("error: ${e.javaClass.simpleName}: ${e.message}")
       onError(FailureCode.OTHER, e.message ?: e.javaClass.simpleName)
     } finally {
       connection?.close()
@@ -203,8 +239,12 @@ object TeslaController {
     while (System.currentTimeMillis() < deadline) {
       val raw = receive(conn, deadline - System.currentTimeMillis()) ?: return null
       val parsed = ParsedResponse(raw)
-      if (!parsed.isFor(routing)) continue
+      if (!parsed.isFor(routing)) {
+        BleLog.add("ignored reply for another app")
+        continue
+      }
       VcsecReply.vehicleStatus(parsed.protobufBytes)?.let { return it }
+      BleLog.add("unexpected status reply fault=${parsed.fault} payload=${parsed.protobufBytes?.hexPrefix()}")
     }
     return null
   }

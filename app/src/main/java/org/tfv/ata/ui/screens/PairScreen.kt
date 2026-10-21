@@ -3,6 +3,7 @@ package org.tfv.ata.ui.screens
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.content.Intent
+import android.widget.Toast
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -19,6 +20,7 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Bluetooth
 import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Key
 import androidx.compose.material3.Button
@@ -33,6 +35,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -44,7 +47,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
@@ -53,14 +59,17 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.tfv.ata.BuildConfig
 import org.tfv.ata.R
 import org.tfv.ata.automation.Notifier
 import org.tfv.ata.core.CommandResult
 import org.tfv.ata.core.FailureCode
 import org.tfv.ata.core.Vin
+import org.tfv.ata.core.ble.BleLog
 import org.tfv.ata.core.ble.BleTransport
 import org.tfv.ata.core.ble.PairOutcome
 import org.tfv.ata.core.ble.PairStep
+import org.tfv.ata.core.ble.ProbeResult
 import org.tfv.ata.core.ble.TeslaController
 import org.tfv.ata.core.ble.VehicleKey
 import org.tfv.ata.ui.AtaUiState
@@ -71,7 +80,7 @@ import org.tfv.ata.ui.theme.AtaColors
 /** Step-by-step assistant that pairs this phone as a key with the selected car. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PairScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit, onVehicles: () -> Unit) {
+fun PairScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit, onVehicles: () -> Unit, onReport: () -> Unit) {
   val context = LocalContext.current
   val pairState by vm.pairState.collectAsStateWithLifecycle()
   val vehicle = state.selected
@@ -96,6 +105,8 @@ fun PairScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit, onVehicl
   var carAwake by rememberSaveable { mutableStateOf(false) }
   var cardReady by rememberSaveable { mutableStateOf(false) }
   val running = pairState is PairUiState.Running
+  val probe by vm.probe.collectAsStateWithLifecycle()
+  val probing by vm.probing.collectAsStateWithLifecycle()
 
   Scaffold(
     topBar = {
@@ -162,7 +173,7 @@ fun PairScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit, onVehicl
       GuideSection(stringResource(R.string.pair_section_pair))
       Button(
         onClick = { vehicle?.let { vm.pairKey(it.vin) } },
-        enabled = ready && nearCar && carAwake && cardReady && !running,
+        enabled = ready && nearCar && carAwake && cardReady && !running && !probing,
         modifier = Modifier.fillMaxWidth(),
       ) {
         if (running) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
@@ -182,6 +193,20 @@ fun PairScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit, onVehicl
 
       PairProgress(pairState, onRetry = { vm.resetPairing() })
 
+      GuideSection(stringResource(R.string.pair_section_test))
+      Text(stringResource(R.string.pair_test_desc), style = MaterialTheme.typography.bodySmall)
+      OutlinedButton(
+        onClick = { vehicle?.let { vm.probeVehicle(it.vin) } },
+        enabled = ready && !running && !probing,
+      ) {
+        if (probing) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+        else Icon(Icons.Filled.Bluetooth, contentDescription = null)
+        Text(stringResource(R.string.pair_test), modifier = Modifier.padding(start = 8.dp))
+      }
+      if (!probing) probe?.let { ProbeResultText(it) }
+
+      DiagnosticsCard(BleLog.lines.collectAsStateWithLifecycle().value, onReport)
+
       Fingerprint()
 
       NfcChooserNote()
@@ -190,7 +215,11 @@ fun PairScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit, onVehicl
 }
 
 @Composable
-private fun PairProgress(pairState: PairUiState, onRetry: () -> Unit) {
+internal fun PairProgress(
+  pairState: PairUiState,
+  onRetry: () -> Unit,
+  addedNext: String = stringResource(R.string.pair_added_next),
+) {
   val step = (pairState as? PairUiState.Running)?.step
   if (pairState is PairUiState.Idle) return
   val finished = pairState as? PairUiState.Finished
@@ -224,7 +253,7 @@ private fun PairProgress(pairState: PairUiState, onRetry: () -> Unit) {
         Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = color)
         val context = LocalContext.current
         val detail = when (result.outcome) {
-          PairOutcome.ADDED -> stringResource(R.string.pair_added_next)
+          PairOutcome.ADDED -> addedNext
           PairOutcome.AWAITING_CONFIRMATION -> stringResource(R.string.pair_awaiting_next)
           PairOutcome.FAILED -> Notifier.failureText(context, CommandResult.Failure(result.detail, result.code ?: FailureCode.OTHER)) +
             "\n\n" + stringResource(troubleshootingFor(result.code))
@@ -238,7 +267,64 @@ private fun PairProgress(pairState: PairUiState, onRetry: () -> Unit) {
   }
 }
 
-private fun troubleshootingFor(code: FailureCode?): Int = when (code) {
+@Composable
+private fun ProbeResultText(result: ProbeResult) {
+  val palette = AtaColors.current
+  val context = LocalContext.current
+  val text = if (result.reached) {
+    stringResource(
+      R.string.pair_test_ok,
+      stringResource(if (result.locked == true) R.string.pair_test_locked else R.string.pair_test_unlocked),
+    )
+  } else {
+    Notifier.failureText(context, CommandResult.Failure("", result.code ?: FailureCode.OTHER)) +
+      "\n\n" + stringResource(troubleshootingFor(result.code))
+  }
+  Text(
+    text,
+    style = MaterialTheme.typography.bodySmall,
+    color = if (result.reached) palette.success else palette.danger,
+  )
+}
+
+/** Technical log of the last pairing / connection test, to copy and send when something doesn't work. */
+@Composable
+internal fun DiagnosticsCard(lines: List<String>, onReport: () -> Unit) {
+  if (lines.isEmpty()) return
+  var open by rememberSaveable { mutableStateOf(false) }
+  val clipboard = LocalClipboardManager.current
+  val context = LocalContext.current
+  Card(modifier = Modifier.fillMaxWidth()) {
+    Column(Modifier.padding(12.dp)) {
+      Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(stringResource(R.string.pair_diagnostics), style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f))
+        TextButton(onClick = { open = !open }) {
+          Text(stringResource(if (open) R.string.pair_diagnostics_hide else R.string.pair_diagnostics_show))
+        }
+      }
+      Text(stringResource(R.string.pair_diagnostics_desc), style = MaterialTheme.typography.bodySmall)
+      if (open) {
+        SelectionContainer {
+          Text(
+            lines.joinToString("\n"),
+            style = MaterialTheme.typography.bodySmall,
+            fontFamily = FontFamily.Monospace,
+            modifier = Modifier.padding(top = 8.dp),
+          )
+        }
+      }
+      Row {
+        TextButton(onClick = {
+          clipboard.setText(AnnotatedString("ATA ${BuildConfig.VERSION_NAME}\n" + lines.joinToString("\n")))
+          Toast.makeText(context, R.string.pair_diagnostics_copied, Toast.LENGTH_SHORT).show()
+        }) { Text(stringResource(R.string.pair_diagnostics_copy)) }
+        TextButton(onClick = onReport) { Text(stringResource(R.string.report_send)) }
+      }
+    }
+  }
+}
+
+internal fun troubleshootingFor(code: FailureCode?): Int = when (code) {
   FailureCode.NOT_REACHABLE -> R.string.pair_help_not_found
   FailureCode.BLUETOOTH_OFF -> R.string.pair_help_bluetooth
   FailureCode.PERMISSION -> R.string.pair_help_permission
@@ -248,7 +334,7 @@ private fun troubleshootingFor(code: FailureCode?): Int = when (code) {
 }
 
 @Composable
-private fun TapCardCallout() {
+internal fun TapCardCallout() {
   val palette = AtaColors.current
   Card(
     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
@@ -274,7 +360,7 @@ private fun TapCardCallout() {
 }
 
 @Composable
-private fun ProgressLine(text: String, done: Boolean, active: Boolean, failed: Boolean) {
+internal fun ProgressLine(text: String, done: Boolean, active: Boolean, failed: Boolean) {
   Row(verticalAlignment = Alignment.CenterVertically) {
     if (active) {
       CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
@@ -291,7 +377,7 @@ private fun ProgressLine(text: String, done: Boolean, active: Boolean, failed: B
 }
 
 @Composable
-private fun TickRow(label: String, checked: Boolean, onChange: (Boolean) -> Unit) {
+internal fun TickRow(label: String, checked: Boolean, onChange: (Boolean) -> Unit) {
   Row(
     Modifier.fillMaxWidth().toggleable(value = checked, role = Role.Checkbox, onValueChange = onChange),
     verticalAlignment = Alignment.CenterVertically,
@@ -302,7 +388,7 @@ private fun TickRow(label: String, checked: Boolean, onChange: (Boolean) -> Unit
 }
 
 @Composable
-private fun Fingerprint() {
+internal fun Fingerprint() {
   val unsupported = stringResource(R.string.fail_unsupported)
   val fingerprint by produceState<String?>(initialValue = null) {
     value = if (!VehicleKey.isSupported) unsupported

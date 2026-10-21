@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -87,6 +88,13 @@ private fun WearApp() {
       block()
     } else {
       pendingAfterPerm = block
+      blePermLauncher.launch(arrayOf(Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_SCAN))
+    }
+  }
+
+  // Ask for Bluetooth right away once a car is synced: the phone's watch-pairing assistant needs it.
+  LaunchedEffect(vin) {
+    if (vin.isNotBlank() && WearControl.directSupported && !WearControl.hasBlePermission(context)) {
       blePermLauncher.launch(arrayOf(Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_SCAN))
     }
   }

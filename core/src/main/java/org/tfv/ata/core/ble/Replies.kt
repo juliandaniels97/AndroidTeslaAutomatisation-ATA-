@@ -45,6 +45,11 @@ internal object VcsecReply {
     val msg = ProtoReader(payload)
     msg.message(NOMINAL_ERROR)?.let { return AppReply.Error("VCSEC error ${it.varint(1) ?: 0}") }
     val status = msg.message(COMMAND_STATUS) ?: return AppReply.KeepWaiting
+    // CommandStatus.operationStatus: 0 OK, 1 WAIT (e.g. waiting for the key card tap), 2 ERROR.
+    when (status.varint(1)?.toInt() ?: 0) {
+      1 -> return AppReply.KeepWaiting
+      2 -> return AppReply.Error("VCSEC operation error ${status.message(3)?.varint(1) ?: 0}")
+    }
     val whitelist = status.message(3) ?: return AppReply.KeepWaiting
     val info = whitelist.varint(1)?.toInt() ?: 0
     return if (info == 0) AppReply.Done else AppReply.Error("key list error $info")

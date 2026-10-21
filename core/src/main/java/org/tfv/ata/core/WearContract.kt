@@ -9,6 +9,18 @@ object WearContract {
   const val MSG_RESULT = "/ata/result"
   /** Capability the phone app advertises, so the watch sends commands only to the phone running ATA. */
   const val CAPABILITY_PHONE = "ata_phone"
+  /** Capability the watch app advertises, so the phone can tell whether ATA is installed on the watch. */
+  const val CAPABILITY_WATCH = "ata_watch"
+
+  /** Phone → watch: one of the WATCH_CMD_* commands. The watch answers with [MSG_WATCH_STATE]. */
+  const val MSG_WATCH_COMMAND = "/ata/watch/command"
+  /** Watch → phone: an encoded [WatchState]. */
+  const val MSG_WATCH_STATE = "/ata/watch/state"
+  const val WATCH_CMD_STATE = "state"
+  const val WATCH_CMD_PROBE = "probe"
+  const val WATCH_CMD_PAIR = "pair"
+  const val WATCH_CMD_DIRECT_ON = "direct_on"
+  const val WATCH_CMD_DIRECT_OFF = "direct_off"
 
   const val KEY_ACTION_IDS = "action_ids"
   const val KEY_ACTION_LABELS = "action_labels"

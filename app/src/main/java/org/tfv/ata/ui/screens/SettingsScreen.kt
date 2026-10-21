@@ -17,6 +17,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.AutoMode
+import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Nfc
@@ -68,6 +69,7 @@ fun SettingsScreen(
   onAutomation: () -> Unit,
   onAbout: () -> Unit,
   onGuide: () -> Unit,
+  onReport: () -> Unit,
 ) {
   val s = state.settings
   val context = LocalContext.current
@@ -224,6 +226,7 @@ fun SettingsScreen(
       }
 
       HorizontalDivider()
+      LinkRow(stringResource(R.string.report_title), Icons.Filled.BugReport, onReport)
       LinkRow(stringResource(R.string.settings_about), Icons.Filled.Info, onAbout)
     }
   }

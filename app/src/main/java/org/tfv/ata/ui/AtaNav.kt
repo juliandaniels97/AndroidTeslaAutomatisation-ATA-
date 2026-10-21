@@ -28,10 +28,12 @@ import org.tfv.ata.ui.screens.GuideTargets
 import org.tfv.ata.ui.screens.HomeScreen
 import org.tfv.ata.ui.screens.MenuConfigScreen
 import org.tfv.ata.ui.screens.PairScreen
+import org.tfv.ata.ui.screens.ReportScreen
 import org.tfv.ata.ui.screens.SettingsScreen
 import org.tfv.ata.ui.screens.VehicleScreen
 import org.tfv.ata.ui.screens.VehiclesScreen
 import org.tfv.ata.ui.screens.WearConfigScreen
+import org.tfv.ata.ui.screens.WearPairScreen
 
 private enum class Tab(val route: String, val labelRes: Int) {
   HOME("home", R.string.tab_home),
@@ -95,15 +97,25 @@ fun AtaNavHost(vm: AtaViewModel, state: AtaUiState) {
           onAutomation = { nav.navigate("automation") },
           onAbout = { nav.navigate("about") },
           onGuide = { nav.navigate("guide") },
+          onReport = { nav.navigate("report") },
         )
       }
       composable("vehicles") { VehiclesScreen(vm, state, onBack = { nav.popBackStack() }) }
       composable("menu") { MenuConfigScreen(vm, state, onBack = { nav.popBackStack() }) }
-      composable("wear") { WearConfigScreen(vm, state, onBack = { nav.popBackStack() }) }
+      composable("wear") { WearConfigScreen(vm, state, onBack = { nav.popBackStack() }, onPairWatch = { nav.navigate("wear_pair") }) }
+      composable("wear_pair") {
+        WearPairScreen(vm, state, onBack = { nav.popBackStack() }, onReport = { nav.navigate("report") })
+      }
+      composable("report") { ReportScreen(onBack = { nav.popBackStack() }) }
       composable("automation") { AutomationScreen(vm, state, onBack = { nav.popBackStack() }) }
       composable("about") { AboutScreen(onBack = { nav.popBackStack() }) }
       composable("pair") {
-        PairScreen(vm, state, onBack = { nav.popBackStack() }, onVehicles = { nav.navigate("vehicles") })
+        PairScreen(
+          vm, state,
+          onBack = { nav.popBackStack() },
+          onVehicles = { nav.navigate("vehicles") },
+          onReport = { nav.navigate("report") },
+        )
       }
       composable("guide") {
         GuideScreen(

@@ -17,6 +17,10 @@ import org.tfv.ata.core.WearContract
  */
 class PhoneWearListener : WearableListenerService() {
   override fun onMessageReceived(event: MessageEvent) {
+    if (event.path == WearContract.MSG_WATCH_STATE) {
+      WatchLink.onState(event.data)
+      return
+    }
     if (event.path != WearContract.MSG_RUN) return
     val action = AtaAction.fromId(String(event.data, Charsets.UTF_8).trim()) ?: return
     val request = ActionRequest(action.id, TriggerSource.WATCH, replyNode = event.sourceNodeId)

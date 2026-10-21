@@ -31,7 +31,7 @@ import org.tfv.ata.ui.components.ActionCheckRow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun WearConfigScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit) {
+fun WearConfigScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit, onPairWatch: () -> Unit = {}) {
   // The watch can't ask for a value (address, percent …), so those actions aren't offered there.
   val funcB = AtaAction.entries.filter { it.category == AtaCategory.FUNCTION_B && it.enabled && !it.needsValue }
   val funcA = AtaAction.entries.filter { it.category == AtaCategory.FUNCTION_A && it.enabled && !it.needsValue }
@@ -59,6 +59,7 @@ fun WearConfigScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit) {
     ) {
       Text(stringResource(R.string.settings_wear_desc), style = MaterialTheme.typography.bodyMedium)
       OverlayPermissionCard()
+      WatchPairCard(onPairWatch)
       funcB.forEach { action -> ActionCheckRow(action, action.id in current) { toggle(action) } }
       Text(
         stringResource(R.string.menu_group_direct),
@@ -67,6 +68,22 @@ fun WearConfigScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit) {
         modifier = Modifier.padding(top = 10.dp, bottom = 2.dp),
       )
       funcA.forEach { action -> ActionCheckRow(action, action.id in current) { toggle(action) } }
+    }
+  }
+}
+
+/** Entry to the watch-pairing assistant (direct Bluetooth control from the watch). */
+@Composable
+private fun WatchPairCard(onOpen: () -> Unit) {
+  androidx.compose.material3.Card(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
+    Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
+      Column(Modifier.weight(1f)) {
+        Text(stringResource(R.string.wear_pair_title), style = MaterialTheme.typography.titleSmall)
+        Text(stringResource(R.string.wear_pair_card_desc), style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(top = 4.dp))
+      }
+      androidx.compose.material3.Button(onClick = onOpen, modifier = Modifier.padding(start = 10.dp)) {
+        Text(stringResource(R.string.pair_open_assistant_short))
+      }
     }
   }
 }

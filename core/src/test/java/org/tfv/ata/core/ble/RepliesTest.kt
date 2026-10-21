@@ -40,6 +40,13 @@ class RepliesTest {
   }
 
   @Test
+  fun whitelistWaitStatusIsNotSuccess() {
+    // WAIT with an (empty) whitelist status: the car still waits for the key card tap.
+    val wait = buildProto { message(4, buildProto { enum(1, 1); message(3, buildProto { enum(1, 0) }) }) }
+    assertEquals(AppReply.KeepWaiting, VcsecReply.forWhitelist(wait))
+  }
+
+  @Test
   fun vehicleStatusParses() {
     val status = buildProto { message(1, buildProto { enum(2, 1); enum(3, 2) }) }
     val parsed = VcsecReply.vehicleStatus(status)!!

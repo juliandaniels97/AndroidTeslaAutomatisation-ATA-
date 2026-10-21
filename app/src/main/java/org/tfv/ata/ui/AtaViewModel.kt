@@ -143,7 +143,7 @@ class AtaViewModel(app: Application) : AndroidViewModel(app) {
   val pairState = _pairState.asStateFlow()
 
   fun pairKey(vin: String) = viewModelScope.launch {
-    if (_pairState.value is PairUiState.Running) return@launch
+    if (_pairState.value is PairUiState.Running || _probing.value) return@launch
     _pairState.value = PairUiState.Running(org.tfv.ata.core.ble.PairStep.SEARCHING)
     var reached: org.tfv.ata.core.ble.PairStep? = null
     val result = kotlinx.coroutines.withContext(Dispatchers.IO) {
@@ -153,6 +153,21 @@ class AtaViewModel(app: Application) : AndroidViewModel(app) {
       }
     }
     _pairState.value = PairUiState.Finished(result, reached)
+  }
+
+  private val _probe = MutableStateFlow<org.tfv.ata.core.ble.ProbeResult?>(null)
+  private val _probing = MutableStateFlow(false)
+  /** Result of the last connection test (null: none yet). */
+  val probe = _probe.asStateFlow()
+  val probing = _probing.asStateFlow()
+
+  fun probeVehicle(vin: String) = viewModelScope.launch {
+    if (_probing.value || _pairState.value is PairUiState.Running) return@launch
+    _probing.value = true
+    _probe.value = kotlinx.coroutines.withContext(Dispatchers.IO) {
+      org.tfv.ata.core.ble.TeslaController.probe(getApplication(), vin)
+    }
+    _probing.value = false
   }
 
   fun resetPairing() {
@@ -187,6 +202,11 @@ class AtaViewModel(app: Application) : AndroidViewModel(app) {
 
   fun setVehicleActions(actions: List<org.tfv.ata.core.AtaAction>) =
     updateSettings { it.copy(vehicleActionIds = actions.map { a -> a.id }) }
+
+  /** Sends menu and selected car to the watch again (e.g. from the watch-pairing assistant). */
+  fun resyncWear() {
+    pushWearConfig()
+  }
 
   fun setWearActions(actions: List<AtaAction>) {
     updateSettings { it.copy(wearActionIds = actions.map { a -> a.id }) }
