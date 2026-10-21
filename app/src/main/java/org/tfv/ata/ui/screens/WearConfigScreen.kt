@@ -33,8 +33,9 @@ import org.tfv.ata.ui.AtaViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WearConfigScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit) {
-  val funcB = AtaAction.entries.filter { it.category == AtaCategory.FUNCTION_B && it.enabled }
-  val funcA = AtaAction.entries.filter { it.category == AtaCategory.FUNCTION_A && it.enabled }
+  // The watch can't ask for a value (address, percent …), so those actions aren't offered there.
+  val funcB = AtaAction.entries.filter { it.category == AtaCategory.FUNCTION_B && it.enabled && !it.needsValue }
+  val funcA = AtaAction.entries.filter { it.category == AtaCategory.FUNCTION_A && it.enabled && !it.needsValue }
   val defaultIds = funcB.filter { !it.beta }.map { it.id }
   val current = state.settings.wearActionIds.ifEmpty { defaultIds }
 

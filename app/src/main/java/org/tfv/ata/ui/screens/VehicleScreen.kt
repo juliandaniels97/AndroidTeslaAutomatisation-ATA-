@@ -1,5 +1,9 @@
 package org.tfv.ata.ui.screens
 
+import android.Manifest
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -45,6 +49,10 @@ import kotlinx.coroutines.withContext
 import org.tfv.ata.R
 import org.tfv.ata.core.AtaAction
 import org.tfv.ata.core.AtaCategory
+import org.tfv.ata.automation.Notifier
+import org.tfv.ata.core.CommandResult
+import org.tfv.ata.core.FailureCode
+import org.tfv.ata.core.ble.PairOutcome
 import org.tfv.ata.core.ble.TeslaController
 import org.tfv.ata.core.ble.VehicleKey
 import org.tfv.ata.ui.ActionHost
@@ -61,6 +69,24 @@ fun VehicleScreen(vm: AtaViewModel, state: AtaUiState, onAddVehicle: () -> Unit 
   val snapshot = state.snapshot
   val experimental = state.settings.experimentalBle
   val refreshing by vm.refreshing.collectAsStateWithLifecycle()
+  val pairing by vm.pairing.collectAsStateWithLifecycle()
+
+  fun startPair() {
+    val vin = state.selected?.vin ?: return
+    vm.pairKey(vin) { result ->
+      val text = when (result.outcome) {
+        PairOutcome.ADDED -> context.getString(R.string.pair_added)
+        PairOutcome.AWAITING_CONFIRMATION -> context.getString(R.string.pair_awaiting)
+        PairOutcome.FAILED -> context.getString(R.string.pair_failed) + ": " +
+          Notifier.failureText(context, CommandResult.Failure(result.detail, result.code ?: FailureCode.OTHER))
+      }
+      Toast.makeText(context, text, Toast.LENGTH_LONG).show()
+    }
+  }
+  val pairPermissions = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { granted ->
+    if (granted.values.isNotEmpty() && granted.values.all { it }) startPair()
+    else Toast.makeText(context, R.string.fail_permission, Toast.LENGTH_LONG).show()
+  }
 
   val allBle = remember { AtaAction.entries.filter { it.category == AtaCategory.FUNCTION_A && it.enabled } }
   val savedBle = remember(state.settings.vehicleActionIds) {
@@ -126,7 +152,8 @@ fun VehicleScreen(vm: AtaViewModel, state: AtaUiState, onAddVehicle: () -> Unit 
             }
             snapshot?.takeIf { it.updatedAt > 0 }?.let {
               Text(
-                stringResource(R.string.last_updated, formatRelative(it.updatedAt)),
+                stringResource(R.string.last_updated, formatRelative(it.updatedAt)) +
+                  if (it.asleep) "  ·  " + stringResource(R.string.status_asleep) else "",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
@@ -142,9 +169,10 @@ fun VehicleScreen(vm: AtaViewModel, state: AtaUiState, onAddVehicle: () -> Unit 
               AddVehicleCard(onAdd = onAddVehicle, modifier = Modifier.padding(top = 10.dp))
             } else {
               PairCard(
+                busy = pairing,
                 onPair = {
-                  val vin = state.selected?.vin
-                  if (vin != null) scope.launch { withContext(Dispatchers.IO) { TeslaController.pairKey(context, vin) } }
+                  if (TeslaController.hasBlePermission(context)) startPair()
+                  else pairPermissions.launch(arrayOf(Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT))
                 },
                 modifier = Modifier.padding(top = 10.dp),
               )
@@ -214,9 +242,11 @@ private fun AddVehicleCard(onAdd: () -> Unit, modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun PairCard(onPair: () -> Unit, modifier: Modifier = Modifier) {
+private fun PairCard(busy: Boolean, onPair: () -> Unit, modifier: Modifier = Modifier) {
+  val unsupported = stringResource(R.string.fail_unsupported)
   val fingerprint by produceState<String?>(initialValue = null) {
-    value = withContext(Dispatchers.IO) { runCatching { VehicleKey.publicKeyFingerprint() }.getOrNull() }
+    value = if (!VehicleKey.isSupported) unsupported
+    else withContext(Dispatchers.IO) { runCatching { VehicleKey.publicKeyFingerprint() }.getOrNull() }
   }
   Card(modifier = modifier.fillMaxWidth()) {
     Column(Modifier.padding(14.dp)) {
@@ -224,9 +254,10 @@ private fun PairCard(onPair: () -> Unit, modifier: Modifier = Modifier) {
       SelectionContainer {
         Text(fingerprint ?: "…", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
       }
-      Button(onClick = onPair, modifier = Modifier.padding(top = 8.dp)) {
-        Icon(Icons.Filled.Key, contentDescription = null)
-        Text(stringResource(R.string.ble_pair), modifier = Modifier.padding(start = 8.dp))
+      Button(onClick = onPair, enabled = !busy && VehicleKey.isSupported, modifier = Modifier.padding(top = 8.dp)) {
+        if (busy) CircularProgressIndicator(modifier = Modifier.padding(end = 4.dp), strokeWidth = 2.dp)
+        else Icon(Icons.Filled.Key, contentDescription = null)
+        Text(stringResource(if (busy) R.string.pair_in_progress else R.string.ble_pair), modifier = Modifier.padding(start = 8.dp))
       }
     }
   }

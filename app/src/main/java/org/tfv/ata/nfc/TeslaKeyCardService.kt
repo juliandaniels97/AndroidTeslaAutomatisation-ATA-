@@ -13,16 +13,13 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.tfv.ata.core.ble.KeyCardCrypto
 import org.tfv.ata.data.AtaStore
-import java.security.SecureRandom
 
 /**
  * Emulates a Tesla NFC key card over HCE, reusing the phone's enrolled EC key.
- * Only responds when the user turned on "NFC key card" in settings.
+ * Only responds when the user turned on "NFC key card" in settings and the phone is unlocked.
  */
 class TeslaKeyCardService : HostApduService() {
   @Volatile private var enabled = false
-  @Volatile private var requireUnlock = true
-  private val random = SecureRandom()
   private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
   override fun onCreate() {
@@ -32,13 +29,11 @@ class TeslaKeyCardService : HostApduService() {
       runBlocking {
         val s = store.settings.first()
         enabled = s.nfcKeyCard
-        requireUnlock = s.nfcKeyCardRequireUnlock
       }
     }
     scope.launch {
       store.settings.collect {
         enabled = it.nfcKeyCard
-        requireUnlock = it.nfcKeyCardRequireUnlock
       }
     }
   }
@@ -51,7 +46,9 @@ class TeslaKeyCardService : HostApduService() {
   override fun processCommandApdu(commandApdu: ByteArray?, extras: Bundle?): ByteArray {
     val apdu = commandApdu ?: return SW_UNKNOWN
     if (!enabled) return SW_CONDITIONS
-    if (requireUnlock && isLocked()) return SW_CONDITIONS
+    // Never answer a reader while the phone is locked: a locked phone in a pocket could otherwise be
+    // relayed to the car (unlock *and* drive).
+    if (isLocked()) return SW_CONDITIONS
     if (apdu.size < 4) return SW_WRONG_LENGTH
 
     // SELECT by AID
@@ -71,10 +68,9 @@ class TeslaKeyCardService : HostApduService() {
   private fun authenticate(apdu: ByteArray): ByteArray {
     val data = apduData(apdu) ?: return SW_WRONG_LENGTH
     if (data.size < 0x51) return SW_WRONG_LENGTH
+    // Data = reader's ephemeral public key (65 bytes) || 16-byte challenge; answer AES-ECB(K, challenge).
     val readerPub = data.copyOfRange(0, 65)
-    val challenge = ByteArray(16)
-    random.nextBytes(challenge)
-    System.arraycopy(data, 69, challenge, 4, 12)
+    val challenge = data.copyOfRange(65, 81)
     return runCatching { KeyCardCrypto.authenticate(readerPub, challenge) + SW_SUCCESS }
       .getOrDefault(SW_UNKNOWN)
   }

@@ -27,7 +27,7 @@ object WearPush {
       dataMap.putInt(WearContract.KEY_BATTERY, snapshot.batteryPercent)
       dataMap.putInt(WearContract.KEY_RANGE, snapshot.rangeKm)
       dataMap.putBoolean(WearContract.KEY_CHARGING, snapshot.charging)
-      dataMap.putBoolean(WearContract.KEY_LOCKED, snapshot.locked)
+      snapshot.locked?.let { dataMap.putBoolean(WearContract.KEY_LOCKED, it) } ?: dataMap.remove(WearContract.KEY_LOCKED)
       dataMap.putString(WearContract.KEY_VEHICLE, vehicleName)
       dataMap.putLong(WearContract.KEY_UPDATED, snapshot.updatedAt)
     }.asPutDataRequest().setUrgent()

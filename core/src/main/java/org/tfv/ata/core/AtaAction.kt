@@ -17,10 +17,10 @@ enum class AtaAction(
   NAVIGATE_HOME("navigate_home", AtaCategory.FUNCTION_B, true),
   NAVIGATE_WORK("navigate_work", AtaCategory.FUNCTION_B, true),
   NAVIGATE_ADDRESS("navigate_address", AtaCategory.FUNCTION_B, true, needsValue = true),
-  SHARE_LOCATION("share_location", AtaCategory.FUNCTION_B, true),
+  SHARE_LOCATION("share_location", AtaCategory.FUNCTION_B, true, needsValue = true),
 
-  LOCK("lock", AtaCategory.FUNCTION_A, true),
-  UNLOCK("unlock", AtaCategory.FUNCTION_A, true),
+  LOCK("lock", AtaCategory.FUNCTION_A, true, beta = true),
+  UNLOCK("unlock", AtaCategory.FUNCTION_A, true, beta = true),
   WAKE("wake", AtaCategory.FUNCTION_A, true, beta = true),
   CLIMATE_ON("climate_on", AtaCategory.FUNCTION_A, true, beta = true),
   CLIMATE_OFF("climate_off", AtaCategory.FUNCTION_A, true, beta = true),

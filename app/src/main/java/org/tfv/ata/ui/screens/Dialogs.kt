@@ -21,6 +21,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import org.tfv.ata.R
 import org.tfv.ata.action.ActionInfo
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
+import org.tfv.ata.core.ActionPolicy
 import org.tfv.ata.core.AtaAction
 
 @Composable
@@ -58,6 +61,14 @@ fun ValueInputDialog(
   onDismiss: () -> Unit,
 ) {
   var value by remember { mutableStateOf("") }
+  val range = ActionPolicy.valueRange(action)
+  val valid = if (range != null) ActionPolicy.parseValue(action, value) != null else value.isNotBlank()
+  val label = when (action) {
+    AtaAction.CHARGE_LIMIT -> stringResource(R.string.value_percent, range?.first ?: 0, range?.last ?: 0)
+    AtaAction.CHARGING_AMPS -> stringResource(R.string.value_amps, range?.first ?: 0, range?.last ?: 0)
+    AtaAction.SET_TEMPERATURE -> stringResource(R.string.value_celsius, range?.first ?: 0, range?.last ?: 0)
+    else -> stringResource(R.string.address_or_place)
+  }
   AlertDialog(
     onDismissRequest = onDismiss,
     title = { Text(stringResource(ActionInfo.labelRes(action))) },
@@ -65,13 +76,15 @@ fun ValueInputDialog(
       OutlinedTextField(
         value = value,
         onValueChange = { value = it },
-        label = { Text(stringResource(R.string.address_or_place)) },
+        label = { Text(label) },
+        isError = value.isNotEmpty() && !valid,
+        keyboardOptions = if (range != null) KeyboardOptions(keyboardType = KeyboardType.Decimal) else KeyboardOptions.Default,
         modifier = Modifier.fillMaxWidth(),
         singleLine = true,
       )
     },
     confirmButton = {
-      TextButton(onClick = { if (value.isNotBlank()) onConfirm(value) }) {
+      TextButton(enabled = valid, onClick = { onConfirm(value.trim()) }) {
         Text(stringResource(R.string.ok))
       }
     },

@@ -16,37 +16,71 @@ import org.tfv.ata.core.AtaAction
 import org.tfv.ata.core.IntentContract
 import org.tfv.ata.data.AtaStore
 
+/**
+ * Launcher shortcuts. They carry ATA's token, which is what makes Samsung Routines (which starts these
+ * shortcuts) a trusted trigger. After the token is renewed, [refresh] re-issues dynamic and pinned shortcuts.
+ */
 object ShortcutSync {
+  private const val PIN_PREFIX = "pin_"
+
   fun refresh(context: Context) {
-    val store = AtaStore.get(context)
+    val app = context.applicationContext
+    val store = AtaStore.get(app)
     CoroutineScope(Dispatchers.Default).launch {
       val settings = store.settings.first()
       val token = store.triggerToken()
-      val actions = settings.launcherMenuActionIds.mapNotNull { AtaAction.fromId(it) }.take(4)
-      val shortcuts = actions.map { build(context, "dyn_${it.id}", it, token) }
-      runCatching { ShortcutManagerCompat.setDynamicShortcuts(context, shortcuts) }
+      val dynamic = settings.launcherMenuActionIds
+        .filter { AtaAction.fromId(it) != null }
+        .take(4)
+        .map { build(app, "dyn_$it", it, null, token) }
+      runCatching { ShortcutManagerCompat.setDynamicShortcuts(app, dynamic) }
+      runCatching {
+        val pinned = ShortcutManagerCompat.getShortcuts(app, ShortcutManagerCompat.FLAG_MATCH_PINNED)
+          .filter { it.id.startsWith(PIN_PREFIX) }
+          .mapNotNull { info ->
+            val intent = info.intent
+            val actionId = intent.getStringExtra(IntentContract.EXTRA_ACTION_ID) ?: return@mapNotNull null
+            build(app, info.id, actionId, intent.getStringExtra(IntentContract.EXTRA_VALUE), token)
+          }
+        if (pinned.isNotEmpty()) ShortcutManagerCompat.updateShortcuts(app, pinned)
+      }
     }
   }
 
-  fun pinToHome(context: Context, action: AtaAction) {
+  fun pinToHome(context: Context, action: AtaAction, value: String? = null) = pinToHome(context, action.id, value)
+
+  fun pinToHome(context: Context, actionId: String, value: String? = null) {
     if (!ShortcutManagerCompat.isRequestPinShortcutSupported(context)) return
     val store = AtaStore.get(context)
     CoroutineScope(Dispatchers.Default).launch {
-      val token = store.triggerToken()
-      val info = build(context, "pin_${action.id}_${System.currentTimeMillis()}", action, token)
+      val info = build(context, "$PIN_PREFIX${actionId}_${System.currentTimeMillis()}", actionId, value, store.triggerToken())
       runCatching { ShortcutManagerCompat.requestPinShortcut(context, info, null) }
     }
   }
 
-  private fun build(context: Context, id: String, action: AtaAction, token: String): ShortcutInfoCompat {
-    val label = context.getString(ActionInfo.labelRes(action))
+  /** A shortcut for the CREATE_SHORTCUT flow (Tasker, launchers, possibly Samsung Routines). */
+  suspend fun forCreateShortcut(context: Context, actionId: String, value: String?): ShortcutInfoCompat =
+    build(context, "$PIN_PREFIX${actionId}_${System.currentTimeMillis()}", actionId, value, AtaStore.get(context).triggerToken())
+
+  fun label(context: Context, actionId: String, value: String?): String {
+    val base = when (actionId) {
+      IntentContract.ACTION_ID_SET_ACTIVE -> context.getString(R.string.shortcut_set_active)
+      IntentContract.ACTION_ID_SET_PASSIVE -> context.getString(R.string.shortcut_set_passive)
+      else -> AtaAction.fromId(actionId)?.let { context.getString(ActionInfo.labelRes(it)) } ?: actionId
+    }
+    return if (value.isNullOrBlank()) base else "$base: $value"
+  }
+
+  private fun build(context: Context, id: String, actionId: String, value: String?, token: String): ShortcutInfoCompat {
+    val label = label(context, actionId, value)
     val intent = Intent(context, RunActionActivity::class.java).apply {
-      this.action = IntentContract.ACTION_RUN
-      putExtra(IntentContract.EXTRA_ACTION_ID, action.id)
+      action = IntentContract.ACTION_RUN
+      putExtra(IntentContract.EXTRA_ACTION_ID, actionId)
+      if (!value.isNullOrBlank()) putExtra(IntentContract.EXTRA_VALUE, value)
       putExtra(IntentContract.EXTRA_TOKEN, token)
     }
     return ShortcutInfoCompat.Builder(context, id)
-      .setShortLabel(label)
+      .setShortLabel(label.take(24))
       .setLongLabel(label)
       .setIcon(IconCompat.createWithResource(context, R.mipmap.ic_launcher))
       .setIntent(intent)

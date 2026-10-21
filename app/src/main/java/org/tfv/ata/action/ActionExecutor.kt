@@ -4,39 +4,51 @@ import android.content.Context
 import android.content.Intent
 import android.widget.Toast
 import org.tfv.ata.R
+import org.tfv.ata.automation.Notifier
 import org.tfv.ata.core.AtaAction
+import org.tfv.ata.core.AtaCategory
 import org.tfv.ata.core.AtaSettings
 import org.tfv.ata.core.CommandResult
 import org.tfv.ata.core.DeepLinks
-import org.tfv.ata.core.NavigationApp
+import org.tfv.ata.core.FailureCode
 import org.tfv.ata.core.Vehicle
 
+/** Runs Basic ("Function B") actions: opens the Tesla app, navigation or the share sheet. */
 object ActionExecutor {
 
+  /**
+   * @param foreground true when called from a visible activity. Android blocks background apps from
+   *   opening other apps, so in the background the action is offered as a tappable notification instead.
+   */
   fun run(
     context: Context,
     action: AtaAction,
     vehicle: Vehicle?,
     settings: AtaSettings,
     value: String? = null,
+    foreground: Boolean = true,
   ): CommandResult {
-    if (action.category == org.tfv.ata.core.AtaCategory.FUNCTION_A) {
-      Toast.makeText(context, R.string.in_development, Toast.LENGTH_SHORT).show()
-      return CommandResult.NotImplemented
-    }
+    if (action.category == AtaCategory.FUNCTION_A) return CommandResult.NotImplemented
     val intent = buildIntent(context, action, vehicle, settings, value)
     if (intent == null) {
-      Toast.makeText(context, R.string.address_missing, Toast.LENGTH_SHORT).show()
-      return CommandResult.Failure("no intent")
+      val result = CommandResult.Failure("address missing", FailureCode.INVALID_VALUE)
+      if (foreground) toast(context, R.string.address_missing) else Notifier.result(context, action, result)
+      return result
+    }
+    if (!foreground) {
+      Notifier.openPrompt(context, action, intent)
+      return CommandResult.Success
     }
     return try {
-      context.startActivity(intent)
+      context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
       CommandResult.Success
     } catch (e: Exception) {
-      Toast.makeText(context, R.string.error_no_app, Toast.LENGTH_SHORT).show()
+      toast(context, R.string.error_no_app)
       CommandResult.Failure(e.message ?: "error")
     }
   }
+
+  private fun toast(context: Context, res: Int) = Toast.makeText(context, res, Toast.LENGTH_SHORT).show()
 
   private fun buildIntent(
     context: Context,

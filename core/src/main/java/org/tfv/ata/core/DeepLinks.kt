@@ -14,7 +14,7 @@ object DeepLinks {
   fun launchTeslaApp(context: Context): Intent? =
     context.packageManager.getLaunchIntentForPackage(TESLA_PACKAGE)
       ?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-      ?: webFallback("https://www.tesla.com/_rs/1/mobile-app")
+      ?: storeFallback(context)
 
   fun teslaSection(context: Context, vararg paths: String): Intent {
     for (path in paths) {
@@ -24,24 +24,21 @@ object DeepLinks {
       }
       if (intent.resolveActivity(context.packageManager) != null) return intent
     }
-    return launchTeslaApp(context) ?: webFallback("https://www.tesla.com")
+    return launchTeslaApp(context) ?: storeFallback(context)
   }
 
   fun navigate(context: Context, app: NavigationApp, query: String): Intent {
     val encoded = Uri.encode(query)
-    return when (app) {
+    val preferred = when (app) {
       NavigationApp.GOOGLE_MAPS ->
-        Intent(Intent.ACTION_VIEW, Uri.parse("google.navigation:q=$encoded")).apply {
-          setPackage(GOOGLE_MAPS_PACKAGE)
-          addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        }
+        Intent(Intent.ACTION_VIEW, Uri.parse("google.navigation:q=$encoded")).setPackage(GOOGLE_MAPS_PACKAGE)
       NavigationApp.WAZE ->
-        Intent(Intent.ACTION_VIEW, Uri.parse("https://waze.com/ul?q=$encoded&navigate=yes")).apply {
-          setPackage(WAZE_PACKAGE)
-          addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        }
-      NavigationApp.TESLA -> teslaShare(context, query)
-    }
+        Intent(Intent.ACTION_VIEW, Uri.parse("https://waze.com/ul?q=$encoded&navigate=yes")).setPackage(WAZE_PACKAGE)
+      NavigationApp.TESLA -> return teslaShare(context, query)
+    }.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    if (preferred.resolveActivity(context.packageManager) != null) return preferred
+    // Chosen navigation app not installed: let any maps app handle it.
+    return Intent(Intent.ACTION_VIEW, Uri.parse("geo:0,0?q=$encoded")).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
   }
 
   /** Share the destination to the Tesla app (send-to-car), like the Android share sheet. */
@@ -70,6 +67,13 @@ object DeepLinks {
       },
       null,
     ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+  /** Tesla app not installed: open its Play Store page (or the web page without a store). */
+  private fun storeFallback(context: Context): Intent {
+    val market = Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$TESLA_PACKAGE")).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    return if (market.resolveActivity(context.packageManager) != null) market
+    else webFallback("https://play.google.com/store/apps/details?id=$TESLA_PACKAGE")
+  }
 
   private fun webFallback(url: String) =
     Intent(Intent.ACTION_VIEW, Uri.parse(url)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

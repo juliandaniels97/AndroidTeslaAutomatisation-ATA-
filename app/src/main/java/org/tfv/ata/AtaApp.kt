@@ -6,6 +6,7 @@ import org.tfv.ata.shortcut.ShortcutSync
 class AtaApp : Application() {
   override fun onCreate() {
     super.onCreate()
+    org.tfv.ata.automation.Notifier.ensureChannels(this)
     ShortcutSync.refresh(this)
   }
 }

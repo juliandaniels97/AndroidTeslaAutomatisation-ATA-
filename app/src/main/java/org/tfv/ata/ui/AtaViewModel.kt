@@ -88,9 +88,9 @@ class AtaViewModel(app: Application) : AndroidViewModel(app) {
   }
 
   private fun effectiveWearActions(s: AtaSettings): List<AtaAction> {
-    val resolved = s.wearActionIds.mapNotNull { AtaAction.fromId(it) }.filter { it.enabled }
+    val resolved = s.wearActionIds.mapNotNull { AtaAction.fromId(it) }.filter { it.enabled && !it.needsValue }
     return resolved.ifEmpty {
-      AtaAction.entries.filter { it.category == AtaCategory.FUNCTION_B && it.enabled && !it.beta }
+      AtaAction.entries.filter { it.category == AtaCategory.FUNCTION_B && it.enabled && !it.beta && !it.needsValue }
     }
   }
 
@@ -121,10 +121,34 @@ class AtaViewModel(app: Application) : AndroidViewModel(app) {
     if (_refreshing.value) return@launch
     _refreshing.value = true
     val snap = runCatching {
-      kotlinx.coroutines.withContext(Dispatchers.IO) { StatusPoller.pollNow(getApplication()) }
+      kotlinx.coroutines.withContext(Dispatchers.IO) { StatusPoller.pollNow(getApplication(), wake = true) }
     }.getOrNull()
     if (snap != null) runCatching { StatusWidget().updateAll(getApplication()) }
     _refreshing.value = false
+  }
+
+  /** Renews the automation token and re-issues shortcuts / widgets so ATA's own triggers keep working. */
+  fun rotateTriggerToken(onDone: () -> Unit = {}) = viewModelScope.launch {
+    store.rotateTriggerToken()
+    ShortcutSync.refresh(getApplication())
+    runCatching { ActionsWidget().updateAll(getApplication()) }
+    onDone()
+  }
+
+  /** Invalidates every NFC tag written so far. */
+  fun rotateNfcToken() = viewModelScope.launch { store.rotateNfcToken() }
+
+  private val _pairing = MutableStateFlow(false)
+  val pairing = _pairing.asStateFlow()
+
+  fun pairKey(vin: String, onResult: (org.tfv.ata.core.ble.PairResult) -> Unit) = viewModelScope.launch {
+    if (_pairing.value) return@launch
+    _pairing.value = true
+    val result = kotlinx.coroutines.withContext(Dispatchers.IO) {
+      org.tfv.ata.core.ble.TeslaController.pairKey(getApplication(), vin)
+    }
+    _pairing.value = false
+    onResult(result)
   }
 
   fun saveVehicle(vehicle: Vehicle) = viewModelScope.launch {
@@ -158,8 +182,8 @@ class AtaViewModel(app: Application) : AndroidViewModel(app) {
 
   fun setWearActions(actions: List<AtaAction>) {
     updateSettings { it.copy(wearActionIds = actions.map { a -> a.id }) }
-    pushWearConfig(actions.ifEmpty {
-      AtaAction.entries.filter { it.category == AtaCategory.FUNCTION_B && it.enabled && !it.beta }
+    pushWearConfig(actions.filter { !it.needsValue }.ifEmpty {
+      AtaAction.entries.filter { it.category == AtaCategory.FUNCTION_B && it.enabled && !it.beta && !it.needsValue }
     })
   }
 

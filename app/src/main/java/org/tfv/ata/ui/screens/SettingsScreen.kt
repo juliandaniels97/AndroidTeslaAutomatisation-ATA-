@@ -56,6 +56,7 @@ fun SettingsScreen(
   onVehicles: () -> Unit,
   onMenu: () -> Unit,
   onWear: () -> Unit,
+  onAutomation: () -> Unit,
   onAbout: () -> Unit,
 ) {
   val s = state.settings
@@ -76,6 +77,7 @@ fun SettingsScreen(
       LinkRow(stringResource(R.string.settings_vehicles), onVehicles)
       LinkRow(stringResource(R.string.settings_menu), onMenu)
       LinkRow(stringResource(R.string.settings_wear), onWear)
+      LinkRow(stringResource(R.string.settings_automation), onAutomation)
       LinkRow(stringResource(R.string.settings_nfc)) {
         context.startActivity(Intent(context, NfcWriteActivity::class.java))
       }
@@ -189,11 +191,6 @@ fun SettingsScreen(
       }
       SwitchRow(stringResource(R.string.nfc_keycard), stringResource(R.string.nfc_keycard_desc), s.nfcKeyCard) {
         vm.updateSettings { it.copy(nfcKeyCard = it.nfcKeyCard.not()) }
-      }
-      if (s.nfcKeyCard) {
-        SwitchRow(stringResource(R.string.nfc_keycard_unlock), stringResource(R.string.nfc_keycard_unlock_desc), s.nfcKeyCardRequireUnlock) {
-          vm.updateSettings { it.copy(nfcKeyCardRequireUnlock = it.nfcKeyCardRequireUnlock.not()) }
-        }
       }
 
       HorizontalDivider()

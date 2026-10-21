@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import org.tfv.ata.core.AtaSettings
+import org.tfv.ata.core.TriggerSource
 import org.tfv.ata.core.Vehicle
 import org.tfv.ata.core.VehicleSnapshot
 
@@ -25,6 +26,7 @@ class AtaStore(private val context: Context) {
   private val keySelected = stringPreferencesKey("selected_vehicle")
   private val keySnapshotPrefix = "snapshot_"
   private val keyToken = stringPreferencesKey("trigger_token")
+  private val keyNfcToken = stringPreferencesKey("nfc_token")
 
   val settings: Flow<AtaSettings> = context.dataStore.data.map { prefs ->
     prefs[keySettings]?.let { runCatching { json.decodeFromString<AtaSettings>(it) }.getOrNull() }
@@ -67,12 +69,42 @@ class AtaStore(private val context: Context) {
       }
     }
 
-  suspend fun triggerToken(): String {
-    val existing = context.dataStore.data.map { it[keyToken] }.first()
+  /** Per-install secret carried by ATA's own shortcuts, widgets and (copied by the user) Tasker tasks. */
+  suspend fun triggerToken(): String = tokenFor(keyToken)
+
+  /** Separate secret for NFC tags (anyone holding a tag can read it), so tags can be revoked on their own. */
+  suspend fun nfcToken(): String = tokenFor(keyNfcToken)
+
+  suspend fun rotateTriggerToken(): String = newToken().also { t -> context.dataStore.edit { it[keyToken] = t } }
+
+  suspend fun rotateNfcToken(): String = newToken().also { t -> context.dataStore.edit { it[keyNfcToken] = t } }
+
+  /**
+   * Decides the trust level of an incoming request. [extraToken] comes from intent extras (shortcuts, widgets,
+   * Tasker), [uriToken] from an `ata://run?token=…` URI (NFC tags). Never trust a source named by the caller.
+   */
+  suspend fun resolveSource(extraToken: String?, uriToken: String?): TriggerSource {
+    val install = triggerToken()
+    if (matches(extraToken, install)) return TriggerSource.TRUSTED
+    if (matches(uriToken, nfcToken()) || matches(uriToken, install)) return TriggerSource.NFC
+    return TriggerSource.EXTERNAL
+  }
+
+  private fun matches(candidate: String?, secret: String): Boolean =
+    !candidate.isNullOrBlank() &&
+      java.security.MessageDigest.isEqual(candidate.toByteArray(Charsets.UTF_8), secret.toByteArray(Charsets.UTF_8))
+
+  private suspend fun tokenFor(key: androidx.datastore.preferences.core.Preferences.Key<String>): String {
+    val existing = context.dataStore.data.map { it[key] }.first()
     if (!existing.isNullOrBlank()) return existing
-    val token = java.util.UUID.randomUUID().toString().replace("-", "")
-    context.dataStore.edit { it[keyToken] = token }
+    val token = newToken()
+    context.dataStore.edit { it[key] = token }
     return token
+  }
+
+  private fun newToken(): String {
+    val bytes = ByteArray(24).also { java.security.SecureRandom().nextBytes(it) }
+    return bytes.joinToString("") { "%02x".format(it) }
   }
 
   suspend fun saveSnapshot(vehicleId: String, snapshot: VehicleSnapshot) {

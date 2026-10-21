@@ -44,7 +44,8 @@ class NfcWriteActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     adapter = NfcAdapter.getDefaultAdapter(this)
-    lifecycleScope.launch { token = AtaStore.get(this@NfcWriteActivity).triggerToken() }
+    // Tags get their own token (Settings → Automation can revoke all tags without touching shortcuts).
+    lifecycleScope.launch { token = AtaStore.get(this@NfcWriteActivity).nfcToken() }
 
     setContent {
       AtaTheme(themeMode = org.tfv.ata.core.ThemeMode.DARK, dynamicColor = false) {
@@ -99,6 +100,10 @@ class NfcWriteActivity : ComponentActivity() {
 
   private fun onTag(tag: Tag) {
     val actionId = armedActionId ?: return
+    if (token.isBlank()) {
+      onResult?.invoke(false)
+      return
+    }
     val uri = "ata://run?action=$actionId&token=$token"
     val message = NdefMessage(arrayOf(NdefRecord.createUri(uri)))
     val ok = writeTag(tag, message)

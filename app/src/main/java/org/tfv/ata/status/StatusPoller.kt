@@ -23,7 +23,11 @@ object StatusPoller {
       ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
     }
 
-  suspend fun pollNow(context: Context): VehicleSnapshot? {
+  /**
+   * Reads the car status over BLE. Background polls ([wake] = false) never wake the car: if it sleeps only the
+   * lock state is refreshed and battery/range are kept from the previous reading.
+   */
+  suspend fun pollNow(context: Context, wake: Boolean = false): VehicleSnapshot? {
     val store = AtaStore.get(context)
     val settings = store.settings.first()
     if (!settings.experimentalBle || !settings.active) return null
@@ -31,9 +35,16 @@ object StatusPoller {
     val vehicles = store.vehicles.first()
     val selectedId = store.selectedVehicleId.first()
     val vehicle = vehicles.firstOrNull { it.id == selectedId } ?: vehicles.firstOrNull() ?: return null
-    val snapshot = runCatching { TeslaController.readStatus(context, vehicle.vin) }.getOrNull() ?: return null
+    val fresh = runCatching { TeslaController.readStatus(context, vehicle.vin, wake) }.getOrNull() ?: return null
+    val snapshot = if (fresh.asleep) {
+      store.snapshot(vehicle.id).first()
+        ?.copy(locked = fresh.locked, asleep = true, updatedAt = fresh.updatedAt)
+        ?: fresh
+    } else {
+      fresh
+    }
     store.saveSnapshot(vehicle.id, snapshot)
-    broadcastStatus(context, vehicle.id, snapshot)
+    if (settings.statusBroadcast) broadcastStatus(context, vehicle.id, snapshot)
     org.tfv.ata.wear.WearPush.pushStatus(context, snapshot, vehicle.name)
     return snapshot
   }
@@ -44,7 +55,7 @@ object StatusPoller {
       putExtra(org.tfv.ata.core.IntentContract.EXTRA_BATTERY, snapshot.batteryPercent)
       putExtra(org.tfv.ata.core.IntentContract.EXTRA_RANGE_KM, snapshot.rangeKm)
       putExtra(org.tfv.ata.core.IntentContract.EXTRA_CHARGING, snapshot.charging)
-      putExtra(org.tfv.ata.core.IntentContract.EXTRA_LOCKED, snapshot.locked)
+      snapshot.locked?.let { putExtra(org.tfv.ata.core.IntentContract.EXTRA_LOCKED, it) }
       putExtra(org.tfv.ata.core.IntentContract.EXTRA_CLIMATE_ON, snapshot.climateOn)
       putExtra(org.tfv.ata.core.IntentContract.EXTRA_INSIDE_C, snapshot.insideTempC)
       putExtra(org.tfv.ata.core.IntentContract.EXTRA_OUTSIDE_C, snapshot.outsideTempC)

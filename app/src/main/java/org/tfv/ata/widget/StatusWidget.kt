@@ -61,7 +61,7 @@ class StatusWidget : GlanceAppWidget() {
           }
         }
         Text(
-          text = snapshot?.let { "${it.rangeKm} km  ·  ${if (it.locked) "🔒" else "🔓"}" } ?: "--",
+          text = snapshot?.let { "${it.rangeKm} km  ·  ${when (it.locked) { true -> "🔒"; false -> "🔓"; null -> "?" }}" } ?: "--",
           style = TextStyle(color = ColorProvider(Color(0xFFABB6C4)), fontSize = 12.sp),
         )
       }

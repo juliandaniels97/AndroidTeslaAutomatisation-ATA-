@@ -22,6 +22,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import org.tfv.ata.R
 import org.tfv.ata.ui.screens.AboutScreen
+import org.tfv.ata.ui.screens.AutomationScreen
 import org.tfv.ata.ui.screens.HomeScreen
 import org.tfv.ata.ui.screens.MenuConfigScreen
 import org.tfv.ata.ui.screens.SettingsScreen
@@ -86,12 +87,14 @@ fun AtaNavHost(vm: AtaViewModel, state: AtaUiState) {
           onVehicles = { nav.navigate("vehicles") },
           onMenu = { nav.navigate("menu") },
           onWear = { nav.navigate("wear") },
+          onAutomation = { nav.navigate("automation") },
           onAbout = { nav.navigate("about") },
         )
       }
       composable("vehicles") { VehiclesScreen(vm, state, onBack = { nav.popBackStack() }) }
       composable("menu") { MenuConfigScreen(vm, state, onBack = { nav.popBackStack() }) }
       composable("wear") { WearConfigScreen(vm, state, onBack = { nav.popBackStack() }) }
+      composable("automation") { AutomationScreen(vm, state, onBack = { nav.popBackStack() }) }
       composable("about") { AboutScreen(onBack = { nav.popBackStack() }) }
     }
   }

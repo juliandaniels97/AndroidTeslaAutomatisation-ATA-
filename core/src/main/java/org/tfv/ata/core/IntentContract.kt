@@ -8,6 +8,10 @@ object IntentContract {
   const val EXTRA_DELAY_MS = "delay_ms"
   const val EXTRA_TOKEN = "token"
 
+  /** Pseudo action ids for shortcuts that switch ATA active / passive (Samsung Routines can't send broadcasts). */
+  const val ACTION_ID_SET_ACTIVE = "set_active"
+  const val ACTION_ID_SET_PASSIVE = "set_passive"
+
   const val ACTION_SET_ACTIVE = "org.tfv.ata.action.SET_ACTIVE"
   const val EXTRA_ACTIVE = "active"
 

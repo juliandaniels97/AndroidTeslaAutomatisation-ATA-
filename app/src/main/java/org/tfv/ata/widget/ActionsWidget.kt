@@ -41,7 +41,7 @@ class ActionsWidget : GlanceAppWidget() {
     val store = AtaStore.get(context)
     val settings = store.settings.first()
     val token = store.triggerToken()
-    val actions = settings.widgetActionIds.mapNotNull { AtaAction.fromId(it) }.filter { it.enabled }.take(8)
+    val actions = settings.widgetActionIds.mapNotNull { AtaAction.fromId(it) }.filter { it.enabled && !it.needsValue }.take(8)
     provideContent {
       Column(GlanceModifier.fillMaxSize().background(Color(0xFF0B0D11)).padding(8.dp)) {
         Text(

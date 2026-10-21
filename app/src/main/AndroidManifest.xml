@@ -24,6 +24,10 @@
             <action android:name="android.intent.action.VIEW" />
             <data android:scheme="geo" />
         </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="market" />
+        </intent>
     </queries>
 
     <application
@@ -50,11 +54,13 @@
             android:exported="false"
             android:foregroundServiceType="connectedDevice" />
 
+        <!-- Entry point for ATA shortcuts (Samsung Routines), widgets, NFC tags and other apps.
+             The trust level comes from ATA's token only; there is deliberately no BROWSABLE filter,
+             so web links can't trigger commands. -->
         <activity
             android:name=".automation.RunActionActivity"
             android:exported="true"
             android:excludeFromRecents="true"
-            android:launchMode="singleInstance"
             android:taskAffinity=""
             android:theme="@style/Theme.ATA.Transparent">
             <intent-filter>
@@ -66,11 +72,23 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:scheme="ata" android:host="run" />
             </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".automation.ConfirmActionActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:taskAffinity=""
+            android:theme="@style/Theme.ATA.Transparent" />
+
+        <activity
+            android:name=".shortcut.CreateShortcutActivity"
+            android:exported="true"
+            android:label="@string/create_shortcut_title"
+            android:theme="@style/Theme.ATA.Starting">
             <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.CREATE_SHORTCUT" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="ata" android:host="run" />
             </intent-filter>
         </activity>
 
