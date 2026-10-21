@@ -8,6 +8,18 @@ permissions:
 jobs:
   smoke:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: phone
+            module: app
+            api: 36
+            target: google_apis
+          - name: wear
+            module: wear
+            api: 34
+            target: android-wear
     env:
       ATA_KEYSTORE_BASE64: ${{ secrets.ATA_KEYSTORE_BASE64 }}
     steps:
@@ -34,24 +46,25 @@ jobs:
             echo "ATA_KEY_PASSWORD=${ATA_KEY_PASSWORD}"
           } >> "$GITHUB_ENV"
       - name: Build release APK (all ABIs)
-        run: ./gradlew --no-daemon :app:assembleRelease -PataAllAbis
+        run: ./gradlew --no-daemon :${{ matrix.module }}:assembleRelease -PataAllAbis
       - name: Enable KVM
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
-      - name: Launch on Android 16 emulator
+      - name: Launch on emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 36
-          target: google_apis
+          api-level: ${{ matrix.api }}
+          target: ${{ matrix.target }}
           arch: x86_64
           disable-animations: true
-          script: bash .github/smoke.sh
+          script: |
+            if [ "${{ matrix.name }}" = phone ]; then bash .github/smoke.sh "$(ls app/build/outputs/apk/release/*.apk | head -1)" phone "-n org.tfv.ata/.ui.MainActivity" "-n org.tfv.ata/.shortcut.CreateShortcutActivity" "-a org.tfv.ata.action.RUN -n org.tfv.ata/.automation.RunActionActivity --es action_id open_tesla_app" "-a org.tfv.ata.action.RUN -n org.tfv.ata/.automation.RunActionActivity --es action_id climate_on"; else bash .github/smoke.sh "$(ls wear/build/outputs/apk/release/*.apk | head -1)" wear "-n org.tfv.ata/.wear.WearMainActivity"; fi
       - name: Post result
         if: always()
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          { echo '### Smoke test'; echo '```'; cat smoke.txt 2>/dev/null | head -c 60000; echo '```'; } > out.md
+          { echo '### Smoke test ${{ matrix.name }}'; echo '```'; cat smoke-${{ matrix.name }}.txt 2>/dev/null | head -c 30000; echo '```'; } > out.md
           gh api "repos/${GITHUB_REPOSITORY}/commits/${GITHUB_SHA}/comments" -F body=@out.md >/dev/null
