@@ -5,8 +5,6 @@ on:
   push:
     branches:
       - '**'
-    tags:
-      - 'v*'
 
 permissions:
   contents: write
@@ -172,7 +170,7 @@ jobs:
 
   publish:
     needs: [build, smoke]
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -184,22 +182,11 @@ jobs:
           name: apks
           path: dist
 
-      - name: Move rolling tag to this commit
-        if: github.ref == 'refs/heads/main'
-        run: |
-          git tag -f "apk-${GITHUB_REF_NAME}"
-          git push -f origin "refs/tags/apk-${GITHUB_REF_NAME}"
-
-      - name: Publish APKs as pre-release
-        if: github.ref == 'refs/heads/main'
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: apk-${{ github.ref_name }}
-          name: APK build (${{ github.ref_name }})
-          prerelease: true
-          files: dist/*.apk
+      # Earlier versions also published a rolling "APK build (main)" pre-release; only versioned releases remain.
+      - name: Remove the old rolling pre-release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release delete apk-main --repo "${GITHUB_REPOSITORY}" --cleanup-tag --yes || true
 
       # A new versionName on main (no tag v<version> yet) publishes the release and creates the tag.
       - name: Detect new version
@@ -224,18 +211,6 @@ jobs:
           body_path: RELEASE_NOTES.md
           prerelease: false
           make_latest: true
-          files: dist/*.apk
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Publish tagged release
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ github.ref_name }}
-          name: ATA ${{ github.ref_name }}
-          body_path: RELEASE_NOTES.md
-          prerelease: false
           files: dist/*.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
