@@ -9,8 +9,7 @@ tap — or an automation — triggers exactly the action you want.
 >
 > **Commercial use requires prior written permission** from the author — see [Legal](#legal).
 
-<img width="410" alt="Neon-ATA-Logo mit Flügelblitz" src="https://github.com/user-attachments/assets/bb4cdebf-f178-4cd7-a835-c01ea2eead8a" />
-<img width="200" alt="ATA vehicle view: neon car in the battery ring with the action tiles" src="docs/screenshots/ata-vehicle.png" />
+<img width="100" alt="Neon-ATA-Logo mit Flügelblitz" src="https://github.com/user-attachments/assets/bb4cdebf-f178-4cd7-a835-c01ea2eead8a" />
 
 
 ## Support the project
@@ -32,6 +31,28 @@ All releases are listed under [Releases](https://github.com/juliandaniels97/Andr
 All release builds are signed with the same release key, so new versions install as an update over
 the old one. (Very early builds were signed with a public debug key; if ATA does not update over such a build,
 uninstall it once and pair the phone with the car again.)
+
+## Screenshots
+
+**Neon — dark mode**
+
+<img width="1832" alt="ATA neon design in dark mode: home, vehicle in 3D, full-screen car, settings, watch settings" src="docs/screenshots/ata-dark.png" />
+
+**Neon — light mode**
+
+<img width="1832" alt="ATA neon design in light mode: home, vehicle, full-screen car, settings, watch settings" src="docs/screenshots/ata-light.png" />
+
+**Material — dark mode**
+
+<img width="1832" alt="ATA Material design in dark mode: home, painted car, full-screen car with animation, vehicle colours, settings" src="docs/screenshots/ata-material-dark.png" />
+
+**Material — light mode**
+
+<img width="1832" alt="ATA Material design in light mode: home, painted car, full-screen car with animation, vehicle colours, settings" src="docs/screenshots/ata-material-light.png" />
+
+**Wear OS**
+
+<img width="1832" alt="ATA on Wear OS: tile grid on round and square watches, action list" src="docs/screenshots/ata-wear.png" />
 
 ## Requirements
 
@@ -367,29 +388,6 @@ keytool -genkey -v -keystore release-keystore.jks -keyalg RSA -keysize 2048 \
 
 Keep the `.jks` file and its passwords safe and **out of git** — losing them means you can't ship
 signed updates that install over an existing install.
-
-## Screenshots
-
-**Neon — dark mode**
-
-<img width="1832" alt="ATA neon design in dark mode: home, vehicle in 3D, full-screen car, settings, watch settings" src="docs/screenshots/ata-dark.png" />
-
-**Neon — light mode**
-
-<img width="1832" alt="ATA neon design in light mode: home, vehicle, full-screen car, settings, watch settings" src="docs/screenshots/ata-light.png" />
-
-**Material — dark mode**
-
-<img width="1832" alt="ATA Material design in dark mode: home, painted car, full-screen car with animation, vehicle colours, settings" src="docs/screenshots/ata-material-dark.png" />
-
-**Material — light mode**
-
-<img width="1832" alt="ATA Material design in light mode: home, painted car, full-screen car with animation, vehicle colours, settings" src="docs/screenshots/ata-material-light.png" />
-
-**Wear OS**
-
-<img width="1832" alt="ATA on Wear OS: tile grid on round and square watches, action list" src="docs/screenshots/ata-wear.png" />
-
 
 
 ## Legal
