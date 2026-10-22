@@ -42,7 +42,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.tfv.ata.R
-import org.tfv.ata.core.BodyStyle
 import org.tfv.ata.core.AtaAction
 import org.tfv.ata.core.AtaCategory
 import org.tfv.ata.core.Vin
@@ -143,7 +142,7 @@ fun VehicleScreen(
             VehicleArt(
               snapshot,
               fx = carFx,
-              body = state.selected?.body ?: BodyStyle.MODEL_3,
+              vehicle = state.selected,
               threeD = state.settings.car3d,
               onOpen = if (experimental) onOpen3d else null,
             )

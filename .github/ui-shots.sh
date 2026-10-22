@@ -91,4 +91,20 @@ for THEME in Dark Light; do
   adb shell input swipe 300 1200 900 1200 600; sleep 2; shot "$t-22-car3d-turned"
   adb shell am start -S -W -n org.tfv.ata/.shortcut.CreateShortcutActivity >/dev/null; sleep 3; shot "$t-9-create-shortcut"
 done
+# Material design in dark and light (Model Y in its default paint).
+for THEME in Dark Light; do
+  t=$(echo $THEME | tr A-Z a-z)
+  restart; tap "Settings"; scroll; tap "Material"; tap "$THEME"
+  if [ "$t" = dark ]; then
+    restart; tap "Settings"; tap "Vehicles"; tap "Edit vehicle"; tap "Model Y"; shot "m-$t-4-editor"; tap "Save"
+  else
+    restart; tap "Settings"; tap "Vehicles"; tap "Edit vehicle"; shot "m-$t-4-editor"; tap "Cancel"
+  fi
+  restart; shot "m-$t-1-home"
+  tap "Vehicle"; sleep 2; shot "m-$t-2-vehicle"
+  restart; tap "Settings"; shot "m-$t-5-settings"; scroll; shot "m-$t-6-settings-2"
+  adb shell am start -S -W -n org.tfv.ata/.ui.MainActivity -a android.intent.action.VIEW -d ata://car3d >/dev/null; sleep 6; shot "m-$t-3-car3d"
+  tap "Show animations"; sleep 0.5
+  for n in 1 2 3 4 5 6 7; do sleep 3.2; shot "m-$t-demo-$n"; done
+done
 ls -la "$OUT"

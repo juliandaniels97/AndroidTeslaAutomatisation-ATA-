@@ -42,6 +42,7 @@ class MainActivity : FragmentActivity() {
       AtaTheme(
         themeMode = state.settings.theme,
         dynamicColor = state.settings.dynamicColor,
+        design = state.settings.design,
       ) {
         SystemBarsForTheme()
         // Survives rotation, so the start animation only plays once per launch.

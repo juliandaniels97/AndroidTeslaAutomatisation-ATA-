@@ -474,4 +474,12 @@
     <string name="widget_status_battery">Akku</string>
     <string name="widget_status_unknown">Noch nicht gelesen</string>
     <string name="widget_status_description">Akku, Reichweite, Innen- und Außentemperatur, Laden und Verriegelung, in jeder Größe.</string>
+    <string name="menu_count">%1$d von %2$d gewählt</string>
+    <string name="menu_count_plain">%1$d eingerichtet</string>
+    <string name="settings_design">Design</string>
+    <string name="settings_design_desc">Neon: leuchtende Linien (Standard). Material: ruhige Material-3-Flächen und ein lackiertes Auto, das dem echten nahekommt. Beides hell und dunkel.</string>
+    <string name="design_neon">Neon (Standard)</string>
+    <string name="design_material">Material</string>
+    <string name="vehicle_paint">Lackierung</string>
+    <string name="vehicle_neon_color">Neon-Farbe</string>
 </resources>

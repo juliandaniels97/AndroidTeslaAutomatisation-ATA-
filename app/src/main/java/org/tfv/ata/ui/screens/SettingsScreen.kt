@@ -56,6 +56,7 @@ import android.content.Intent
 import org.tfv.ata.R
 import org.tfv.ata.core.NavigationApp
 import org.tfv.ata.core.ThemeMode
+import org.tfv.ata.core.UiDesign
 import org.tfv.ata.geo.Geo
 import org.tfv.ata.nfc.NfcWriteActivity
 import org.tfv.ata.ui.AtaUiState
@@ -106,6 +107,17 @@ fun SettingsScreen(
 
       HorizontalDivider()
       SectionTitle(stringResource(R.string.section_appearance))
+      Text(stringResource(R.string.settings_design), style = MaterialTheme.typography.titleSmall)
+      Text(stringResource(R.string.settings_design_desc), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+      Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 4.dp, bottom = 8.dp)) {
+        UiDesign.entries.forEach { design ->
+          FilterChip(
+            selected = s.design == design,
+            onClick = { vm.updateSettings { it.copy(design = design) } },
+            label = { Text(stringResource(if (design == UiDesign.NEON) R.string.design_neon else R.string.design_material)) },
+          )
+        }
+      }
       Text(stringResource(R.string.settings_theme), style = MaterialTheme.typography.titleSmall)
       Column {
         ThemeMode.entries.forEach { mode ->

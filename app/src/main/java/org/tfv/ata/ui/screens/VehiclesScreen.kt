@@ -45,6 +45,14 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.unit.dp
 import org.tfv.ata.R
 import org.tfv.ata.core.BodyStyle
+import org.tfv.ata.core.CarPaint
+import org.tfv.ata.core.NeonColor
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.graphics.Color
 import org.tfv.ata.core.Vehicle
 import org.tfv.ata.core.Vin
 import org.tfv.ata.ui.AtaUiState
@@ -53,11 +61,9 @@ import org.tfv.ata.ui.components.car.CarCamera
 import org.tfv.ata.ui.components.car.CarFxState
 import org.tfv.ata.ui.components.car.CarModel
 import org.tfv.ata.ui.components.car.CarStatus
-import org.tfv.ata.ui.components.car.NeonStyle
 import org.tfv.ata.ui.components.car.drawNeonCar
 import org.tfv.ata.ui.components.car.drawFlatCar
-import org.tfv.ata.ui.components.car.FlatStyle
-import org.tfv.ata.ui.theme.AtaColors
+import org.tfv.ata.ui.components.car.rememberCarLook
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -110,14 +116,37 @@ fun VehiclesScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit) {
     VehicleFormDialog(
       existing = editing,
       threeD = state.settings.car3d,
-      onSave = { name, vin, home, work, body ->
+      onSave = { draft ->
         val e = editing
-        if (e == null) vm.addVehicle(name, vin, home, work, body)
-        else vm.saveVehicle(e.copy(name = name, vin = vin, navHome = home, navWork = work, bodyStyle = body))
+        if (e == null) vm.saveVehicle(draft.copy(id = java.util.UUID.randomUUID().toString()))
+        else vm.saveVehicle(
+          e.copy(
+            name = draft.name, vin = draft.vin, navHome = draft.navHome, navWork = draft.navWork,
+            bodyStyle = draft.bodyStyle, paint = draft.paint, neonColor = draft.neonColor,
+          ),
+        )
         showForm = false
       },
       onDismiss = { showForm = false },
     )
+  }
+}
+
+/** Round colour buttons; the chosen one gets a ring. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun Swatches(colors: List<Pair<String, Color>>, selected: String, onPick: (String) -> Unit) {
+  FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    colors.forEach { (id, color) ->
+      val chosen = id == selected
+      androidx.compose.foundation.layout.Box(
+        Modifier.size(34.dp)
+          .border(if (chosen) 3.dp else 1.dp, if (chosen) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant, CircleShape)
+          .padding(if (chosen) 5.dp else 2.dp)
+          .background(color, CircleShape)
+          .clickable { onPick(id) },
+      )
+    }
   }
 }
 
@@ -136,7 +165,7 @@ fun bodyLabel(style: BodyStyle): String = when (style) {
 private fun VehicleFormDialog(
   existing: Vehicle?,
   threeD: Boolean,
-  onSave: (name: String, vin: String, home: String, work: String, bodyStyle: String) -> Unit,
+  onSave: (Vehicle) -> Unit,
   onDismiss: () -> Unit,
 ) {
   var name by remember { mutableStateOf(existing?.name ?: "") }
@@ -144,9 +173,12 @@ private fun VehicleFormDialog(
   var home by remember { mutableStateOf(existing?.navHome ?: "") }
   var work by remember { mutableStateOf(existing?.navWork ?: "") }
   var body by remember { mutableStateOf(existing?.bodyStyle ?: "") }
+  var paint by remember { mutableStateOf(existing?.paint ?: "") }
+  var neon by remember { mutableStateOf(existing?.neonColor ?: "") }
   val vinValid = Vin.isValid(vin)
-  val shown = Vehicle("", name, vin, bodyStyle = body).body
-  val palette = AtaColors.current
+  val draft = Vehicle("", name, vin, bodyStyle = body, paint = paint, neonColor = neon)
+  val shown = draft.body
+  val look = rememberCarLook(draft, lineWidth = 2f)
 
   AlertDialog(
     onDismissRequest = onDismiss,
@@ -175,8 +207,8 @@ private fun VehicleFormDialog(
           // About three quarters of the width, whatever the dialog height.
           val zoom = 1.45f * size.width / minOf(size.width * 1.25f, size.height * 1.9f) * shape.fit
           val camera = CarCamera.side(size.width, size.height, zoom)
-          if (threeD) drawNeonCar(shape, camera, CarCamera.SIDE_YAW, CarFxState(), CarStatus(), 0L, NeonStyle(line = palette.accent, glow = false, lineWidth = 2f))
-          else drawFlatCar(shape, camera, CarFxState(), CarStatus(), 0L, FlatStyle(palette.carBody, palette.carGlass, palette.accent, palette.isDark))
+          if (threeD) drawNeonCar(shape, camera, CarCamera.SIDE_YAW, CarFxState(), CarStatus(), 0L, look.style.copy(glow = false))
+          else drawFlatCar(shape, camera, CarFxState(), CarStatus(), 0L, look.flat)
         }
         FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
           val auto = BodyStyle.fromVin(vin)
@@ -189,12 +221,20 @@ private fun VehicleFormDialog(
             FilterChip(selected = body == style.name, onClick = { body = style.name }, label = { Text(bodyLabel(style)) })
           }
         }
+        // Colour: Tesla paint for the Material design, line colour for the neon design.
+        if (look.material) {
+          Text(stringResource(R.string.vehicle_paint), style = MaterialTheme.typography.titleSmall)
+          Swatches(CarPaint.entries.map { it.name to Color(it.argb) }, draft.carPaint.name) { paint = it }
+        } else {
+          Text(stringResource(R.string.vehicle_neon_color), style = MaterialTheme.typography.titleSmall)
+          Swatches(NeonColor.entries.map { it.name to Color(it.argb) }, draft.carNeon.name) { neon = it }
+        }
       }
     },
     confirmButton = {
       TextButton(
         enabled = name.isNotBlank() && vinValid,
-        onClick = { onSave(name.trim(), vin, home.trim(), work.trim(), body) },
+        onClick = { onSave(draft.copy(name = name.trim(), navHome = home.trim(), navWork = work.trim())) },
       ) { Text(stringResource(R.string.save)) }
     },
     dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } },

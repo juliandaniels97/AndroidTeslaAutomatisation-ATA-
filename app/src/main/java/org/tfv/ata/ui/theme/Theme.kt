@@ -15,6 +15,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import org.tfv.ata.core.ThemeMode
+import org.tfv.ata.core.UiDesign
 
 // Logo-inspired palette: electric blue + neon red on deep dark.
 val NeonBlue = Color(0xFF4FB4FF)
@@ -77,10 +78,75 @@ private val DarkColors = darkColorScheme(
   outlineVariant = Color(0xFF2E3540),
 )
 
+// Material design: Material 3 tonal scheme around a calm blue.
+private val MaterialLightColors = lightColorScheme(
+  primary = Color(0xFF415F91),
+  onPrimary = Color.White,
+  primaryContainer = Color(0xFFD6E3FF),
+  onPrimaryContainer = Color(0xFF001B3E),
+  secondary = Color(0xFF565F71),
+  onSecondary = Color.White,
+  secondaryContainer = Color(0xFFDAE2F9),
+  onSecondaryContainer = Color(0xFF131C2B),
+  tertiary = Color(0xFF705575),
+  onTertiary = Color.White,
+  tertiaryContainer = Color(0xFFFAD8FD),
+  onTertiaryContainer = Color(0xFF28132E),
+  error = Color(0xFFBA1A1A),
+  errorContainer = Color(0xFFFFDAD6),
+  onErrorContainer = Color(0xFF410002),
+  background = Color(0xFFF9F9FF),
+  onBackground = Color(0xFF191C20),
+  surface = Color(0xFFF9F9FF),
+  onSurface = Color(0xFF191C20),
+  surfaceVariant = Color(0xFFE0E2EC),
+  onSurfaceVariant = Color(0xFF44474E),
+  surfaceContainerLowest = Color.White,
+  surfaceContainerLow = Color(0xFFF3F3FA),
+  surfaceContainer = Color(0xFFEDEDF4),
+  surfaceContainerHigh = Color(0xFFE7E8EE),
+  surfaceContainerHighest = Color(0xFFE2E2E9),
+  outline = Color(0xFF74777F),
+  outlineVariant = Color(0xFFC4C6D0),
+)
+
+private val MaterialDarkColors = darkColorScheme(
+  primary = Color(0xFFAAC7FF),
+  onPrimary = Color(0xFF0A305F),
+  primaryContainer = Color(0xFF284777),
+  onPrimaryContainer = Color(0xFFD6E3FF),
+  secondary = Color(0xFFBEC6DC),
+  onSecondary = Color(0xFF283141),
+  secondaryContainer = Color(0xFF3E4759),
+  onSecondaryContainer = Color(0xFFDAE2F9),
+  tertiary = Color(0xFFDDBCE0),
+  onTertiary = Color(0xFF3F2844),
+  tertiaryContainer = Color(0xFF573E5C),
+  onTertiaryContainer = Color(0xFFFAD8FD),
+  error = Color(0xFFFFB4AB),
+  errorContainer = Color(0xFF93000A),
+  onErrorContainer = Color(0xFFFFDAD6),
+  background = Color(0xFF111318),
+  onBackground = Color(0xFFE2E2E9),
+  surface = Color(0xFF111318),
+  onSurface = Color(0xFFE2E2E9),
+  surfaceVariant = Color(0xFF44474E),
+  onSurfaceVariant = Color(0xFFC4C6D0),
+  surfaceContainerLowest = Color(0xFF0C0E13),
+  surfaceContainerLow = Color(0xFF191C20),
+  surfaceContainer = Color(0xFF1D2024),
+  surfaceContainerHigh = Color(0xFF282A2F),
+  surfaceContainerHighest = Color(0xFF33353A),
+  outline = Color(0xFF8E9099),
+  outlineVariant = Color(0xFF44474E),
+)
+
 /** ATA-specific colours (action tiles, accents, badges) that follow the light / dark theme. */
 @Immutable
 data class AtaPalette(
   val isDark: Boolean,
+  /** Material design: flat tonal surfaces, no glow (see [UiDesign]). */
+  val material: Boolean = false,
   /** Normal actions: icon, glow and tile edge. */
   val accent: Color,
   /** Critical actions that open the car. */
@@ -135,6 +201,26 @@ private val LightPalette = AtaPalette(
   muted = Color(0xFF7A8592),
 )
 
+/** Material palette derived from the colour scheme (also follows Material You). */
+private fun materialPalette(colors: ColorScheme, dark: Boolean) = AtaPalette(
+  isDark = dark,
+  material = true,
+  accent = colors.primary,
+  critical = colors.error,
+  tileTop = colors.surfaceContainerHigh,
+  tileBottom = colors.surfaceContainerHigh,
+  tileEdge = Color.Transparent,
+  tileText = colors.onSurface,
+  badgeBackground = colors.surfaceContainerHighest,
+  badgeIcon = colors.onSurfaceVariant,
+  success = if (dark) Color(0xFF81C995) else Color(0xFF2E7D32),
+  warning = if (dark) Color(0xFFF2C14E) else Color(0xFF8C6D00),
+  danger = colors.error,
+  carBody = if (dark) Color(0xFF5C6F8E) else Color(0xFFB4C8EC),
+  carGlass = if (dark) Color(0xFF1E2430) else Color(0xFF3C4858),
+  muted = colors.outline,
+)
+
 val LocalAtaPalette = staticCompositionLocalOf { DarkPalette }
 
 /** Shortcut: `AtaColors.current.accent` etc. */
@@ -153,22 +239,25 @@ fun isDarkTheme(themeMode: ThemeMode, systemDark: Boolean): Boolean = when (them
 fun AtaTheme(
   themeMode: ThemeMode,
   dynamicColor: Boolean,
+  design: UiDesign = UiDesign.NEON,
   content: @Composable () -> Unit,
 ) {
   val dark = isDarkTheme(themeMode, isSystemInDarkTheme())
   val context = LocalContext.current
+  val material = design == UiDesign.MATERIAL
   val colors: ColorScheme = when {
     dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ->
       if (dark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+    material -> if (dark) MaterialDarkColors else MaterialLightColors
     dark -> DarkColors
     else -> LightColors
   }
   val base = if (dark) DarkPalette else LightPalette
   // With Material You, accents follow the wallpaper colours; critical stays red.
-  val palette = if (dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-    base.copy(accent = colors.primary)
-  } else {
-    base
+  val palette = when {
+    material -> materialPalette(colors, dark)
+    dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> base.copy(accent = colors.primary)
+    else -> base
   }
   CompositionLocalProvider(LocalAtaPalette provides palette) {
     MaterialTheme(colorScheme = colors, content = content)

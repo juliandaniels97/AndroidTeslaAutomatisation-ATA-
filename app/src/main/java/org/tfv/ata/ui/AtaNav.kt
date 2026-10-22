@@ -31,6 +31,7 @@ import org.tfv.ata.ui.screens.GuideTargets
 import org.tfv.ata.ui.screens.HomeScreen
 import org.tfv.ata.ui.screens.KeyCardScreen
 import org.tfv.ata.ui.screens.MenuConfigScreen
+import org.tfv.ata.ui.screens.MenuSection
 import org.tfv.ata.ui.screens.PairScreen
 import org.tfv.ata.ui.screens.ReportScreen
 import org.tfv.ata.ui.screens.SettingsScreen
@@ -119,7 +120,11 @@ fun AtaNavHost(vm: AtaViewModel, state: AtaUiState, pendingRoute: String? = null
         )
       }
       composable("vehicles") { VehiclesScreen(vm, state, onBack = { nav.popBackStack() }) }
-      composable("menu") { MenuConfigScreen(vm, state, onBack = { nav.popBackStack() }) }
+      composable("menu") { MenuConfigScreen(vm, state, onBack = { nav.popBackStack() }, onOpen = { nav.navigate("menu/${it.route}") }) }
+      composable("menu/{section}") { entry ->
+        val section = MenuSection.entries.firstOrNull { it.route == entry.arguments?.getString("section") }
+        MenuConfigScreen(vm, state, onBack = { nav.popBackStack() }, section = section)
+      }
       composable("wear") {
         WearConfigScreen(
           vm, state,

@@ -474,4 +474,12 @@
     <string name="widget_status_battery">Battery</string>
     <string name="widget_status_unknown">Not read yet</string>
     <string name="widget_status_description">Battery, range, inside and outside temperature, charging and lock state, in every size.</string>
+    <string name="menu_count">%1$d of %2$d chosen</string>
+    <string name="menu_count_plain">%1$d set up</string>
+    <string name="settings_design">Design</string>
+    <string name="settings_design_desc">Neon: glowing lines (standard). Material: calm Material 3 surfaces and a painted car that looks like the real one. Both in light and dark.</string>
+    <string name="design_neon">Neon (standard)</string>
+    <string name="design_material">Material</string>
+    <string name="vehicle_paint">Paint</string>
+    <string name="vehicle_neon_color">Neon colour</string>
 </resources>

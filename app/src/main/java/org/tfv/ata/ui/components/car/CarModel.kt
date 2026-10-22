@@ -371,6 +371,95 @@ class CarShape(private val s: BodySpec) {
     listOf(V3(side * w * .74f, s.beltFront + .06f, l - .12f), V3(side * w * .98f, s.beltMid - .05f, l * .62f), V3(side * (w + .01f), s.beltMid, 0f), V3(side * (w - .01f), s.beltRear, -l * .7f), V3(side * w * .8f, s.beltRear, -l + .1f)),
   )
 
+  // ---- Solid body (Material design) ----
+
+  /** A flat surface of the solid body: body paint, glass or the glass roof. */
+  enum class Surface { TRIM, BODY, GLASS, ROOF }
+  class Facet(val points: List<V3>, val normal: V3, val surface: Surface) {
+    val center = V3(points.sumOf { it.x.toDouble() }.toFloat() / points.size, points.sumOf { it.y.toDouble() }.toFloat() / points.size, points.sumOf { it.z.toDouble() }.toFloat() / points.size)
+  }
+
+  /** Resamples a closed ring to [n] points evenly by angle around the car's centre, so rings line up. */
+  private fun resample(ring: List<V3>, n: Int = 64): List<V3> {
+    fun angle(v: V3) = ((kotlin.math.atan2(v.x.toDouble(), (v.z / l).toDouble()) + 2 * PI) % (2 * PI))
+    val pts = if (ring.first() == ring.last()) ring.dropLast(1) else ring
+    return (0 until n).map { k ->
+      val a = 2 * PI * k / n
+      var found: V3? = null
+      for (i in pts.indices) {
+        val p = pts[i]
+        val q = pts[(i + 1) % pts.size]
+        val a1 = angle(p)
+        var a2 = angle(q)
+        if (a2 < a1 - PI) a2 += 2 * PI
+        val aa = if (a < a1 - PI) a + 2 * PI else a
+        if (aa in a1..a2) {
+          val f = if (a2 == a1) 0.0 else (aa - a1) / (a2 - a1)
+          found = V3(p.x + (q.x - p.x) * f.toFloat(), p.y + (q.y - p.y) * f.toFloat(), p.z + (q.z - p.z) * f.toFloat())
+          break
+        }
+      }
+      found ?: pts.minBy { kotlin.math.abs(angle(it) - a) }
+    }
+  }
+
+  private fun normalOf(a: V3, b: V3, c: V3): V3 {
+    val u = b - a
+    val v = c - a
+    val n = V3(u.y * v.z - u.z * v.y, u.z * v.x - u.x * v.z, u.x * v.y - u.y * v.x)
+    val len = kotlin.math.sqrt(n.x * n.x + n.y * n.y + n.z * n.z).coerceAtLeast(1e-5f)
+    return V3(n.x / len, n.y / len, n.z / len)
+  }
+
+  /** The solid body as flat surfaces between four rings: sill, belt line, glass base and roof. */
+  val facets: List<Facet> = run {
+    val sill = resample(body[0])
+    val belt = resample(body[1])
+    val glassBase = resample(
+      line(
+        symmetric(
+          listOf(
+            V3(0f, beltY(s.windscreenBase) + .02f, s.windscreenBase + .05f), V3(w * .8f, beltY(s.windscreenBase) + .01f, s.windscreenBase - .02f),
+            V3(w - .03f, s.beltMid + .02f, s.windscreenBase - .35f), V3(w - .03f, s.beltMid + .02f, 0f), V3(w - .04f, s.beltRear + .02f, s.rearGlassBase + .3f),
+            V3(w * .8f, s.beltRear + .01f, s.rearGlassBase + .02f), V3(0f, s.beltRear + .02f, s.rearGlassBase - .03f),
+          ),
+        ),
+        closed = true,
+      ),
+    )
+    val roof = resample(body[2])
+    // Black rocker panel along the bottom, like the real cars.
+    val rocker = sill.map { V3(it.x * 1.005f, it.y + .1f, it.z) }
+    val rings = listOf(sill, rocker, belt, glassBase, roof)
+    val surfaces = listOf(Surface.TRIM, Surface.BODY, Surface.BODY, Surface.GLASS)
+    buildList {
+      for (band in 0..3) {
+        val a = rings[band]
+        val b = rings[band + 1]
+        for (i in a.indices) {
+          val j = (i + 1) % a.size
+          val quad = listOf(a[i], a[j], b[j], b[i])
+          var n = normalOf(a[i], a[j], b[i])
+          val c = V3((a[i].x + b[j].x) / 2, (a[i].y + b[j].y) / 2, (a[i].z + b[j].z) / 2)
+          if (n.x * c.x + n.y * (c.y - .6f) + n.z * c.z / 2 < 0) n = V3(-n.x, -n.y, -n.z)
+          add(Facet(quad, n, surfaces[band]))
+        }
+      }
+      add(Facet(roof, V3(0f, 1f, 0f), Surface.ROOF))
+    }
+  }
+
+  /** Tyre and rim disc of a wheel for the solid body. */
+  fun wheelDisc(side: Float, zc: Float, radius: Float): List<V3> =
+    CarModel.circleYZ(side * w * 1.03f, s.wheelRadius + .01f, zc, radius, 22).dropLast(1)
+
+  /** Outline of the front door (for a filled, swinging door panel) and of its window part. */
+  fun doorPanel(side: Float): List<V3> {
+    val lines = frontDoor(side)
+    return listOf(lines[2][0], lines[2][1], lines[1][1]) + lines[3].reversed()
+  }
+  fun doorWindow(side: Float): List<V3> = listOf(frontDoor(side)[1][1]) + frontDoor(side)[3].reversed()
+
   /** Where the tappable spot of [spot] sits on this body. */
   fun anchor(spot: CarHotspot): V3 = when (spot) {
     CarHotspot.DRIVER_DOOR -> V3(-w - .03f, (s.sill + s.beltMid) / 2f + .05f, (doorFront + s.doorRear) / 2f)

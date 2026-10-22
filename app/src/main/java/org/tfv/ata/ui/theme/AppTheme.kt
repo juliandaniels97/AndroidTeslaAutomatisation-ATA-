@@ -18,7 +18,7 @@ fun AtaAppTheme(content: @Composable () -> Unit) {
   val context = LocalContext.current
   val settings by remember { AtaStore.get(context).settings }.collectAsState(initial = null)
   val s = settings ?: return // first frame: wait for the stored theme instead of flashing the wrong one
-  AtaTheme(themeMode = s.theme, dynamicColor = s.dynamicColor) {
+  AtaTheme(themeMode = s.theme, dynamicColor = s.dynamicColor, design = s.design) {
     SystemBarsForTheme()
     content()
   }

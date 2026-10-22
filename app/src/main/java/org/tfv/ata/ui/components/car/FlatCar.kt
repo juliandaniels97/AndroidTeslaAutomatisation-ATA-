@@ -40,7 +40,10 @@ fun DrawScope.drawFlatCar(shape: CarShape, camera: CarCamera, fx: CarFxState, st
     points.forEachIndexed { i, o -> if (i == 0) moveTo(o.x, o.y) else lineTo(o.x, o.y) }
     if (close) close()
   }
-  val unit = (p(1f, 0f).x - p(0f, 0f).x)
+  // Pixels per metre; [dir] is +1 when the front points right on screen, -1 when it points left.
+  val unitSigned = p(1f, 0f).x - p(0f, 0f).x
+  val unit = kotlin.math.abs(unitSigned)
+  val dir = if (unitSigned < 0f) -1f else 1f
   val l = s.length
   val bottom = s.sill - .1f
   val arch = s.wheelRadius + .07f
@@ -200,7 +203,7 @@ fun DrawScope.drawFlatCar(shape: CarShape, camera: CarCamera, fx: CarFxState, st
     val hood = top.filter { (z, _) -> z > s.windscreenBase + .02f }.map { (z, y) -> z to y } + listOf(s.windscreenBase + .02f to beltY(s.windscreenBase) - .02f, l - .1f to s.beltFront - .05f)
     drawPath(path(hood.map { (z, y) -> p(z, y) }), Color.Black.copy(alpha = .5f * frunk))
     val pivot = p(s.windscreenBase, beltY(s.windscreenBase))
-    val a = Math.toRadians(shape.frunkAngle * .7 * frunk)
+    val a = Math.toRadians(shape.frunkAngle * .7 * frunk * dir)
     drawPath(path(hood.map { (z, y) -> rotate2d(p(z, y), pivot, a) }), lerp(style.body, Color.White, .12f))
   }
   val trunk = fx.openness(CarEffect.TRUNK, now)
@@ -209,7 +212,7 @@ fun DrawScope.drawFlatCar(shape: CarShape, camera: CarCamera, fx: CarFxState, st
     val lid = top.filter { (z, _) -> z < lidTop }.map { (z, y) -> z to y } + listOf(-l + .04f to s.beltRear - .08f, lidTop to topY(lidTop) - .12f)
     drawPath(path(lid.map { (z, y) -> p(z, y) }), Color.Black.copy(alpha = .5f * trunk))
     val pivot = p(lidTop + .1f, topY(lidTop + .1f))
-    val a = Math.toRadians(shape.trunkAngle * .84 * trunk)
+    val a = Math.toRadians(shape.trunkAngle * .84 * trunk * dir)
     drawPath(path(lid.map { (z, y) -> rotate2d(p(z, y), pivot, a) }), lerp(style.body, Color.White, .12f))
   }
 
@@ -218,7 +221,7 @@ fun DrawScope.drawFlatCar(shape: CarShape, camera: CarCamera, fx: CarFxState, st
   val port = fx.openness(CarEffect.CHARGE_PORT, now)
   val pc = p(shape.chargePortCenter.z, shape.chargePortCenter.y)
   val portW = unit * .2f * (1f - .7f * port)
-  drawRect(lerp(style.body, Color.Black, .2f), Offset(pc.x - unit * .1f, pc.y - unit * .07f), Size(portW, unit * .14f))
+  drawRect(lerp(style.body, Color.Black, .2f), Offset(pc.x - portW / 2f, pc.y - unit * .07f), Size(portW, unit * .14f))
   if (charging > 0f || port > 0f) {
     val glow = if (charging > 0f) (.55f + .45f * sin(t * 3)) * charging else port * .6f
     val r = unit * .3f
@@ -228,7 +231,7 @@ fun DrawScope.drawFlatCar(shape: CarShape, camera: CarCamera, fx: CarFxState, st
     val cable = Path().apply {
       moveTo(pc.x, pc.y)
       val ground = p(shape.chargePortCenter.z - .9f, 0f)
-      cubicTo(pc.x - unit * .5f, pc.y + unit * .1f, ground.x + unit * .2f, ground.y - unit * .3f, ground.x, ground.y)
+      cubicTo(pc.x - dir * unit * .5f, pc.y + unit * .1f, ground.x + dir * unit * .2f, ground.y - unit * .3f, ground.x, ground.y)
     }
     drawPath(cable, Color(0xFF2A2F36).copy(alpha = charging), style = Stroke(unit * .05f, cap = StrokeCap.Round))
     for (k in 0 until 3) {
@@ -241,7 +244,7 @@ fun DrawScope.drawFlatCar(shape: CarShape, camera: CarCamera, fx: CarFxState, st
 
   // Wheels with five-spoke rims; they turn while driving remotely.
   val drive = fx.pulse(CarEffect.DRIVE, now, 3000)
-  val spin = drive?.let { (it * it * (3 - 2 * it)) * 6f * PI.toFloat() } ?: 0f
+  val spin = (drive?.let { (it * it * (3 - 2 * it)) * 6f * PI.toFloat() } ?: 0f) * dir
   for (zc in listOf(s.wheelFront, s.wheelRear)) {
     val c = p(zc, wheelY)
     val r = unit * s.wheelRadius

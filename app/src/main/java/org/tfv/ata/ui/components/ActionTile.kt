@@ -42,6 +42,44 @@ fun ActionTile(
   val palette = AtaColors.current
   val accent = if (action in CommandDispatcher.criticalActions) palette.critical else palette.accent
   val alpha = if (enabled) 1f else 0.45f
+  if (palette.material) {
+    // Material: flat tonal tile, the icon on a tonal circle.
+    val scheme = MaterialTheme.colorScheme
+    val critical = action in CommandDispatcher.criticalActions
+    Box(
+      modifier.aspectRatio(1f).clip(RoundedCornerShape(24.dp)).background(palette.tileTop.copy(alpha = if (enabled) 1f else .5f))
+        .then(if (interactive && enabled) Modifier.clickable(onClick = onClick) else Modifier),
+    ) {
+      Column(
+        Modifier.fillMaxSize().padding(10.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+      ) {
+        Box(
+          Modifier.size(48.dp).clip(androidx.compose.foundation.shape.CircleShape)
+            .background((if (critical) scheme.errorContainer else scheme.primaryContainer).copy(alpha = if (enabled) 1f else .5f)),
+          contentAlignment = Alignment.Center,
+        ) {
+          Icon(
+            iconFor(action),
+            contentDescription = null,
+            modifier = Modifier.size(26.dp),
+            tint = (if (critical) scheme.onErrorContainer else scheme.onPrimaryContainer).copy(alpha = if (enabled) 1f else .5f),
+          )
+        }
+        Text(
+          text = stringResource(ActionInfo.labelRes(action)),
+          style = MaterialTheme.typography.labelMedium,
+          color = scheme.onSurface.copy(alpha = if (enabled) 1f else .55f),
+          textAlign = TextAlign.Center,
+          maxLines = 2,
+          overflow = TextOverflow.Ellipsis,
+          modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+        )
+      }
+    }
+    return
+  }
   val tile = modifier
     .aspectRatio(1f)
     .clip(shape)

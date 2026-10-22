@@ -23,10 +23,10 @@ ATA is free for personal use. If it saves you a few taps every day, you can supp
 
 ## Downloads
 
-Latest release **v1.8.0** — phone APK for **64‑bit ARM (arm64‑v8a)**, watch APK for **64‑ and 32‑bit ARM (arm64‑v8a + armeabi‑v7a)**:
+Latest release **v1.8.1** — phone APK for **64‑bit ARM (arm64‑v8a)**, watch APK for **64‑ and 32‑bit ARM (arm64‑v8a + armeabi‑v7a)**:
 
-- 📱 Phone APK: **[ATA-phone-v1.8.0-arm64-v8a.apk](https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-/releases/download/v1.8.0/ATA-phone-v1.8.0-arm64-v8a.apk)**
-- ⌚ Wear OS APK: **[ATA-wear-v1.8.0.apk](https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-/releases/download/v1.8.0/ATA-wear-v1.8.0.apk)**
+- 📱 Phone APK: **[ATA-phone-v1.8.1-arm64-v8a.apk](https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-/releases/download/v1.8.1/ATA-phone-v1.8.1-arm64-v8a.apk)**
+- ⌚ Wear OS APK: **[ATA-wear-v1.8.1.apk](https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-/releases/download/v1.8.1/ATA-wear-v1.8.1.apk)**
 
 All releases are listed under [Releases](https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-/releases).
 All release builds are signed with the same release key, so new versions install as an update over
@@ -93,6 +93,16 @@ and Bluetooth permission is granted.
 The last snapshot is cached on device and shown on the Vehicle tab, the status widget, the watch and
 its complications, with a relative "updated X ago" timestamp.
 
+## Design
+
+Choose under **Settings → Appearance → Design**, each in light and dark:
+
+- **Neon (standard):** glowing lines on a dark showroom, a neon car with a floor reflection.
+- **Material:** calm Material 3 surfaces, flat tonal tiles, and a **painted car close to the real one**:
+  black glass roof, dark windows, black rocker panels and bumpers, dark aero wheels, light strips and a
+  clear‑coat sheen when it turns. Doors and lids open as painted panels; the effects use Material
+  colours without glow.
+
 ## Vehicle view
 
 The Vehicle tab shows your car inside a **battery ring** (dark blue 100–80 %, blue 80–20 %, yellow
@@ -100,9 +110,12 @@ The Vehicle tab shows your car inside a **battery ring** (dark blue 100–80 %, 
 
 - **Six body styles:** Model 3, Model Y, Model S, Model X, Cybertruck and Roadster. ATA picks the
   style from the VIN; you can override it under **Settings → Vehicles → Edit** (with a live preview).
+  The steering wheel, driver door and charge port sit on the left (left‑hand drive).
+- **Colour per vehicle:** a Tesla paint for the Material design (Pearl White, Solid Black, Stealth Grey,
+  Midnight Silver, Quicksilver, Deep Blue, Ultra Red, Stainless) and a line colour for the neon design.
 - **3D (default):** a minimalist neon car that turns slowly, with rims, mirrors, door handles, seats,
   the battery pack in the floor (cells light up with the charge level) and a reflection on the floor.
-  Tap it for the **full‑screen view**: turn it with one finger, **pinch to zoom**, and tap the glowing
+  Tap it for the **full‑screen view**: turn it with one finger (it follows the finger), **pinch to zoom**, and tap the glowing
   spots on the car (doors, frunk, trunk, charge port, windows, lights, climate) to run actions right
   there.
 - **2D:** switch off **Settings → Appearance → 3D vehicle view** for a calm, solid side view of your
@@ -282,7 +295,7 @@ until the car confirms. After that, tap to lock/unlock like a card.
 
 ## Settings
 
-- **Theme** (System/Light/Dark) + Material You dynamic color; **language** follows the system
+- **Design** (Neon or Material) and **theme** (System/Light/Dark) + Material You dynamic color; **language** follows the system
   (English & German).
 - **Navigation app**: Google Maps, Waze or system.
 - **Confirm critical actions**, **biometric lock** (apply in the app and when confirming an
@@ -357,13 +370,21 @@ signed updates that install over an existing install.
 
 ## Screenshots
 
-**Dark mode**
+**Neon — dark mode**
 
-<img width="1832" alt="ATA in dark mode: home, vehicle in 3D, full-screen car, settings, watch settings" src="docs/screenshots/ata-dark.png" />
+<img width="1832" alt="ATA neon design in dark mode: home, vehicle in 3D, full-screen car, settings, watch settings" src="docs/screenshots/ata-dark.png" />
 
-**Light mode**
+**Neon — light mode**
 
-<img width="1832" alt="ATA in light mode: home, vehicle, full-screen car, settings, watch settings" src="docs/screenshots/ata-light.png" />
+<img width="1832" alt="ATA neon design in light mode: home, vehicle, full-screen car, settings, watch settings" src="docs/screenshots/ata-light.png" />
+
+**Material — dark mode**
+
+<img width="1832" alt="ATA Material design in dark mode: home, painted car, full-screen car with animation, vehicle colours, settings" src="docs/screenshots/ata-material-dark.png" />
+
+**Material — light mode**
+
+<img width="1832" alt="ATA Material design in light mode: home, painted car, full-screen car with animation, vehicle colours, settings" src="docs/screenshots/ata-material-light.png" />
 
 **Wear OS**
 

@@ -18,6 +18,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.filled.AutoMode
+import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.filled.Widgets
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.foundation.clickable
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -32,9 +38,22 @@ import org.tfv.ata.ui.AtaUiState
 import org.tfv.ata.ui.AtaViewModel
 import org.tfv.ata.ui.components.ActionCheckRow
 
+/** Sub-menus of "Menu & widgets". */
+enum class MenuSection(val route: String) { ICON("icon"), ROUTINES("routines"), PRESETS("presets"), WIDGET("widget") }
+
+/**
+ * "Menu & widgets": an overview ([section] = null) that leads to the sub-menus for the app-icon menu, Samsung
+ * Routines, fixed-value shortcuts and the actions widget.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MenuConfigScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit) {
+fun MenuConfigScreen(
+  vm: AtaViewModel,
+  state: AtaUiState,
+  onBack: () -> Unit,
+  section: MenuSection? = null,
+  onOpen: (MenuSection) -> Unit = {},
+) {
   val funcB = AtaAction.entries.filter { it.category == AtaCategory.FUNCTION_B && it.enabled }
   val funcA = AtaAction.entries.filter { it.category == AtaCategory.FUNCTION_A && it.enabled }
   val menu = state.settings.launcherMenuActionIds
@@ -46,11 +65,24 @@ fun MenuConfigScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit) {
   val presets = state.settings.presets
   var pickPreset by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(false) }
   var presetAction by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf<AtaAction?>(null) }
+  val routinesUsed = routine.count { it !in menu }
 
   Scaffold(
     topBar = {
       TopAppBar(
-        title = { Text(stringResource(R.string.settings_menu)) },
+        title = {
+          Text(
+            stringResource(
+              when (section) {
+                null -> R.string.settings_menu
+                MenuSection.ICON -> R.string.menu_launcher_title
+                MenuSection.ROUTINES -> R.string.menu_routines_title
+                MenuSection.PRESETS -> R.string.presets_title
+                MenuSection.WIDGET -> R.string.menu_widget_title
+              },
+            ),
+          )
+        },
         navigationIcon = {
           IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null) }
         },
@@ -61,61 +93,62 @@ fun MenuConfigScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit) {
       Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(16.dp),
       verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-      Text(stringResource(R.string.menu_launcher_title), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
-      Text(stringResource(R.string.menu_launcher_desc), style = MaterialTheme.typography.bodySmall)
-      funcB.forEach { action ->
-        val checked = action.id in menu
-        ActionCheckRow(action, checked, enabled = checked || menu.size < 4) {
-          toggleMenu(vm, action, checked)
+      when (section) {
+        null -> {
+          SectionLink(Icons.Filled.Apps, stringResource(R.string.menu_launcher_title), stringResource(R.string.menu_count, menu.size, 4)) { onOpen(MenuSection.ICON) }
+          SectionLink(Icons.Filled.AutoMode, stringResource(R.string.menu_routines_title), stringResource(R.string.menu_count, routinesUsed, maxExtra)) { onOpen(MenuSection.ROUTINES) }
+          SectionLink(Icons.Filled.Tune, stringResource(R.string.presets_title), stringResource(R.string.menu_count_plain, presets.size)) { onOpen(MenuSection.PRESETS) }
+          SectionLink(Icons.Filled.Widgets, stringResource(R.string.menu_widget_title), stringResource(R.string.menu_count, widget.size, 8)) { onOpen(MenuSection.WIDGET) }
         }
-      }
-      GroupLabel(stringResource(R.string.menu_group_direct))
-      funcA.forEach { action ->
-        val checked = action.id in menu
-        ActionCheckRow(action, checked, enabled = checked || menu.size < 4) {
-          toggleMenu(vm, action, checked)
-        }
-      }
-
-      Text(stringResource(R.string.menu_routines_title), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(top = 16.dp))
-      RoutinesHint()
-      Text(stringResource(R.string.menu_routines_desc, maxExtra), style = MaterialTheme.typography.bodySmall)
-      routineChoices.forEach { action ->
-        val checked = action.id in routine
-        ActionCheckRow(action, checked, enabled = checked || routine.count { it !in menu } + presets.size < maxExtra) {
-          vm.updateSettings { s ->
-            s.copy(routineActionIds = if (checked) s.routineActionIds - action.id else s.routineActionIds + action.id)
+        MenuSection.ICON -> {
+          Text(stringResource(R.string.menu_launcher_desc), style = MaterialTheme.typography.bodySmall)
+          funcB.forEach { action ->
+            val checked = action.id in menu
+            ActionCheckRow(action, checked, enabled = checked || menu.size < 4) { toggleMenu(vm, action, checked) }
+          }
+          GroupLabel(stringResource(R.string.menu_group_direct))
+          funcA.forEach { action ->
+            val checked = action.id in menu
+            ActionCheckRow(action, checked, enabled = checked || menu.size < 4) { toggleMenu(vm, action, checked) }
           }
         }
-      }
-
-      GroupLabel(stringResource(R.string.presets_title))
-      Text(stringResource(R.string.presets_desc), style = MaterialTheme.typography.bodySmall)
-      presets.forEach { entry ->
-        val (id, value) = org.tfv.ata.shortcut.ShortcutSync.parsePreset(entry) ?: return@forEach
-        val action = AtaAction.fromId(id) ?: return@forEach
-        PresetRow(action, org.tfv.ata.shortcut.ShortcutSync.label(context, id, value)) {
-          vm.updateSettings { s -> s.copy(presets = s.presets - entry) }
+        MenuSection.ROUTINES -> {
+          RoutinesHint()
+          Text(stringResource(R.string.menu_routines_desc, maxExtra), style = MaterialTheme.typography.bodySmall)
+          routineChoices.forEach { action ->
+            val checked = action.id in routine
+            ActionCheckRow(action, checked, enabled = checked || routinesUsed + presets.size < maxExtra) {
+              vm.updateSettings { s ->
+                s.copy(routineActionIds = if (checked) s.routineActionIds - action.id else s.routineActionIds + action.id)
+              }
+            }
+          }
         }
-      }
-      androidx.compose.material3.OutlinedButton(
-        onClick = { pickPreset = true },
-        enabled = routine.count { it !in menu } + presets.size < maxExtra,
-      ) { Text(stringResource(R.string.presets_add)) }
-
-      Text(stringResource(R.string.menu_widget_title), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(top = 16.dp))
-      Text(stringResource(R.string.menu_widget_desc), style = MaterialTheme.typography.bodySmall)
-      funcB.forEach { action ->
-        val checked = action.id in widget
-        ActionCheckRow(action, checked, enabled = checked || widget.size < 8) {
-          toggleWidget(vm, action, checked)
+        MenuSection.PRESETS -> {
+          Text(stringResource(R.string.presets_desc), style = MaterialTheme.typography.bodySmall)
+          presets.forEach { entry ->
+            val (id, value) = org.tfv.ata.shortcut.ShortcutSync.parsePreset(entry) ?: return@forEach
+            val action = AtaAction.fromId(id) ?: return@forEach
+            PresetRow(action, org.tfv.ata.shortcut.ShortcutSync.label(context, id, value)) {
+              vm.updateSettings { s -> s.copy(presets = s.presets - entry) }
+            }
+          }
+          androidx.compose.material3.OutlinedButton(
+            onClick = { pickPreset = true },
+            enabled = routinesUsed + presets.size < maxExtra,
+          ) { Text(stringResource(R.string.presets_add)) }
         }
-      }
-      GroupLabel(stringResource(R.string.menu_group_direct))
-      funcA.forEach { action ->
-        val checked = action.id in widget
-        ActionCheckRow(action, checked, enabled = checked || widget.size < 8) {
-          toggleWidget(vm, action, checked)
+        MenuSection.WIDGET -> {
+          Text(stringResource(R.string.menu_widget_desc), style = MaterialTheme.typography.bodySmall)
+          funcB.forEach { action ->
+            val checked = action.id in widget
+            ActionCheckRow(action, checked, enabled = checked || widget.size < 8) { toggleWidget(vm, action, checked) }
+          }
+          GroupLabel(stringResource(R.string.menu_group_direct))
+          funcA.forEach { action ->
+            val checked = action.id in widget
+            ActionCheckRow(action, checked, enabled = checked || widget.size < 8) { toggleWidget(vm, action, checked) }
+          }
         }
       }
     }
@@ -191,6 +224,18 @@ private fun PresetRow(action: AtaAction, label: String, onDelete: () -> Unit) {
       Icon(androidx.compose.material.icons.Icons.Filled.Delete, contentDescription = stringResource(R.string.presets_delete))
     }
   }
+}
+
+@Composable
+private fun SectionLink(icon: androidx.compose.ui.graphics.vector.ImageVector, title: String, summary: String, onClick: () -> Unit) {
+  androidx.compose.material3.ListItem(
+    headlineContent = { Text(title) },
+    supportingContent = { Text(summary) },
+    leadingContent = { Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
+    trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
+    colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+    modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
+  )
 }
 
 @Composable

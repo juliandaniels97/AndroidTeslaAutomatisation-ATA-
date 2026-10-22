@@ -32,6 +32,8 @@ fun DrawScope.drawBatteryRing(
   glow: Boolean,
   unknownColor: Color,
   width: Float = 13f,
+  /** Material design: an even, solid arc with round ends instead of the flowing neon light. */
+  material: Boolean = false,
 ) {
   val t = now / 1000f
   val blend = if (glow) BlendMode.Plus else BlendMode.SrcOver
@@ -42,6 +44,17 @@ fun DrawScope.drawBatteryRing(
     return
   }
   val color = batteryColor(level)
+  if (material) {
+    drawCircle(color.copy(alpha = .16f), radius, center, style = Stroke(width))
+    val sweepAll = 360f * level.coerceIn(0, 100) / 100f
+    drawArc(color, -90f, sweepAll, false, topLeft, box, style = Stroke(width, cap = StrokeCap.Round))
+    if (charging && sweepAll > 20f) {
+      // A lighter segment travels along the arc while charging.
+      val head = (t * 120f) % sweepAll
+      drawArc(Color.White.copy(alpha = .45f), -90f + head, minOf(18f, sweepAll - head), false, topLeft, box, style = Stroke(width * .55f, cap = StrokeCap.Round))
+    }
+    return
+  }
   drawCircle(color.copy(alpha = .10f), radius, center, style = Stroke(width))
   val sweep = 360f * level.coerceIn(0, 100) / 100f
   val segments = maxOf(2, (sweep / 3f).toInt())

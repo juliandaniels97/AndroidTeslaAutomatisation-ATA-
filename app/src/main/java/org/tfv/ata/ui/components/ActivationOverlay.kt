@@ -40,12 +40,17 @@ fun ActivationOverlay(vm: AtaViewModel) {
       val center = Offset(size.width / 2f, size.height * 0.42f)
       for (i in 0..2) {
         val fr = (p + i / 3f) % 1f
-        drawCircle(
-          color = palette.accent.copy(alpha = (1f - fr) * 0.45f),
-          radius = fr * size.minDimension * 0.45f,
-          center = center,
-          style = Stroke(width = 4f),
-        )
+        if (palette.material) {
+          // Material: soft filled ripples.
+          drawCircle(palette.accent.copy(alpha = (1f - fr) * 0.14f), fr * size.minDimension * 0.45f, center)
+        } else {
+          drawCircle(
+            color = palette.accent.copy(alpha = (1f - fr) * 0.45f),
+            radius = fr * size.minDimension * 0.45f,
+            center = center,
+            style = Stroke(width = 4f),
+          )
+        }
       }
     }
   }
@@ -62,13 +67,20 @@ fun ActivationOverlay(vm: AtaViewModel) {
       val center = Offset(size.width / 2f, size.height * 0.42f)
       val p = progress.value
       val fade = 1f - p
-      for (i in 0..2) {
-        drawCircle(
-          color = color.copy(alpha = fade * 0.6f),
-          radius = (p + i * 0.12f) * size.minDimension * 0.5f,
-          center = center,
-          style = Stroke(width = 6f * fade + 1f),
-        )
+      if (palette.material) {
+        // Material: one ripple that fills and fades (emphasized easing).
+        val e = androidx.compose.animation.core.FastOutSlowInEasing.transform(p)
+        drawCircle(color.copy(alpha = fade * 0.22f), e * size.minDimension * 0.55f, center)
+        drawCircle(color.copy(alpha = fade * 0.5f), e * size.minDimension * 0.55f, center, style = Stroke(width = 3f))
+      } else {
+        for (i in 0..2) {
+          drawCircle(
+            color = color.copy(alpha = fade * 0.6f),
+            radius = (p + i * 0.12f) * size.minDimension * 0.5f,
+            center = center,
+            style = Stroke(width = 6f * fade + 1f),
+          )
+        }
       }
       event.bearing?.let { bearing ->
         val rad = Math.toRadians(bearing.toDouble())
@@ -77,7 +89,7 @@ fun ActivationOverlay(vm: AtaViewModel) {
           center.x + (sin(rad) * len).toFloat(),
           center.y - (cos(rad) * len).toFloat(),
         )
-        drawLine(color.copy(alpha = fade), center, end, strokeWidth = 8f * fade + 2f)
+        drawLine(color.copy(alpha = fade), center, end, strokeWidth = 8f * fade + 2f, cap = androidx.compose.ui.graphics.StrokeCap.Round)
       }
     }
   }

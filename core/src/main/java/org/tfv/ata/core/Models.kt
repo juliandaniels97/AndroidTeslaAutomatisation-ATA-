@@ -11,9 +11,45 @@ data class Vehicle(
   val navWork: String = "",
   /** [BodyStyle] name, empty = derived from the VIN. */
   val bodyStyle: String = "",
+  /** [CarPaint] name for the Material design, empty = the default paint of the body style. */
+  val paint: String = "",
+  /** [NeonColor] name for the neon design, empty = blue. */
+  val neonColor: String = "",
 ) {
+  /** Paint shown in the Material design. */
+  val carPaint: CarPaint get() = CarPaint.entries.firstOrNull { it.name == paint } ?: CarPaint.defaultFor(body)
+  /** Line colour of the neon car. */
+  val carNeon: NeonColor get() = NeonColor.entries.firstOrNull { it.name == neonColor } ?: NeonColor.BLUE
   /** The chosen body style, else the one encoded in the VIN, else Model 3. */
   val body: BodyStyle get() = BodyStyle.entries.firstOrNull { it.name == bodyStyle } ?: BodyStyle.fromVin(vin) ?: BodyStyle.MODEL_3
+}
+
+/** Tesla paints (approximate colours, ARGB) for the Material car. */
+enum class CarPaint(val argb: Long) {
+  PEARL_WHITE(0xFFEDEEEC),
+  SOLID_BLACK(0xFF16171A),
+  STEALTH_GREY(0xFF41454B),
+  MIDNIGHT_SILVER(0xFF5A5F66),
+  QUICKSILVER(0xFFA4A8AC),
+  DEEP_BLUE(0xFF1E3767),
+  ULTRA_RED(0xFFA3161F),
+  STAINLESS(0xFFB9BCBF);
+
+  companion object {
+    fun defaultFor(style: BodyStyle) = if (style == BodyStyle.CYBERTRUCK) STAINLESS else PEARL_WHITE
+  }
+}
+
+/** Line colours of the neon car. */
+enum class NeonColor(val argb: Long) {
+  BLUE(0xFF4FB4FF),
+  CYAN(0xFF2EF2E2),
+  PURPLE(0xFFB57BFF),
+  PINK(0xFFFF5FB1),
+  RED(0xFFFF4D40),
+  GREEN(0xFF39FF88),
+  AMBER(0xFFFFB347),
+  WHITE(0xFFE8F6FF),
 }
 
 /** Tesla body styles, used for the neon drawing of the car. */
@@ -52,9 +88,13 @@ data class VehicleSnapshot(
 
 enum class ThemeMode { SYSTEM, LIGHT, DARK }
 
+/** Look of the app: glowing neon lines, or calm Material 3 surfaces. Both come in light and dark. */
+enum class UiDesign { NEON, MATERIAL }
+
 @Serializable
 data class AtaSettings(
   val theme: ThemeMode = ThemeMode.DARK,
+  val design: UiDesign = UiDesign.NEON,
   val dynamicColor: Boolean = false,
   val confirmCritical: Boolean = true,
   val haptics: Boolean = true,

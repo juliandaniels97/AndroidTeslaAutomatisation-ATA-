@@ -41,7 +41,9 @@ class CarCamera(
   fun project(p: V3): Projected {
     val c = view(p)
     val d = distance - c.z
-    return Projected(Offset(width / 2f + pan.x + focal * c.x / d, height / 2f + pan.y - focal * c.y / d), c.z)
+    // Screen x is mirrored: the model's -x side (driver, steering wheel, charge port) is the car's left, and the
+    // car follows the finger when turned.
+    return Projected(Offset(width / 2f + pan.x - focal * c.x / d, height / 2f + pan.y - focal * c.y / d), c.z)
   }
 
   companion object {
@@ -49,7 +51,7 @@ class CarCamera(
     const val SIDE_PITCH = 3f
     const val SIDE_DISTANCE = 40f
 
-    /** Static side view (2D mode): left side, front to the right, almost no perspective. */
+    /** Static side view (2D mode): driver's (left) side, front to the left, almost no perspective. */
     fun side(width: Float, height: Float, zoom: Float = 1f, pan: Offset = Offset.Zero) =
       CarCamera(SIDE_YAW, SIDE_PITCH, width, height, zoom, SIDE_DISTANCE, pan)
   }
