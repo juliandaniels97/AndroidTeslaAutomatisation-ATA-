@@ -38,6 +38,8 @@ data class BodySpec(
   val doorRear: Float,
   /** Straight edges instead of smooth curves (Cybertruck). */
   val angular: Boolean = false,
+  /** Four doors (false: coupé, no rear seats). */
+  val rearDoors: Boolean = true,
 )
 
 object CarModel {
@@ -70,7 +72,7 @@ object CarModel {
     BodyStyle.ROADSTER to BodySpec(
       2.15f, .98f, .32f,
       listOf(2.17f to .60f, 1.30f to .78f, .65f to 1.02f, .05f to 1.15f, -.65f to 1.13f, -1.45f to .98f, -2.15f to .82f), .52f,
-      .60f, .86f, .84f, .10f, -.60f, .52f, 1.15f, .95f, -1.45f, 1.35f, -1.35f, .34f, -.45f,
+      .60f, .86f, .84f, .10f, -.60f, .52f, 1.15f, .95f, -1.45f, 1.35f, -1.35f, .34f, -.45f, rearDoors = false,
     ),
   )
   private val shapes = HashMap<BodyStyle, CarShape>()
@@ -113,6 +115,7 @@ object CarModel {
  * bars) plus the movable parts and anchor points used by the effects.
  */
 class CarShape(private val s: BodySpec) {
+  val spec: BodySpec get() = s
   private val l = s.length
   private val w = s.width
 
@@ -179,7 +182,7 @@ class CarShape(private val s: BodySpec) {
   val wheels: List<List<V3>> = buildList {
     for (side in listOf(1f, -1f)) for (zc in wheelZ) {
       add(CarModel.circleYZ(side * w * 1.02f, s.wheelRadius + .01f, zc, s.wheelRadius))
-      add(CarModel.circleYZ(side * w * 1.02f, s.wheelRadius + .01f, zc, s.wheelRadius * .5f, 16))
+      add(CarModel.circleYZ(side * w * 1.02f, s.wheelRadius + .01f, zc, s.wheelRadius * .9f, 24))
     }
   }
 
@@ -190,7 +193,8 @@ class CarShape(private val s: BodySpec) {
     }
   val taillight: List<V3> = line(listOf(V3(-w * .8f, s.beltRear, -l + .08f), V3(0f, s.beltRear + .01f, -l - .03f), V3(w * .8f, s.beltRear, -l + .08f)))
 
-  private val doorFront = s.windscreenBase - .08f
+  /** Front edge of the front doors: behind the windscreen base and the front wheel arch. */
+  val doorFront = minOf(s.windscreenBase - .08f, s.wheelFront - s.wheelRadius - .12f)
 
   /** Front doors (closed): panel outline on the side; hinge at the front edge. */
   fun frontDoor(side: Float): List<List<V3>> {
@@ -230,6 +234,10 @@ class CarShape(private val s: BodySpec) {
     closed = true, steps = 6,
   )
   val trunkHinge = V3(0f, lidTopY + .04f, lidTopZ + .2f)
+
+  /** Opening angles: long lids (Cybertruck tonneau) open less far. */
+  val frunkAngle = -55f * minOf(1f, 1.0f / (l - s.windscreenBase))
+  val trunkAngle = 50f * minOf(1f, 1.0f / (lidTopZ + l))
 
   /** Charge port flap on the rear left side, above the rear wheel. */
   val chargePortCenter = V3(-w, beltY(s.wheelRear - s.wheelRadius) - .13f, s.wheelRear - s.wheelRadius - .01f)
@@ -273,6 +281,95 @@ class CarShape(private val s: BodySpec) {
   val headlightLeft = V3(-.72f * w, s.beltFront + .11f, l - .2f)
   val headlightRight = V3(.72f * w, s.beltFront + .11f, l - .2f)
   fun sentryEye(side: Float) = V3(side * w, s.beltMid + .02f, s.doorRear)
+
+  // ---- Details ----
+
+  /** Rear door seam (vertical line in front of the rear wheel arch), only on four-door bodies. */
+  private val rearDoorRear = s.wheelRear + s.wheelRadius + .12f
+  fun rearDoorSeam(side: Float): List<V3> =
+    if (!s.rearDoors) emptyList() else listOf(V3(side * (w - .01f), s.sill + .02f, rearDoorRear), V3(side * (w - .01f), beltY(rearDoorRear), rearDoorRear))
+
+  /** Door handles (flush bars just below the belt line); index 0 = front door. */
+  fun handles(side: Float): List<List<V3>> = buildList {
+    val y = beltY(s.doorRear) - .1f
+    add(listOf(V3(side * (w + .005f), y, s.doorRear + .32f), V3(side * (w + .005f), y, s.doorRear + .14f)))
+    if (s.rearDoors) add(listOf(V3(side * (w + .005f), y, rearDoorRear + .32f), V3(side * (w + .005f), y, rearDoorRear + .14f)))
+  }
+
+  /** Where the mirror is fixed to the body; it folds around this point. */
+  fun mirrorMount(side: Float) = V3(side * (w - .02f), s.beltMid + .03f, s.windscreenBase - .12f)
+  fun mirror(side: Float): List<V3> {
+    val m = mirrorMount(side)
+    return line(
+      listOf(m, V3(m.x + side * .2f, m.y + .02f, m.z - .02f), V3(m.x + side * .24f, m.y + .1f, m.z - .06f), V3(m.x + side * .1f, m.y + .13f, m.z - .05f), m),
+      steps = 4,
+    )
+  }
+
+  /** Rim with five spokes at [angle] (radians) for the wheel at [zc] on [side]. */
+  fun rim(side: Float, zc: Float, angle: Float): List<List<V3>> {
+    val x = side * w * 1.025f
+    val cy = s.wheelRadius + .01f
+    val r = s.wheelRadius
+    return buildList {
+      add(CarModel.circleYZ(x, cy, zc, r * .7f, 20))
+      add(CarModel.circleYZ(x, cy, zc, r * .16f, 10))
+      for (k in 0 until 5) {
+        val a = angle + 2 * PI.toFloat() * k / 5
+        add(listOf(V3(x, cy + r * .16f * sin(a), zc + r * .16f * cos(a)), V3(x, cy + r * .7f * sin(a + .12f), zc + r * .7f * cos(a + .12f))))
+      }
+    }
+  }
+  val wheelCenters: List<Pair<Float, Float>> = listOf(1f, -1f).flatMap { side -> wheelZ.map { side to it } }
+  /** Wheel centre for effects (outside face). */
+  fun wheelHub(side: Float, zc: Float) = V3(side * w * 1.03f, s.wheelRadius + .01f, zc)
+
+  /** Seats seen through the glass: cushion and backrest outlines. */
+  val seats: List<List<V3>> = buildList {
+    val front = (s.windscreenBase + s.doorRear) / 2f - .25f
+    val rows = if (s.rearDoors) listOf(front, front - .95f) else listOf(front)
+    val y = s.sill + .32f
+    val top = s.beltMid + .2f
+    for (z in rows) for (cx in listOf(-.4f * w, .4f * w)) {
+      for (dx in listOf(-.15f, .15f)) add(listOf(V3(cx + dx, y, z + .2f), V3(cx + dx, y, z - .1f), V3(cx + dx, top, z - .28f)))
+      add(CarModel.smooth(listOf(V3(cx - .15f, top, z - .28f), V3(cx, top + .04f, z - .3f), V3(cx + .15f, top, z - .28f)), steps = 4))
+    }
+  }
+
+  /** Dashboard across the cabin, with the vents where the air comes out. */
+  val dashboard: List<V3> = CarModel.smooth(listOf(V3(-.8f * w, s.beltMid - .02f, s.windscreenBase - .32f), V3(0f, s.beltMid + .01f, s.windscreenBase - .38f), V3(.8f * w, s.beltMid - .02f, s.windscreenBase - .32f)))
+  val ventZ = s.windscreenBase - .4f
+
+  /** Battery pack in the floor between the axles, split into cells. */
+  val packFront = s.wheelFront - s.wheelRadius - .1f
+  val packRear = s.wheelRear + s.wheelRadius + .1f
+  val packY = s.sill - .1f
+  val packHalfWidth = .78f * w
+  val pack: List<V3> = listOf(
+    V3(-packHalfWidth, packY, packFront), V3(packHalfWidth, packY, packFront), V3(packHalfWidth, packY, packRear), V3(-packHalfWidth, packY, packRear), V3(-packHalfWidth, packY, packFront),
+  )
+
+  /** Lower front intake and rear diffuser lines. */
+  val bumpers: List<List<V3>> = listOf(
+    line(listOf(V3(-.55f * w, s.sill + .14f, l - .06f), V3(0f, s.sill + .12f, l + .0f), V3(.55f * w, s.sill + .14f, l - .06f))),
+    line(listOf(V3(-.6f * w, s.sill + .1f, -l + .06f), V3(0f, s.sill + .08f, -l - .01f), V3(.6f * w, s.sill + .1f, -l + .06f))),
+  )
+
+  /** B-pillars and the bar that splits the glass roof. */
+  val pillars: List<List<V3>> = buildList {
+    for (side in listOf(1f, -1f)) add(listOf(V3(side * (w - .01f), beltY(s.doorRear), s.doorRear), V3(side * (s.roofWidth + .03f), s.roofHeight - .01f, s.doorRear)))
+    add(listOf(V3(-s.roofWidth, s.roofHeight + .01f, s.doorRear), V3(s.roofWidth, s.roofHeight + .01f, s.doorRear)))
+  }
+
+  /** Charge cable hanging from the port to the floor. */
+  val chargeCable: List<V3> = chargePortCenter.let { c ->
+    CarModel.smooth(listOf(c, V3(c.x - .25f, c.y - .05f, c.z - .05f), V3(c.x - .55f, c.y - .5f, c.z - .2f), V3(c.x - .75f, 0f, c.z - .35f), V3(c.x - 1.3f, 0f, c.z - .5f)))
+  }
+
+  /** The belt line of one side (front to rear), used for the light that runs along the car. */
+  fun beltLine(side: Float): List<V3> = CarModel.smooth(
+    listOf(V3(side * w * .74f, s.beltFront + .06f, l - .12f), V3(side * w * .98f, s.beltMid - .05f, l * .62f), V3(side * (w + .01f), s.beltMid, 0f), V3(side * (w - .01f), s.beltRear, -l * .7f), V3(side * w * .8f, s.beltRear, -l + .1f)),
+  )
 
   /** Where the tappable spot of [spot] sits on this body. */
   fun anchor(spot: CarHotspot): V3 = when (spot) {

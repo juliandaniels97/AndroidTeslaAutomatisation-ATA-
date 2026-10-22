@@ -78,6 +78,11 @@ class AtaViewModel(app: Application) : AndroidViewModel(app) {
     _carFx.value = _carFx.value.with(action, System.currentTimeMillis())
   }
 
+  /** Puts the drawing back as it was (after the animation demo). */
+  fun restoreCarFx(fx: org.tfv.ata.ui.components.car.CarFxState) {
+    _carFx.value = fx
+  }
+
   fun markOnboarded() = viewModelScope.launch { store.updateSettings { it.copy(onboarded = true) } }
 
   fun recordCarLocation() = viewModelScope.launch {

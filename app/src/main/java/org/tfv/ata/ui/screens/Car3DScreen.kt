@@ -34,6 +34,8 @@ import androidx.compose.material.icons.filled.DoorFront
 import androidx.compose.material.icons.filled.EvStation
 import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.Luggage
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.filled.Thermostat
 import androidx.compose.material.icons.filled.Window
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -45,6 +47,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -65,6 +68,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.delay
 import org.tfv.ata.R
 import org.tfv.ata.action.ActionInfo
 import org.tfv.ata.core.ActionPolicy
@@ -80,12 +84,37 @@ import org.tfv.ata.ui.components.car.CarStatus
 import org.tfv.ata.ui.components.car.NeonStyle
 import org.tfv.ata.ui.components.car.drawBatteryRing
 import org.tfv.ata.ui.components.car.drawNeonCar
+import org.tfv.ata.ui.components.car.drawFlatCar
+import org.tfv.ata.ui.components.car.FlatStyle
+import org.tfv.ata.ui.theme.AtaColors
 import org.tfv.ata.ui.components.car.rememberFrameClock
 import org.tfv.ata.ui.components.iconFor
 import kotlin.math.roundToInt
 
 private val SHOWROOM = Color(0xFF04060B)
 private val NEON = Color(0xFF4FB4FF)
+
+/** Animation demo: what plays one after another (drawing only, nothing is sent to the car). */
+private val DEMO_STEPS: List<List<AtaAction>> = listOf(
+  listOf(AtaAction.WAKE),
+  listOf(AtaAction.UNLOCK),
+  listOf(AtaAction.DOOR_DRIVER_OPEN, AtaAction.DOOR_PASSENGER_OPEN),
+  listOf(AtaAction.FRUNK, AtaAction.TRUNK),
+  listOf(AtaAction.VENT_WINDOWS),
+  listOf(AtaAction.CHARGE_PORT_OPEN, AtaAction.CHARGE_START),
+  listOf(AtaAction.CLIMATE_ON, AtaAction.DEFROST, AtaAction.STEERING_WHEEL_HEATER),
+  listOf(AtaAction.MEDIA_TOGGLE),
+  listOf(AtaAction.FLASH_LIGHTS, AtaAction.HONK),
+  listOf(AtaAction.BIOWEAPON_ON),
+  listOf(AtaAction.SENTRY_ON),
+  listOf(
+    AtaAction.CLOSE_WINDOWS, AtaAction.TRUNK_CLOSE, AtaAction.CHARGE_STOP, AtaAction.CHARGE_PORT_CLOSE, AtaAction.CLIMATE_OFF,
+    AtaAction.DEFROST_OFF, AtaAction.STEERING_WHEEL_HEATER_OFF, AtaAction.BIOWEAPON_OFF, AtaAction.SENTRY_OFF, AtaAction.REMOTE_DRIVE,
+  ),
+  listOf(AtaAction.BOOMBOX_FART),
+  listOf(AtaAction.LOCK),
+)
+private const val DEMO_STEP_MS = 2500L
 
 private const val MIN_ZOOM = .7f
 private const val MAX_ZOOM = 3f
@@ -151,11 +180,26 @@ fun Car3DScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit) {
   var zoom by remember { mutableFloatStateOf(1f) }
   var pan by remember { mutableStateOf(Offset.Zero) }
   val threeD = state.settings.car3d
+  var demo by remember { mutableStateOf(false) }
+  LaunchedEffect(demo) {
+    if (!demo) return@LaunchedEffect
+    val before = vm.carFx.value
+    try {
+      for (step in DEMO_STEPS) {
+        step.forEach { vm.onCarAction(it) }
+        delay(DEMO_STEP_MS)
+      }
+    } finally {
+      vm.restoreCarFx(before)
+    }
+    demo = false
+  }
   val shape = CarModel.shape(state.selected?.body ?: BodyStyle.MODEL_3)
   var sheet by remember { mutableStateOf<Pair<Boolean, CarHotspot?>?>(null) }
   val snapshot = state.snapshot
   val known = snapshot != null && snapshot.updatedAt > 0
-  val status = CarStatus(snapshot?.charging == true, snapshot?.climateOn == true, snapshot?.sentry == true)
+  val status = CarStatus(snapshot?.charging == true, snapshot?.climateOn == true, snapshot?.sentry == true, if (known) snapshot?.batteryPercent else null)
+  val palette = AtaColors.current
   val style = NeonStyle(line = NEON, glow = true, lineWidth = 3f)
   val pulse by rememberInfiniteTransition(label = "spots").animateFloat(
     initialValue = .85f,
@@ -190,7 +234,8 @@ fun Car3DScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit) {
             }
           },
       ) {
-        drawNeonCar(shape, camera, if (threeD) yaw else CarCamera.SIDE_YAW, fx, status, now, style)
+        if (threeD) drawNeonCar(shape, camera, yaw, fx, status, now, style)
+        else drawFlatCar(shape, camera, fx, status, now, FlatStyle(palette.carBody, palette.carGlass, palette.accent, dark = true))
         if (known) {
           drawBatteryRing(Offset(size.width / 2f, size.height * .86f), size.minDimension * .07f, snapshot?.batteryPercent, status.charging, now, true, NEON, width = 8f)
         }
@@ -247,6 +292,15 @@ fun Car3DScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit) {
         ) {
           Icon(Icons.Filled.DirectionsCar, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
           Text(stringResource(R.string.hs_general), color = Color.White, fontWeight = FontWeight.Medium)
+        }
+        Row(
+          Modifier.padding(top = 8.dp).background(Color.White.copy(alpha = .06f), CircleShape).border(1.dp, Color.White.copy(alpha = .25f), CircleShape)
+            .clickable { demo = !demo }.padding(horizontal = 14.dp, vertical = 7.dp),
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+          Icon(if (demo) Icons.Filled.Stop else Icons.Filled.PlayArrow, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+          Text(stringResource(if (demo) R.string.car_demo_stop else R.string.car_demo), color = Color.White, style = MaterialTheme.typography.labelLarge)
         }
         Text(
           stringResource(if (threeD) R.string.car3d_hint else R.string.car2d_hint),

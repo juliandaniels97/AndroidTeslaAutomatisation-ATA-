@@ -457,4 +457,6 @@
     <string name="car2d_hint">Zum Zoomen zwei Finger spreizen · leuchtende Punkte antippen</string>
     <string name="car3d_open">Fahrzeug im Vollbild öffnen</string>
     <string name="car3d_reset">Ansicht zurücksetzen</string>
+    <string name="car_demo">Animationen zeigen</string>
+    <string name="car_demo_stop">Stopp</string>
 </resources>

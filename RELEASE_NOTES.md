@@ -1,22 +1,28 @@
-## ATA v1.6.0 — Sechs Fahrzeugtypen, 2D-Ansicht und Pinch-Zoom
+## ATA v1.7.0 — Detailreicheres 3D-Fahrzeug, mehr Animationen, ruhige 2D-Ansicht
 
-### Fahrzeugtypen
-- Das Neon-Fahrzeug gibt es jetzt als **Model 3, Model Y, Model S, Model X, Cybertruck und Roadster**, jeweils als minimalistische Neon-Silhouette mit eigenen Proportionen. Der Cybertruck ist kantig gezeichnet.
-- Der Typ wird **automatisch aus der VIN erkannt**. Unter **Einstellungen → Fahrzeuge → Bearbeiten** lässt er sich auch von Hand festlegen, mit Live-Vorschau im Dialog.
-- Alle Animationen (Türen, Frunk, Kofferraum, Ladeklappe, Fenster, Licht, Bioschutz-Nebel usw.) und die antippbaren Punkte passen sich dem jeweiligen Fahrzeug an.
+### 2D-Ansicht wieder ohne Neon
+- Ist die 3D-Ansicht ausgeschaltet, wird das Fahrzeug wieder **wie früher gezeichnet**: lackierte Karosserie, getönte Scheiben, Reifen mit Felgen, weicher Schatten, kein Neon-Leuchten.
+- Das gilt für alle sechs Fahrzeugtypen, im Fahrzeug-Tab, im Vollbild und in der Vorschau im Fahrzeug-Dialog.
+- Die Animationen gibt es auch hier, nur dezent: Tür, Frunk, Kofferraum, Ladeklappe mit Kabel, Fenster, Licht, Bioschutz, Wächter und weitere.
 
-### 2D- oder 3D-Ansicht
-- Neuer Schalter **Einstellungen → Darstellung → 3D-Fahrzeugansicht**.
-  - **An:** Das Fahrzeug dreht sich wie bisher und lässt sich im Vollbild mit dem Finger drehen.
-  - **Aus:** Es erscheint eine **statische Seitenansicht (2D)** für jeden Fahrzeugtyp. In der Seitenansicht ist „Beifahrertür öffnen“ über die Fahrertür erreichbar.
-- Der Punkt „Fenster“ sitzt jetzt auf der Fahrerseite.
+### Mehr Details im Neon-3D-Fahrzeug
+- Felgen mit fünf Speichen, Außenspiegel, Türgriffe, B-Säulen und Glasdach-Steg, hintere Türfuge, Frontschürze und Diffusor.
+- Sitze und Armaturenbrett sind durch die Scheiben zu sehen.
+- **Akku im Fahrzeugboden:** Die Zellen leuchten passend zum Ladestand.
+- Dezentes Raster auf dem Showroom-Boden.
 
-### Vollbild
-- **Pinch-to-Zoom:** Mit zwei Fingern zoomen und verschieben. In 2D verschiebt ein Finger das Bild.
-- Der Button oben setzt Drehung, Zoom und Position zurück.
+### Neue Animationen am Fahrzeug
+- **Aufwecken:** Die Lichtleisten fahren von der Mitte nach außen hoch, die Felgen blitzen auf.
+- **Entriegeln:** Türgriffe leuchten, Umfeldbeleuchtung unter den Spiegeln, die Spiegel klappen aus.
+- **Verriegeln:** Die Spiegel klappen ein.
+- **Laden:** Ladekabel mit fließender Energie, eine Welle läuft durch die Akkuzellen.
+- **Klima und Temperatur:** Luftströme aus den Düsen.
+- **Musik:** Equalizer auf dem Armaturenbrett und Schallringe über dem Dach.
+- **Wächter-Modus:** Ein roter Radarstrahl tastet den Boden ab.
+- **Herbeirufen (Remote Drive):** Die Räder drehen sich, Fahrtlinien ziehen am Fahrzeug vorbei.
+- Im Ruhezustand atmen die Tagfahrlichter leicht, und ab und zu läuft ein Lichtstreifen über die Gürtellinie.
 
-### Kleinigkeiten
-- In der Fahrzeugliste stehen Fahrzeugtyp und VIN, der Bearbeiten-Button hat das richtige Stift-Symbol.
-- Schalter in den Einstellungen reagieren jetzt auf die ganze Zeile, nicht nur auf den Schalter selbst.
+### Animationen zeigen
+- Neuer Button **„Animationen zeigen“** im Vollbild. Er spielt alle Effekte nacheinander ab, ohne einen Befehl ans Fahrzeug zu senden.
 
 NFC-Schlüsselkarte (Handy und Uhr) bleibt **BETA**.

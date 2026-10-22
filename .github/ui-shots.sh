@@ -44,9 +44,12 @@ done
 tap "Automatic (VIN: Cybertruck)"; tap "Save"
 restart; tap "Vehicle"; sleep 2; shot "body-3d-tab"
 adb shell am start -S -W -n org.tfv.ata/.ui.MainActivity -a android.intent.action.VIEW -d ata://car3d >/dev/null; sleep 6; shot "body-3d-full"
+demo() { tap "Show animations"; sleep 0.6; for n in 01 02 03 04 05 06 07 08 09 10 11 12 13 14; do shot "$1-$n"; sleep 1.9; done; }
+demo "demo-3d"
 restart; tap "Settings"; scroll; tap "3D vehicle view"; shot "body-settings-2d"
 restart; tap "Vehicle"; sleep 2; shot "body-2d-tab"
 adb shell am start -S -W -n org.tfv.ata/.ui.MainActivity -a android.intent.action.VIEW -d ata://car3d >/dev/null; sleep 6; shot "body-2d-full"
+demo "demo-2d"
 restart; tap "Settings"; scroll; tap "3D vehicle view"
 
 for THEME in Dark Light; do

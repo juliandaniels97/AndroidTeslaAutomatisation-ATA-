@@ -49,6 +49,8 @@ import org.tfv.ata.ui.components.car.CarStatus
 import org.tfv.ata.ui.components.car.NeonStyle
 import org.tfv.ata.ui.components.car.drawBatteryRing
 import org.tfv.ata.ui.components.car.drawNeonCar
+import org.tfv.ata.ui.components.car.drawFlatCar
+import org.tfv.ata.ui.components.car.FlatStyle
 import org.tfv.ata.ui.components.car.rememberFrameClock
 import org.tfv.ata.ui.theme.AtaColors
 import kotlin.math.min
@@ -74,7 +76,7 @@ fun VehicleArt(
   val palette = AtaColors.current
   val now by rememberFrameClock()
   val style = NeonStyle(line = palette.accent, glow = palette.isDark, lineWidth = if (palette.isDark) 2.4f else 3f)
-  val status = CarStatus(charging = charging, climate = climate, sentry = snapshot?.sentry == true)
+  val status = CarStatus(charging = charging, climate = climate, sentry = snapshot?.sentry == true, battery = if (known) snapshot?.batteryPercent else null)
   val badgePulse by rememberInfiniteTransition(label = "badge").animateFloat(
     initialValue = 1f,
     targetValue = 1.12f,
@@ -96,7 +98,8 @@ fun VehicleArt(
       val inner = radius * 2f * .92f
       val camera = if (threeD) CarCamera(yaw, 20f, inner, inner, zoom = 1.35f * shape.fit) else CarCamera.side(inner, inner, zoom = 1.3f * shape.fit)
       translate(center.x - inner / 2f, center.y - inner / 2f) {
-        drawNeonCar(shape, camera, yaw, fx, status, now, style, androidx.compose.ui.geometry.Size(inner, inner))
+        if (threeD) drawNeonCar(shape, camera, yaw, fx, status, now, style, androidx.compose.ui.geometry.Size(inner, inner))
+        else drawFlatCar(shape, camera, fx, status, now, FlatStyle(palette.carBody, palette.carGlass, palette.accent, palette.isDark))
       }
     }
     if (onOpen != null) {

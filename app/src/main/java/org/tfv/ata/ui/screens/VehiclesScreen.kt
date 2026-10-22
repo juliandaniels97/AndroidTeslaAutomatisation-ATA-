@@ -55,6 +55,8 @@ import org.tfv.ata.ui.components.car.CarModel
 import org.tfv.ata.ui.components.car.CarStatus
 import org.tfv.ata.ui.components.car.NeonStyle
 import org.tfv.ata.ui.components.car.drawNeonCar
+import org.tfv.ata.ui.components.car.drawFlatCar
+import org.tfv.ata.ui.components.car.FlatStyle
 import org.tfv.ata.ui.theme.AtaColors
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -107,6 +109,7 @@ fun VehiclesScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit) {
   if (showForm) {
     VehicleFormDialog(
       existing = editing,
+      threeD = state.settings.car3d,
       onSave = { name, vin, home, work, body ->
         val e = editing
         if (e == null) vm.addVehicle(name, vin, home, work, body)
@@ -132,6 +135,7 @@ fun bodyLabel(style: BodyStyle): String = when (style) {
 @Composable
 private fun VehicleFormDialog(
   existing: Vehicle?,
+  threeD: Boolean,
   onSave: (name: String, vin: String, home: String, work: String, bodyStyle: String) -> Unit,
   onDismiss: () -> Unit,
 ) {
@@ -170,10 +174,9 @@ private fun VehicleFormDialog(
           val shape = CarModel.shape(shown)
           // About three quarters of the width, whatever the dialog height.
           val zoom = 1.45f * size.width / minOf(size.width * 1.25f, size.height * 1.9f) * shape.fit
-          drawNeonCar(
-            shape, CarCamera.side(size.width, size.height, zoom), CarCamera.SIDE_YAW, CarFxState(), CarStatus(), 0L,
-            NeonStyle(line = palette.accent, glow = false, lineWidth = 2f),
-          )
+          val camera = CarCamera.side(size.width, size.height, zoom)
+          if (threeD) drawNeonCar(shape, camera, CarCamera.SIDE_YAW, CarFxState(), CarStatus(), 0L, NeonStyle(line = palette.accent, glow = false, lineWidth = 2f))
+          else drawFlatCar(shape, camera, CarFxState(), CarStatus(), 0L, FlatStyle(palette.carBody, palette.carGlass, palette.accent, palette.isDark))
         }
         FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
           val auto = BodyStyle.fromVin(vin)

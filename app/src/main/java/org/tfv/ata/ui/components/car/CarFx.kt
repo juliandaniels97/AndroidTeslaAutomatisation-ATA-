@@ -5,8 +5,9 @@ import org.tfv.ata.core.AtaAction
 /** What the car drawing shows besides its status: doors and lids that were opened, lights, heating … */
 enum class CarEffect {
   DOOR_DRIVER, DOOR_PASSENGER, TRUNK, FRUNK, CHARGE_PORT, WINDOWS, DEFROST, WHEEL_HEAT, BIOWEAPON, CLIMATE,
+  CHARGING, SENTRY, MIRRORS_FOLDED,
   // One-shot effects:
-  LIGHTS, HONK, WAKE, LOCK, UNLOCK, PUFF, LOCATE,
+  LIGHTS, HONK, WAKE, LOCK, UNLOCK, PUFF, LOCATE, DRIVE, MEDIA, AIRFLOW,
 }
 
 /** A part that is open / on: since when, and until when it is shown (the car doesn't report every part back). */
@@ -34,14 +35,14 @@ data class CarFxState(
   }
 
   fun with(action: AtaAction, now: Long): CarFxState {
-    fun on(e: CarEffect, holdMs: Long = Long.MAX_VALUE) =
+    fun CarFxState.on(e: CarEffect, holdMs: Long = Long.MAX_VALUE) =
       copy(toggles = toggles + (e to FxToggle(true, now, if (holdMs == Long.MAX_VALUE) Long.MAX_VALUE else now + holdMs)))
-    fun off(e: CarEffect): CarFxState {
+    fun CarFxState.off(e: CarEffect): CarFxState {
       val current = toggles[e] ?: return this
       if (!current.on || now >= current.until) return this
       return copy(toggles = toggles + (e to FxToggle(false, now)))
     }
-    fun pulse(e: CarEffect) = copy(pulses = pulses + (e to now))
+    fun CarFxState.pulse(e: CarEffect) = copy(pulses = pulses + (e to now))
     return when (action) {
       AtaAction.DOOR_DRIVER_OPEN -> on(CarEffect.DOOR_DRIVER, 12_000)
       AtaAction.DOOR_PASSENGER_OPEN -> on(CarEffect.DOOR_PASSENGER, 12_000)
@@ -63,8 +64,15 @@ data class CarFxState(
       AtaAction.FLASH_LIGHTS -> pulse(CarEffect.LIGHTS)
       AtaAction.HONK -> pulse(CarEffect.HONK)
       AtaAction.WAKE -> pulse(CarEffect.WAKE)
-      AtaAction.LOCK -> pulse(CarEffect.LOCK)
-      AtaAction.UNLOCK -> pulse(CarEffect.UNLOCK)
+      AtaAction.LOCK -> pulse(CarEffect.LOCK).on(CarEffect.MIRRORS_FOLDED)
+      AtaAction.UNLOCK -> pulse(CarEffect.UNLOCK).off(CarEffect.MIRRORS_FOLDED)
+      AtaAction.CHARGE_START -> on(CarEffect.CHARGING, 10 * 60_000)
+      AtaAction.CHARGE_STOP -> off(CarEffect.CHARGING)
+      AtaAction.SENTRY_ON -> on(CarEffect.SENTRY)
+      AtaAction.SENTRY_OFF -> off(CarEffect.SENTRY)
+      AtaAction.REMOTE_DRIVE -> pulse(CarEffect.DRIVE)
+      AtaAction.MEDIA_TOGGLE, AtaAction.MEDIA_NEXT, AtaAction.MEDIA_PREVIOUS -> pulse(CarEffect.MEDIA)
+      AtaAction.SET_TEMPERATURE, AtaAction.OVERHEAT_PROTECTION_ON -> pulse(CarEffect.AIRFLOW)
       AtaAction.BOOMBOX_FART -> pulse(CarEffect.PUFF)
       AtaAction.BOOMBOX_LOCATE -> pulse(CarEffect.LOCATE)
       else -> this
