@@ -54,5 +54,7 @@ object ActionInfo {
     AtaAction.MEDIA_TOGGLE -> R.string.a_media_toggle
     AtaAction.MEDIA_NEXT -> R.string.a_media_next
     AtaAction.MEDIA_PREVIOUS -> R.string.a_media_previous
+    AtaAction.BOOMBOX_FART -> R.string.a_boombox_fart
+    AtaAction.BOOMBOX_LOCATE -> R.string.a_boombox_locate
   }
 }

@@ -48,6 +48,8 @@ for THEME in Dark Light; do
   restart; tap "Settings"; tap "Wear OS watch"; tap "Start"; sleep 5; shot "$t-15-wear-pair"; scroll; shot "$t-16-wear-pair-2"
   restart; tap "Settings"; scroll; scroll; scroll; scroll; tap "Send bug report"; sleep 6; shot "$t-17-report"; scroll; shot "$t-18-report-2"
   restart; tap "Settings"; scroll; scroll; scroll; tap "Set up NFC key card"; sleep 3; shot "$t-19-keycard"; scroll; shot "$t-20-keycard-2"
+  adb shell am start -S -W -n org.tfv.ata/.ui.MainActivity -a android.intent.action.VIEW -d ata://car3d >/dev/null; sleep 6; shot "$t-21-car3d"
+  adb shell input swipe 300 1200 900 1200 600; sleep 2; shot "$t-22-car3d-turned"
   adb shell am start -S -W -n org.tfv.ata/.shortcut.CreateShortcutActivity >/dev/null; sleep 3; shot "$t-9-create-shortcut"
 done
 ls -la "$OUT"

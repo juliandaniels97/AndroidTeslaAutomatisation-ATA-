@@ -57,7 +57,10 @@ fun ActionHost(
       val result = CommandDispatcher.run(context, action, state.selected, state.settings, value)
       if (isBle) vm.setConnecting(false)
       val success = result is CommandResult.Success
-      if (success && isBle) vm.recordCarLocation()
+      if (success && isBle) {
+        vm.recordCarLocation()
+        vm.onCarAction(action)
+      }
       vm.playFx(success, Geo.screenBearingToCar(context, state.settings, heading))
     }
   }

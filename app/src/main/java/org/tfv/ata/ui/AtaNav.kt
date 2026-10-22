@@ -24,6 +24,7 @@ import androidx.navigation.compose.rememberNavController
 import org.tfv.ata.R
 import org.tfv.ata.ui.screens.AboutScreen
 import org.tfv.ata.ui.screens.AutomationScreen
+import org.tfv.ata.ui.screens.Car3DScreen
 import org.tfv.ata.ui.screens.CarFinderScreen
 import org.tfv.ata.ui.screens.GuideScreen
 import org.tfv.ata.ui.screens.GuideTargets
@@ -101,6 +102,7 @@ fun AtaNavHost(vm: AtaViewModel, state: AtaUiState, pendingRoute: String? = null
           onAddVehicle = { nav.navigate("vehicles") },
           onPair = { nav.navigate("pair") },
           onFindCar = { nav.navigate("find_car") },
+          onOpen3d = { nav.navigate("car3d") },
         )
       }
       composable(Tab.SETTINGS.route) {
@@ -133,6 +135,7 @@ fun AtaNavHost(vm: AtaViewModel, state: AtaUiState, pendingRoute: String? = null
         WearPairScreen(vm, state, onBack = { nav.popBackStack() }, onReport = { nav.navigate("report") })
       }
       composable("report") { ReportScreen(onBack = { nav.popBackStack() }) }
+      composable("car3d") { Car3DScreen(vm, state, onBack = { nav.popBackStack() }) }
       composable("find_car") { CarFinderScreen(state, onBack = { nav.popBackStack() }) }
       composable("nfc_card") {
         KeyCardScreen(vm, state, onBack = { nav.popBackStack() }, onReport = { nav.navigate("report") })

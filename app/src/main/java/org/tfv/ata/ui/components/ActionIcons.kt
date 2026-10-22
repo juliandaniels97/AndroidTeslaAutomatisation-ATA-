@@ -12,6 +12,8 @@ import androidx.compose.material.icons.filled.Luggage
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material.icons.filled.Nightlight
+import androidx.compose.material.icons.filled.Cloud
+import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.PlayArrow
@@ -83,4 +85,6 @@ fun iconFor(action: AtaAction): ImageVector = when (action) {
   AtaAction.MEDIA_TOGGLE -> Icons.Filled.PlayArrow
   AtaAction.MEDIA_NEXT -> Icons.Filled.SkipNext
   AtaAction.MEDIA_PREVIOUS -> Icons.Filled.SkipPrevious
+  AtaAction.BOOMBOX_FART -> Icons.Filled.Cloud
+  AtaAction.BOOMBOX_LOCATE -> Icons.Filled.NotificationsActive
 }

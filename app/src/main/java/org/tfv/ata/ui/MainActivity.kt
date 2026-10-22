@@ -67,12 +67,15 @@ class MainActivity : FragmentActivity() {
   private fun routeFor(intent: Intent?): String? = when (intent?.data?.toString()) {
     WearContract.DEEP_LINK_WEAR_PAIR -> "wear_pair"
     DEEP_LINK_FIND_CAR -> "find_car"
+    DEEP_LINK_CAR_3D -> "car3d"
     else -> null
   }
 
   companion object {
     /** Opened by the "find my car" widget (explicit intent, not exported as a link). */
     const val DEEP_LINK_FIND_CAR = "ata://find-car"
+    /** Full-screen 3D car (explicit intent only). */
+    const val DEEP_LINK_CAR_3D = "ata://car3d"
   }
 
   override fun onResume() {

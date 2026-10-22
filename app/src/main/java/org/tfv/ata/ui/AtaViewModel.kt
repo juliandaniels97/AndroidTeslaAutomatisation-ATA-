@@ -70,6 +70,14 @@ class AtaViewModel(app: Application) : AndroidViewModel(app) {
   fun playFx(success: Boolean = true, bearing: Float? = null) {
     _fx.value = ActivationFx(System.nanoTime(), success, bearing)
   }
+  private val _carFx = MutableStateFlow(org.tfv.ata.ui.components.car.CarFxState())
+  /** Doors, lids, lights … the car drawing animates after an action reached the car. */
+  val carFx = _carFx.asStateFlow()
+
+  fun onCarAction(action: AtaAction) {
+    _carFx.value = _carFx.value.with(action, System.currentTimeMillis())
+  }
+
   fun markOnboarded() = viewModelScope.launch { store.updateSettings { it.copy(onboarded = true) } }
 
   fun recordCarLocation() = viewModelScope.launch {

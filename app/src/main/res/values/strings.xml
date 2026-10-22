@@ -6,7 +6,7 @@
     <string name="in_development">This feature is in development.</string>
     <string name="error_no_app">No matching app installed.</string>
     <string name="onboarding_title">Welcome to ATA</string>
-    <string name="onboarding_body">ATA controls and automates your Tesla — no account, no Fleet API, no cloud.\n\n▸ BASIC FEATURES\nOpen the Tesla app; jump to Charging/Climate/Controls/Location (BETA — may just open the app). Navigate Home/Work or any address (sent to the Tesla app, or Google Maps/Waze). Share a destination.\n\n▸ BLE FEATURES (BETA)\nEnable under Settings → Experimental, add your vehicle (VIN) and pair the phone key. Then lock/unlock, climate, charging, trunk/frunk, windows, sentry and more over Bluetooth, plus live status (battery, range, temperatures).\n\n▸ MAKE IT YOURS\nOn the Actions tab, long-press a tile to edit: drag to reorder, delete, re-add with +, then Save layout. Add vehicle actions via the star on the Vehicle tab or the + list. Pin any action as a shortcut, app-icon menu entry or widget (up to 8 tiles).\n\n▸ AUTOMATION\nTrigger actions from Samsung Routines or Tasker, and react to the car status (battery, charging, locked…) via ATA broadcasts.\n\nTip: set Home/Work addresses under Settings → Addresses — navigation works even without a saved vehicle.</string>
+    <string name="onboarding_body">ATA controls and automates your Tesla — no account, no Fleet API, no cloud.\n\n▸ BASIC FEATURES\nOpen the Tesla app; jump to Charging/Climate/Controls/Location (BETA — may just open the app). Navigate Home/Work or any address (sent to the Tesla app, or Google Maps/Waze). Share a destination.\n\n▸ BLE FEATURES\nEnable under Settings → Bluetooth &amp; NFC, add your vehicle (VIN) and pair the phone key. Then lock/unlock, climate, charging, trunk/frunk, windows, sentry and more over Bluetooth, plus live status (battery, range, temperatures).\n\n▸ MAKE IT YOURS\nOn the Actions tab, long-press a tile to edit: drag to reorder, delete, re-add with +, then Save layout. Add vehicle actions via the star on the Vehicle tab or the + list. Pin any action as a shortcut, app-icon menu entry or widget (up to 8 tiles).\n\n▸ AUTOMATION\nTrigger actions from Samsung Routines or Tasker, and react to the car status (battery, charging, locked…) via ATA broadcasts.\n\nTip: set Home/Work addresses under Settings → Addresses — navigation works even without a saved vehicle.</string>
     <string name="onboarding_cta">Let\'s go</string>
 
     <string name="tab_home">Actions</string>
@@ -144,11 +144,11 @@
     <string name="cmd_failed">Command failed</string>
     <string name="ble_pair">Pair this phone as a key</string>
     <string name="ble_pair_desc">Once, with a key card at the car. The assistant guides you step by step.</string>
-    <string name="section_experimental">Experimental</string>
+    <string name="section_experimental">Bluetooth &amp; NFC</string>
     <string name="settings_experimental_ble">Direct BLE control</string>
-    <string name="settings_experimental_ble_desc">Enable the in-development BLE features (direct Bluetooth control). Unverified; use at your own risk.</string>
+    <string name="settings_experimental_ble_desc">Controls the car directly over Bluetooth (after pairing the phone once). Some functions depend on the vehicle, e.g. opening doors, the power liftgate or the boombox sounds, and don\'t work on every model.</string>
     <string name="ble_enable_title">Enable BLE features</string>
-    <string name="ble_enable_desc">Direct Bluetooth control of your Tesla. You can turn it off again under Settings → Experimental.</string>
+    <string name="ble_enable_desc">Direct Bluetooth control of your Tesla. You can turn it off again under Settings → Bluetooth &amp; NFC.</string>
     <string name="activate">Activate</string>
     <string name="section_places">Addresses</string>
     <string name="settings_places_desc">Saved separately from vehicles, so navigation shortcuts (e.g. Navigate home) work even without a vehicle added.</string>
@@ -165,7 +165,7 @@
     <string name="result_failed">%1$s failed</string>
     <string name="result_blocked">%1$s blocked</string>
     <string name="deny_inactive">ATA is passive. Switch it to active to run automations.</string>
-    <string name="deny_ble_disabled">The BLE features are turned off (Settings → Experimental).</string>
+    <string name="deny_ble_disabled">The Bluetooth features are turned off (Settings → Bluetooth &amp; NFC).</string>
     <string name="deny_locked">Unlock your phone to run this command, or allow it in Settings → Automation.</string>
     <string name="deny_external">Not allowed for other apps. Use an ATA shortcut or allow it in Settings → Automation.</string>
     <string name="confirm_title">Run %1$s?</string>
@@ -241,7 +241,7 @@
     <string name="pair_intro">Your phone becomes its own Tesla key (separate from the Tesla app\'s phone key, both work side by side). The car must allow it once: you confirm with a key card that already works with the car.</string>
     <string name="pair_section_phone">1 · On the phone</string>
     <string name="pair_check_android">Android 12 or newer</string>
-    <string name="pair_check_ble">Direct BLE control (BETA) on</string>
+    <string name="pair_check_ble">Direct BLE control on</string>
     <string name="pair_action_enable">Turn on</string>
     <string name="pair_check_vehicle">Car with VIN added</string>
     <string name="pair_check_vehicle_missing">No car added yet.</string>
@@ -289,7 +289,7 @@
     <string name="guide_nfc_steps">Get an NFC sticker (NTAG213/215/216).\nTap \"Write tag\", pick an action and hold the sticker to the back of the phone.\nFrom then on, tapping the phone on the sticker runs the action (e.g. in the car holder).</string>
     <string name="guide_nfc_write">Write tag</string>
     <string name="guide_wear_steps">Install ATA on the watch (Play Store on the watch or the wear APK).\nPick the actions for the watch under \"Wear OS watch\": they sync automatically.\nTaps on the watch run on the phone; \"Open Tesla app\" opens it on the phone.\nOptional, so the watch works without the phone: \"Wear OS watch\" → \"Pair watch\" (assistant on the phone).</string>
-    <string name="guide_ble_title">Bluetooth control (BETA)</string>
+    <string name="guide_ble_title">Bluetooth control</string>
     <string name="guide_ble_steps">Turn on \"Direct BLE control\" and add a car with VIN.\nPair the phone once with the assistant (you need a working key card).\nThen the car tab, widgets and automations can lock, unlock, climate and more directly over Bluetooth.</string>
     <string name="guide_keycard_steps">Optional and BETA: the phone acts as an NFC key card.\nTurn on \"NFC key card\" in settings, then add it in the car like a card (Controls → Locks → Add key).\nThe phone only answers while it is unlocked.</string>
     <string name="guide_keycard_steps_tesla">The Tesla app is installed and already answers at the card reader. Keep ATA\'s NFC key card OFF: then there is no app chooser.\nIf you turn it on anyway, ATA only answers while ATA is open on screen. Otherwise the Tesla app answers as usual.\nDoes Android still ask? Open the NFC settings and check the default app for contactless use.</string>
@@ -437,4 +437,19 @@
     <string name="a_media_toggle">Media play/pause</string>
     <string name="a_media_next">Next track</string>
     <string name="a_media_previous">Previous track</string>
+    <string name="vehicle_specific_hint">Some functions depend on the vehicle (e.g. opening doors, power liftgate, boombox) and don\'t work on every model.</string>
+    <string name="a_boombox_fart">Fart sound</string>
+    <string name="a_boombox_locate">Locate sound</string>
+    <string name="hs_driver_door">Driver door</string>
+    <string name="hs_passenger_door">Passenger door</string>
+    <string name="hs_frunk">Frunk</string>
+    <string name="hs_trunk">Trunk</string>
+    <string name="hs_charge_port">Charge port</string>
+    <string name="hs_windows">Windows</string>
+    <string name="hs_lights">Lights &amp; sound</string>
+    <string name="hs_climate">Climate &amp; cabin</string>
+    <string name="hs_general">General</string>
+    <string name="car3d_hint">Drag to turn · tap the glowing spots</string>
+    <string name="car3d_open">Open the car in 3D</string>
+    <string name="car3d_reset">Reset view</string>
 </resources>

@@ -6,7 +6,7 @@
     <string name="in_development">Diese Funktion ist in Entwicklung.</string>
     <string name="error_no_app">Keine passende App installiert.</string>
     <string name="onboarding_title">Willkommen bei ATA</string>
-    <string name="onboarding_body">ATA steuert und automatisiert deinen Tesla — ohne Konto, ohne Fleet API, ohne Cloud.\n\n▸ BASISFUNKTIONEN\nTesla-App öffnen; zu Laden/Klima/Steuerung/Standort springen (BETA — öffnet ggf. nur die App). Nach Hause/Arbeit oder zu jeder Adresse navigieren (an die Tesla-App gesendet, oder Google Maps/Waze). Ziel teilen.\n\n▸ BLE-FEATURES (BETA)\nUnter Einstellungen → Experimentell aktivieren, Fahrzeug (VIN) hinzufügen und Telefonschlüssel koppeln. Dann ver-/entriegeln, Klima, Laden, Kofferraum/Frunk, Fenster, Wächtermodus u. v. m. über Bluetooth — plus Live-Status (Akku, Reichweite, Temperaturen).\n\n▸ ANPASSEN\nAuf dem Aktionen-Tab eine Kachel lange drücken: per Drag anordnen, löschen, mit + wieder hinzufügen, dann Darstellung speichern. Fahrzeugaktionen über den Stern im Fahrzeug-Tab oder die +-Liste hinzufügen. Jede Aktion als Shortcut, App-Icon-Menü oder Widget anheften (bis zu 8 Kacheln).\n\n▸ AUTOMATISIERUNG\nAktionen aus Samsung Routines oder Tasker auslösen und auf den Fahrzeugstatus (Akku, Laden, verriegelt …) über ATA-Broadcasts reagieren.\n\nTipp: Heimat-/Arbeitsadresse unter Einstellungen → Adressen festlegen — Navigation funktioniert auch ohne gespeichertes Fahrzeug.</string>
+    <string name="onboarding_body">ATA steuert und automatisiert deinen Tesla — ohne Konto, ohne Fleet API, ohne Cloud.\n\n▸ BASISFUNKTIONEN\nTesla-App öffnen; zu Laden/Klima/Steuerung/Standort springen (BETA — öffnet ggf. nur die App). Nach Hause/Arbeit oder zu jeder Adresse navigieren (an die Tesla-App gesendet, oder Google Maps/Waze). Ziel teilen.\n\n▸ BLE-FUNKTIONEN\nUnter Einstellungen → Bluetooth &amp; NFC aktivieren, Fahrzeug (VIN) hinzufügen und Telefonschlüssel koppeln. Dann ver-/entriegeln, Klima, Laden, Kofferraum/Frunk, Fenster, Wächtermodus u. v. m. über Bluetooth — plus Live-Status (Akku, Reichweite, Temperaturen).\n\n▸ ANPASSEN\nAuf dem Aktionen-Tab eine Kachel lange drücken: per Drag anordnen, löschen, mit + wieder hinzufügen, dann Darstellung speichern. Fahrzeugaktionen über den Stern im Fahrzeug-Tab oder die +-Liste hinzufügen. Jede Aktion als Shortcut, App-Icon-Menü oder Widget anheften (bis zu 8 Kacheln).\n\n▸ AUTOMATISIERUNG\nAktionen aus Samsung Routines oder Tasker auslösen und auf den Fahrzeugstatus (Akku, Laden, verriegelt …) über ATA-Broadcasts reagieren.\n\nTipp: Heimat-/Arbeitsadresse unter Einstellungen → Adressen festlegen — Navigation funktioniert auch ohne gespeichertes Fahrzeug.</string>
     <string name="onboarding_cta">Los geht\'s</string>
 
     <string name="tab_home">Aktionen</string>
@@ -144,11 +144,11 @@
     <string name="cmd_failed">Befehl fehlgeschlagen</string>
     <string name="ble_pair">Handy als Schlüssel koppeln</string>
     <string name="ble_pair_desc">Einmalig, mit einer Schlüsselkarte am Auto. Der Assistent führt dich Schritt für Schritt.</string>
-    <string name="section_experimental">Experimentell</string>
+    <string name="section_experimental">Bluetooth &amp; NFC</string>
     <string name="settings_experimental_ble">Direkte BLE-Steuerung</string>
-    <string name="settings_experimental_ble_desc">Aktiviert die in Entwicklung befindlichen BLE-Features (direkte Bluetooth-Steuerung). Ungetestet, Nutzung auf eigene Gefahr.</string>
+    <string name="settings_experimental_ble_desc">Steuert das Auto direkt per Bluetooth (nach einmaligem Koppeln des Handys). Manche Funktionen sind fahrzeugspezifisch, z. B. Türen öffnen, elektrische Heckklappe oder Boombox-Geräusche, und funktionieren nicht bei jedem Modell.</string>
     <string name="ble_enable_title">BLE-Features aktivieren</string>
-    <string name="ble_enable_desc">Direkte Bluetooth-Steuerung deines Tesla. Wieder deaktivieren unter Einstellungen → Experimentell.</string>
+    <string name="ble_enable_desc">Direkte Bluetooth-Steuerung deines Tesla. Wieder ausschalten unter Einstellungen → Bluetooth &amp; NFC.</string>
     <string name="activate">Aktivieren</string>
     <string name="section_places">Adressen</string>
     <string name="settings_places_desc">Getrennt von Fahrzeugen gespeichert, damit Navigations-Shortcuts (z. B. Nach Hause) auch ohne hinzugefügtes Fahrzeug funktionieren.</string>
@@ -165,7 +165,7 @@
     <string name="result_failed">%1$s fehlgeschlagen</string>
     <string name="result_blocked">%1$s blockiert</string>
     <string name="deny_inactive">ATA ist passiv. Schalte ATA aktiv, damit Automationen laufen.</string>
-    <string name="deny_ble_disabled">Die BLE-Funktionen sind ausgeschaltet (Einstellungen → Experimentell).</string>
+    <string name="deny_ble_disabled">Die Bluetooth-Funktionen sind ausgeschaltet (Einstellungen → Bluetooth &amp; NFC).</string>
     <string name="deny_locked">Entsperre dein Telefon oder erlaube es unter Einstellungen → Automation.</string>
     <string name="deny_external">Für andere Apps nicht erlaubt. Nutze einen ATA-Shortcut oder erlaube es unter Einstellungen → Automation.</string>
     <string name="confirm_title">%1$s ausführen?</string>
@@ -241,7 +241,7 @@
     <string name="pair_intro">Dein Handy wird ein eigener Tesla-Schlüssel (getrennt vom Handy-Schlüssel der Tesla-App, beide funktionieren nebeneinander). Das Auto muss das einmal erlauben: Du bestätigst mit einer Schlüsselkarte, die schon am Auto funktioniert.</string>
     <string name="pair_section_phone">1 · Am Handy</string>
     <string name="pair_check_android">Android 12 oder neuer</string>
-    <string name="pair_check_ble">Direkte BLE-Steuerung (BETA) an</string>
+    <string name="pair_check_ble">Direkte BLE-Steuerung an</string>
     <string name="pair_action_enable">Einschalten</string>
     <string name="pair_check_vehicle">Fahrzeug mit VIN angelegt</string>
     <string name="pair_check_vehicle_missing">Noch kein Fahrzeug angelegt.</string>
@@ -289,7 +289,7 @@
     <string name="guide_nfc_steps">NFC-Aufkleber besorgen (NTAG213/215/216).\n„Tag beschreiben“ antippen, Aktion wählen und den Aufkleber an die Handy-Rückseite halten.\nDanach startet das Antippen des Aufklebers die Aktion (z. B. an der Handyhalterung im Auto).</string>
     <string name="guide_nfc_write">Tag beschreiben</string>
     <string name="guide_wear_steps">ATA auf der Uhr installieren (Play Store auf der Uhr oder Wear-APK).\nUnter „Wear OS Uhr“ die Aktionen für die Uhr wählen: Sie werden automatisch übertragen.\nTaps auf der Uhr werden auf dem Handy ausgeführt, „Tesla App öffnen“ öffnet sie auf dem Handy.\nOptional, damit die Uhr ohne Handy funktioniert: „Wear OS Uhr“ → „Uhr koppeln“ (Assistent auf dem Handy).</string>
-    <string name="guide_ble_title">Bluetooth-Steuerung (BETA)</string>
+    <string name="guide_ble_title">Bluetooth-Steuerung</string>
     <string name="guide_ble_steps">„Direkte BLE-Steuerung“ einschalten und ein Fahrzeug mit VIN anlegen.\nDas Handy einmalig mit dem Assistenten koppeln (dafür brauchst du eine funktionierende Schlüsselkarte).\nDanach können Fahrzeug-Tab, Widgets und Automationen direkt per Bluetooth ver- und entriegeln, klimatisieren und mehr.</string>
     <string name="guide_keycard_steps">Optional und BETA: Das Handy funktioniert als NFC-Schlüsselkarte.\nIn den Einstellungen „NFC-Schlüsselkarte“ einschalten und im Auto wie eine Karte anlernen (Steuerung → Schlösser → Schlüssel hinzufügen).\nDas Handy antwortet nur, wenn es entsperrt ist.</string>
     <string name="guide_keycard_steps_tesla">Die Tesla-App ist installiert und antwortet bereits am Kartenleser. Lass die NFC-Schlüsselkarte von ATA AUS, dann erscheint keine App-Auswahl.\nSchaltest du sie trotzdem ein, antwortet ATA nur, solange ATA geöffnet ist. Sonst antwortet wie gewohnt die Tesla-App.\nFragt Android trotzdem? In den NFC-Einstellungen die Standard-App für kontaktlose Nutzung prüfen.</string>
@@ -437,4 +437,19 @@
     <string name="a_media_toggle">Musik Play/Pause</string>
     <string name="a_media_next">Nächster Titel</string>
     <string name="a_media_previous">Vorheriger Titel</string>
+    <string name="vehicle_specific_hint">Manche Funktionen sind fahrzeugspezifisch (z. B. Türen öffnen, elektrische Heckklappe, Boombox) und funktionieren nicht bei jedem Modell.</string>
+    <string name="a_boombox_fart">Furzgeräusch</string>
+    <string name="a_boombox_locate">Ortungston</string>
+    <string name="hs_driver_door">Fahrertür</string>
+    <string name="hs_passenger_door">Beifahrertür</string>
+    <string name="hs_frunk">Frunk</string>
+    <string name="hs_trunk">Kofferraum</string>
+    <string name="hs_charge_port">Ladeanschluss</string>
+    <string name="hs_windows">Fenster</string>
+    <string name="hs_lights">Licht &amp; Ton</string>
+    <string name="hs_climate">Klima &amp; Innenraum</string>
+    <string name="hs_general">Allgemein</string>
+    <string name="car3d_hint">Ziehen zum Drehen · leuchtende Punkte antippen</string>
+    <string name="car3d_open">Fahrzeug in 3D öffnen</string>
+    <string name="car3d_reset">Ansicht zurücksetzen</string>
 </resources>

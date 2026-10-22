@@ -58,7 +58,9 @@ enum class AtaAction(
   REMOTE_DRIVE("remote_drive", AtaCategory.FUNCTION_A, true, beta = true),
   MEDIA_TOGGLE("media_toggle", AtaCategory.FUNCTION_A, true, beta = true),
   MEDIA_NEXT("media_next", AtaCategory.FUNCTION_A, true, beta = true),
-  MEDIA_PREVIOUS("media_previous", AtaCategory.FUNCTION_A, true, beta = true);
+  MEDIA_PREVIOUS("media_previous", AtaCategory.FUNCTION_A, true, beta = true),
+  BOOMBOX_FART("boombox_fart", AtaCategory.FUNCTION_A, true, beta = true),
+  BOOMBOX_LOCATE("boombox_locate", AtaCategory.FUNCTION_A, true, beta = true);
 
   companion object {
     fun fromId(id: String?): AtaAction? = entries.firstOrNull { it.id == id }

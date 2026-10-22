@@ -60,6 +60,7 @@ fun VehicleScreen(
   onAddVehicle: () -> Unit = {},
   onPair: () -> Unit = {},
   onFindCar: () -> Unit = {},
+  onOpen3d: () -> Unit = {},
 ) {
   val context = LocalContext.current
   val scope = rememberCoroutineScope()
@@ -137,7 +138,8 @@ fun VehicleScreen(
         modifier = Modifier.fillMaxSize().padding(padding),
         header = {
           Column(Modifier.fillMaxWidth()) {
-            VehicleArt(snapshot)
+            val carFx by vm.carFx.collectAsStateWithLifecycle()
+            VehicleArt(snapshot, fx = carFx, onOpen = if (experimental) onOpen3d else null)
             Row(Modifier.fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.SpaceEvenly) {
               StatBox(stringResource(R.string.stat_battery), snapshot?.let { "${it.batteryPercent}%" } ?: "--")
               StatBox(stringResource(R.string.stat_range), snapshot?.let { "${it.rangeKm} km" } ?: "--")
@@ -151,6 +153,15 @@ fun VehicleScreen(
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
+                textAlign = TextAlign.Center,
+              )
+            }
+            if (experimental) {
+              Text(
+                stringResource(R.string.vehicle_specific_hint),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
                 textAlign = TextAlign.Center,
               )
             }
