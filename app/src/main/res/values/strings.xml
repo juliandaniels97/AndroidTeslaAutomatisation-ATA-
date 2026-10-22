@@ -76,10 +76,6 @@
     <string name="settings_poll">Status interval: %1$d min</string>
     <string name="settings_poll_desc">Requires the BLE features. 0 turns off background status (minimum 15 min). Background polls never wake the car: while it sleeps only the lock state is refreshed.</string>
 
-    <string name="section_proximity">Proximity unlock</string>
-    <string name="settings_proximity">Unlock when approaching</string>
-    <string name="settings_proximity_desc">Experimental. Disabled by default. Requires direct BLE (in development).</string>
-    <string name="settings_proximity_meters">Trigger distance: %1$d m</string>
 
     <string name="settings_about">About</string>
     <string name="about_version">Version %1$s</string>

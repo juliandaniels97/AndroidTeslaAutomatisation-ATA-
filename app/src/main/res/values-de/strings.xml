@@ -76,10 +76,6 @@
     <string name="settings_poll">Status-Intervall: %1$d Min</string>
     <string name="settings_poll_desc">Benötigt die BLE-Features. 0 deaktiviert Hintergrund-Abfragen (Minimum 15 Min). Hintergrund-Abfragen wecken das Auto nie: Schläft es, wird nur der Verriegelungsstatus aktualisiert.</string>
 
-    <string name="section_proximity">Entriegeln bei Annäherung</string>
-    <string name="settings_proximity">Bei Annäherung entriegeln</string>
-    <string name="settings_proximity_desc">Experimentell. Standardmäßig aus. Benötigt direktes BLE (in Entwicklung).</string>
-    <string name="settings_proximity_meters">Auslöse-Entfernung: %1$d m</string>
 
     <string name="settings_about">Über</string>
     <string name="about_version">Version %1$s</string>

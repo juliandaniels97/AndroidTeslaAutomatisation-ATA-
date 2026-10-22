@@ -330,8 +330,6 @@ until the car confirms. After that, tap to lock/unlock like a card.
 - **3D vehicle view** on or off (off: solid 2D side view); vehicle **type** per vehicle.
 - **Status interval**: how often ATA polls the car for a battery/range/climate snapshot over BLE
   (Off, or 15 min and up). Requires the BLE features.
-- **Proximity unlock (BETA)** is reserved for an upcoming release (see known limitations) and currently has no
-  effect.
 
 ## Known limitations
 
@@ -339,7 +337,6 @@ until the car confirms. After that, tap to lock/unlock like a card.
   have them.
 - The **boombox** (fart and locate sound) is not part of Tesla's Bluetooth protocol (only the cloud API
   offers it), so ATA can't trigger it.
-- **Proximity unlock** is not implemented — the setting is a placeholder and has no effect.
 - **Seat heater** has no BLE command mapped yet; the tile reports it as unavailable.
 - **Samsung Routines** only lists ATA's published app shortcuts (icon menu + routine actions, see
   above); whether the extra routine actions appear depends on the One UI version.

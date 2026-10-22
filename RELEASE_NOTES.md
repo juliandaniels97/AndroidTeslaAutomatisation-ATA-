@@ -3,6 +3,7 @@
 ### NFC-Schlüsselkarte
 - Die **NFC-Schlüsselkarte** (Handy und Uhr) ist **kein BETA mehr**. Sie funktioniert am Fahrzeug.
 - Auch sonst gibt es in der App **keine BETA-Hinweise mehr**, z. B. bei der Navigations-App „Tesla“.
+- Der Platzhalter **„Entriegeln bei Annäherung“** ist aus den Einstellungen verschwunden. Der Schalter hatte keine Funktion.
 
 ### Boombox entfernt
 - **Furzgeräusch und Ortungston** sind entfernt. Tesla bietet die Boombox nur über die Cloud (Fleet API) an, nicht über Bluetooth.

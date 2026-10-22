@@ -229,23 +229,6 @@ fun SettingsScreen(
       if (s.nfcKeyCard) KeyCardHint()
 
       HorizontalDivider()
-      SectionTitle(stringResource(R.string.section_proximity))
-      SwitchRow(stringResource(R.string.settings_proximity), stringResource(R.string.settings_proximity_desc), s.proximityUnlock) {
-        vm.updateSettings { it.copy(proximityUnlock = it.proximityUnlock.not()) }
-      }
-      if (s.proximityUnlock) {
-        var proxLocal by remember(s.proximityMeters) { mutableFloatStateOf(s.proximityMeters.toFloat()) }
-        Text(stringResource(R.string.settings_proximity_meters, proxLocal.toInt()), style = MaterialTheme.typography.titleSmall)
-        Slider(
-          value = proxLocal,
-          valueRange = 5f..100f,
-          steps = 18,
-          onValueChange = { proxLocal = (it / 5f).toInt() * 5f },
-          onValueChangeFinished = { vm.updateSettings { it.copy(proximityMeters = proxLocal.toInt()) } },
-        )
-      }
-
-      HorizontalDivider()
       LinkRow(stringResource(R.string.report_title), Icons.Filled.BugReport, onReport)
       LinkRow(stringResource(R.string.settings_about), Icons.Filled.Info, onAbout)
     }
