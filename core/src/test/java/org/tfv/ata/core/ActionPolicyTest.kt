@@ -94,4 +94,15 @@ class ActionPolicyTest {
     assertEquals(22, ActionPolicy.parseValue(AtaAction.SET_TEMPERATURE, "21,6"))
     assertEquals(16, ActionPolicy.parseValue(AtaAction.CHARGING_AMPS, " 16 "))
   }
+
+  @Test
+  fun proximityOnlyUnlocksAndAsksWhileLocked() {
+    val on = ble.copy(proximityUnlock = true)
+    assertEquals(allow, decide(AtaAction.UNLOCK, TriggerSource.PROXIMITY, locked = false, settings = on))
+    assertEquals(confirm, decide(AtaAction.UNLOCK, TriggerSource.PROXIMITY, locked = true, settings = on))
+    assertEquals(allow, decide(AtaAction.UNLOCK, TriggerSource.PROXIMITY, locked = true, settings = on.copy(proximityWhenLocked = true)))
+    // Switched off, or anything but unlocking: never.
+    assertEquals(PolicyDecision.Deny(DenyReason.NOT_ALLOWED_EXTERNAL), decide(AtaAction.UNLOCK, TriggerSource.PROXIMITY, settings = ble))
+    assertEquals(PolicyDecision.Deny(DenyReason.NOT_ALLOWED_EXTERNAL), decide(AtaAction.TRUNK, TriggerSource.PROXIMITY, settings = on))
+  }
 }

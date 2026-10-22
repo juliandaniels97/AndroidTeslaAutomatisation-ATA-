@@ -476,4 +476,18 @@
     <string name="design_material">Material</string>
     <string name="vehicle_paint">Lackierung</string>
     <string name="vehicle_neon_color">Neon-Farbe</string>
+    <string name="finder_direction">%1$s · ca. %2$d min zu Fuß</string>
+    <string name="finder_calibrate">Der Kompass ist unsicher: Handy ein paarmal in Form einer Acht schwenken.</string>
+    <string name="finder_no_compass">Dieses Handy hat keinen Kompass: Der Pfeil geht davon aus, dass die Oberkante nach Norden zeigt.</string>
+    <string name="finder_gps_rough">Position noch ungenau (±%1$d m), die Richtung kann abweichen. Kurz warten oder ins Freie gehen.</string>
+    <string name="section_proximity">Entriegeln bei Annäherung</string>
+    <string name="settings_proximity">Bei Annäherung entriegeln</string>
+    <string name="settings_proximity_desc">Entriegelt das Auto einmal, wenn du mit dem Handy darauf zugehst, gemessen an der Stärke des Bluetooth-Signals des Autos. Nur nachdem du weg warst, nie zweimal hintereinander.</string>
+    <string name="settings_proximity_meters">Entriegeln ab ca. %1$d m</string>
+    <string name="settings_proximity_locked">Auch bei gesperrtem Handy</string>
+    <string name="settings_proximity_locked_desc">Aus: Bei gesperrtem Handy fragt ATA vorher per Benachrichtigung.</string>
+    <string name="settings_proximity_hint">Die Entfernung ist ungefähr (die Signalstärke hängt von Auto, Handy, Tasche und Umgebung ab): einfach ausprobieren und anpassen. Solange die Funktion an ist, zeigt eine stille Benachrichtigung das an. Braucht Bluetooth und Standortzugriff.</string>
+    <string name="proximity_needs_ble">Zuerst die direkte Bluetooth-Steuerung einschalten.</string>
+    <string name="proximity_notif_title">Entriegeln bei Annäherung</string>
+    <string name="proximity_notif_text">Achtet auf das Auto in der Nähe</string>
 </resources>

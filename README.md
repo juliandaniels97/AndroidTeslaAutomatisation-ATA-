@@ -147,6 +147,15 @@ The Vehicle tab shows your car inside a **battery ring** (dark blue 100–80 %, 
   defence surrounds the car (not the cabin) with green fog. **Show animations** in the full‑screen view
   plays them all without sending anything to the car.
 
+#### Unlock when walking up
+
+**Settings → Unlock when approaching** unlocks the car once when you walk up to it with the phone. ATA watches
+the strength of the car's Bluetooth signal (filtered by the car's BLE name, so it also works with the screen off,
+or read from the Tesla app's existing connection) and unlocks when it rises above the distance you set
+(about 2–20 m). It only fires after you were away from the car, never right after starting next to it and not twice
+within two minutes. With the phone locked, ATA asks with a notification first, unless you allow it while locked.
+A quiet notification shows while it is on.
+
 ## Security
 
 ATA can open your car, so every request is checked by one policy (`ActionPolicy`) before it runs.
@@ -158,6 +167,7 @@ The trust level comes **only** from ATA's own per‑install token — never from
 | **ATA shortcuts, widgets, Samsung Routines, Tasker with token** | ✅ | ✅ — also while the phone is locked (switchable) | Notification **"Run …?"** → tap (+ biometrics if enabled). Per action you can allow it without asking (phone unlocked; optionally also locked) |
 | ATA watch app | ✅ | ✅ | ✅ after a confirming second tap on the unlocked watch |
 | NFC tag written by ATA | ✅ | ✅ | always asks via notification |
+| Proximity unlock (walking up to the car) | — | — | **Unlock only**: straight away with the phone unlocked; with the phone locked a notification asks first (unless allowed) |
 | Other apps, links, foreign tags (no token) | ✅ | only actions you allow under **Settings → Automation**, phone unlocked | ❌ never |
 
 - The BLE features stay off until you turn them on under **Settings → Bluetooth & NFC**, and

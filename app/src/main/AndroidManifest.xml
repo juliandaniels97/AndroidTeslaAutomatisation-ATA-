@@ -10,6 +10,7 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.NFC" />
     <!-- "Display over other apps": lets a watch tap or an automation open the Tesla app / navigation
          on the phone while ATA is in the background (Android blocks background activity starts otherwise). -->
@@ -63,6 +64,21 @@
             android:name=".automation.CommandService"
             android:exported="false"
             android:foregroundServiceType="connectedDevice" />
+
+        <!-- Proximity unlock: watches the car's Bluetooth signal while the setting is on. -->
+        <service
+            android:name=".proximity.ProximityService"
+            android:exported="false"
+            android:foregroundServiceType="connectedDevice" />
+
+        <receiver
+            android:name=".proximity.ProximityBootReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
 
         <!-- Entry point for ATA shortcuts (Samsung Routines), widgets, NFC tags and other apps.
              The trust level comes from ATA's token only; there is deliberately no BROWSABLE filter,

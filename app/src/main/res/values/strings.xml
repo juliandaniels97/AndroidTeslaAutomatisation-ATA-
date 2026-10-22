@@ -476,4 +476,18 @@
     <string name="design_material">Material</string>
     <string name="vehicle_paint">Paint</string>
     <string name="vehicle_neon_color">Neon colour</string>
+    <string name="finder_direction">%1$s · about %2$d min on foot</string>
+    <string name="finder_calibrate">The compass is unsure: move the phone in a figure 8 a few times.</string>
+    <string name="finder_no_compass">This phone has no compass: the arrow assumes the top of the phone points north.</string>
+    <string name="finder_gps_rough">Position still rough (±%1$d m): the direction may be off. Wait a moment or step outside.</string>
+    <string name="section_proximity">Unlock when approaching</string>
+    <string name="settings_proximity">Unlock when walking up</string>
+    <string name="settings_proximity_desc">Unlocks the car once when you walk up to it with the phone, measured by the strength of the car\'s Bluetooth signal. Only after you were away from the car, never twice in a row.</string>
+    <string name="settings_proximity_meters">Unlock from about %1$d m</string>
+    <string name="settings_proximity_locked">Also while the phone is locked</string>
+    <string name="settings_proximity_locked_desc">Off: with the phone locked, ATA asks with a notification first.</string>
+    <string name="settings_proximity_hint">The distance is approximate (signal strength depends on the car, phone, pocket and surroundings): try it out and adjust. A quiet notification shows while proximity unlock is on. Needs Bluetooth and location access.</string>
+    <string name="proximity_needs_ble">Turn on Direct BLE control first.</string>
+    <string name="proximity_notif_title">Unlock when walking up</string>
+    <string name="proximity_notif_text">Watching for the car nearby</string>
 </resources>

@@ -124,8 +124,12 @@ data class AtaSettings(
   val carLat: Double = 0.0,
   val carLng: Double = 0.0,
   val carLocAt: Long = 0,
+  /** Unlock when walking up to the car (Bluetooth signal strength, see ProximityDetector). */
   val proximityUnlock: Boolean = false,
-  val proximityMeters: Int = 30,
+  /** Distance at which the car unlocks, 2 … 20 m (approximate). */
+  val proximityMeters: Int = 5,
+  /** Also unlock while the phone is locked (otherwise ATA asks with a notification). */
+  val proximityWhenLocked: Boolean = false,
   val homeActionIds: List<String> = emptyList(),
   val vehicleActionIds: List<String> = emptyList(),
   val wearActionIds: List<String> = emptyList(),

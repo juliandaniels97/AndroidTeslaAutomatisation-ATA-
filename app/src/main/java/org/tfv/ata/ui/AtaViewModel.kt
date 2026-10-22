@@ -96,6 +96,7 @@ class AtaViewModel(app: Application) : AndroidViewModel(app) {
     viewModelScope.launch {
       val s = store.settings.first()
       StatusPoller.sync(getApplication(), s)
+      org.tfv.ata.proximity.ProximityService.sync(getApplication(), s, currentVehicle())
     }
     pushWearConfig()
   }
@@ -127,6 +128,7 @@ class AtaViewModel(app: Application) : AndroidViewModel(app) {
     store.updateSettings(transform)
     val after = store.settings.first()
     if (before.wearGrid != after.wearGrid || before.wearComplicationIds != after.wearComplicationIds) pushWearConfig()
+    org.tfv.ata.proximity.ProximityService.sync(getApplication(), after, currentVehicle())
     ShortcutSync.refresh(getApplication())
     StatusPoller.sync(getApplication(), store.settings.first())
     runCatching {
@@ -200,6 +202,7 @@ class AtaViewModel(app: Application) : AndroidViewModel(app) {
     store.saveVehicles(merged)
     if (current.none { it.id == vehicle.id }) store.selectVehicle(vehicle.id)
     pushWearConfig()
+    org.tfv.ata.proximity.ProximityService.sync(getApplication(), store.settings.first(), currentVehicle())
   }
 
   fun addVehicle(name: String, vin: String, home: String, work: String, bodyStyle: String = "") =

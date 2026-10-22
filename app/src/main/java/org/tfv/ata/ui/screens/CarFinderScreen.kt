@@ -23,7 +23,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.MyLocation
-import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -43,7 +42,19 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
+import androidx.compose.foundation.Canvas
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -53,7 +64,8 @@ import kotlinx.coroutines.launch
 import org.tfv.ata.R
 import org.tfv.ata.geo.CarFinder
 import org.tfv.ata.geo.Geo
-import org.tfv.ata.geo.rememberDeviceHeading
+import org.tfv.ata.geo.rememberCompass
+import org.tfv.ata.geo.shortestTurn
 import androidx.glance.appwidget.updateAll
 import org.tfv.ata.data.AtaStore
 import org.tfv.ata.widget.CarFinderWidget
@@ -72,7 +84,7 @@ fun CarFinderScreen(state: AtaUiState, onBack: () -> Unit) {
     permissionTick++
   }
   val me = rememberLiveLocation(context, hasPermission)
-  val heading by rememberDeviceHeading(enabled = true)
+  val compass by rememberCompass(enabled = true, location = me)
   val car = CarFinder.carLocation(state.settings)
   val palette = AtaColors.current
 
@@ -105,23 +117,27 @@ fun CarFinderScreen(state: AtaUiState, onBack: () -> Unit) {
         else -> {
           val distance = me.distanceTo(car)
           val bearing = me.bearingTo(car)
-          val rotation by animateFloatAsState(targetValue = normalize(bearing - heading), label = "arrow")
           if (distance < 15f) {
             Text(stringResource(R.string.finder_here), style = MaterialTheme.typography.headlineSmall, color = palette.success)
           } else {
-            Icon(
-              Icons.Filled.Navigation,
-              contentDescription = null,
-              tint = palette.accent,
-              modifier = Modifier.size(220.dp).rotate(rotation),
-            )
+            CompassDial(heading = compass.degrees, bearing = bearing, available = compass.available)
           }
           Text(CarFinder.distanceText(distance), style = MaterialTheme.typography.displaySmall, fontWeight = FontWeight.Bold)
-          Text(CarFinder.cardinal(context, bearing), style = MaterialTheme.typography.titleMedium)
           Text(
-            stringResource(R.string.finder_gps_accuracy, me.accuracy.toInt()),
+            stringResource(R.string.finder_direction, CarFinder.cardinal(context, bearing), ((distance / 1.3f) / 60f).toInt().coerceAtLeast(1)),
+            style = MaterialTheme.typography.titleMedium,
+          )
+          if (!compass.available) {
+            Text(stringResource(R.string.finder_no_compass), style = MaterialTheme.typography.bodySmall, color = palette.warning, textAlign = TextAlign.Center)
+          } else if (!compass.reliable) {
+            Text(stringResource(R.string.finder_calibrate), style = MaterialTheme.typography.bodySmall, color = palette.warning, textAlign = TextAlign.Center)
+          }
+          Text(
+            if (me.accuracy > distance) stringResource(R.string.finder_gps_rough, me.accuracy.toInt())
+            else stringResource(R.string.finder_gps_accuracy, me.accuracy.toInt()),
             style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = if (me.accuracy > distance) palette.warning else MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
           )
         }
       }
@@ -165,7 +181,64 @@ fun CarFinderScreen(state: AtaUiState, onBack: () -> Unit) {
   }
 }
 
-private fun normalize(degrees: Float): Float = ((degrees % 360) + 360) % 360
+/**
+ * Compass rose that turns with the phone (N points north), the car marked on the rim and a big arrow pointing
+ * at it. Turns the shortest way round; a short vibration when the phone faces the car.
+ */
+@Composable
+private fun CompassDial(heading: Float, bearing: Float, available: Boolean) {
+  val palette = AtaColors.current
+  val haptics = LocalHapticFeedback.current
+  val scheme = MaterialTheme.colorScheme
+  val textMeasurer = rememberTextMeasurer()
+  // Continuous angles (no jump at 0°/360°), so the animation always takes the short way.
+  val angles = remember { floatArrayOf(-heading, bearing - heading) }
+  angles[0] += shortestTurn(angles[0], -heading)
+  angles[1] += shortestTurn(angles[1], bearing - heading)
+  val dialAnim by animateFloatAsState(angles[0], label = "dial")
+  val arrowAnim by animateFloatAsState(angles[1], label = "arrow")
+  val onTarget = available && kotlin.math.abs(shortestTurn(0f, bearing - heading)) < 8f
+  LaunchedEffect(onTarget) { if (onTarget) haptics.performHapticFeedback(HapticFeedbackType.LongPress) }
+  val cardinals = listOf("N", "O", "S", "W").let { if (java.util.Locale.getDefault().language == "de") it else listOf("N", "E", "S", "W") }
+
+  Canvas(Modifier.size(280.dp)) {
+    val c = center
+    val r = size.minDimension / 2f - 8f
+    drawCircle(scheme.surfaceVariant.copy(alpha = .5f), r, c)
+    drawCircle(scheme.outlineVariant, r, c, style = Stroke(2f))
+    rotate(dialAnim, c) {
+      for (i in 0 until 72) {
+        val major = i % 9 == 0
+        val len = if (major) 18f else if (i % 3 == 0) 11f else 6f
+        val a = Math.toRadians(i * 5.0)
+        val from = Offset(c.x + (r - len) * kotlin.math.sin(a).toFloat(), c.y - (r - len) * kotlin.math.cos(a).toFloat())
+        val to = Offset(c.x + r * kotlin.math.sin(a).toFloat(), c.y - r * kotlin.math.cos(a).toFloat())
+        drawLine(if (i == 0) palette.critical else scheme.onSurfaceVariant.copy(alpha = if (major) .9f else .45f), from, to, if (major) 4f else 2f, StrokeCap.Round)
+      }
+      cardinals.forEachIndexed { k, label ->
+        val a = Math.toRadians(k * 90.0)
+        val layout = textMeasurer.measure(label, TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Bold, color = if (k == 0) palette.critical else scheme.onSurface))
+        val pos = Offset(c.x + (r - 40f) * kotlin.math.sin(a).toFloat(), c.y - (r - 40f) * kotlin.math.cos(a).toFloat())
+        rotate(-dialAnim, pos) {
+          drawText(layout, topLeft = Offset(pos.x - layout.size.width / 2f, pos.y - layout.size.height / 2f))
+        }
+      }
+    }
+    // Car on the rim and the arrow towards it.
+    rotate(arrowAnim, c) {
+      drawCircle(if (onTarget) palette.success else palette.accent, 14f, Offset(c.x, c.y - r + 2f))
+      val tip = Offset(c.x, c.y - r * .62f)
+      val path = Path().apply {
+        moveTo(tip.x, tip.y)
+        lineTo(c.x + r * .2f, c.y + r * .22f)
+        lineTo(c.x, c.y + r * .1f)
+        lineTo(c.x - r * .2f, c.y + r * .22f)
+        close()
+      }
+      drawPath(path, if (onTarget) palette.success else palette.accent)
+    }
+  }
+}
 
 /** The phone's position, updated every second while the screen is shown. */
 @SuppressLint("MissingPermission") // checked by the caller (hasPermission)
