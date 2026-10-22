@@ -190,7 +190,9 @@ fun DrawScope.drawNeonCar(
       val mid = (a.offset.x + b.offset.x) / 2f
       val spec = exp(-((mid - highlightX) / (area.width * .11f)).let { it * it })
       val c = lerp(color, style.white, spec * .65f)
-      drawLine(c.copy(alpha = alpha * (.38f + .62f * depth.coerceIn(0f, 1f))), a.offset, b.offset, width, StrokeCap.Round)
+      // Lines further back fade (less on light backgrounds, where faint lines would vanish).
+      val near = if (style.glow) .38f else .62f
+      drawLine(c.copy(alpha = alpha * (near + (1 - near) * depth.coerceIn(0f, 1f))), a.offset, b.offset, width, StrokeCap.Round)
     }
   }
 
@@ -260,7 +262,11 @@ fun DrawScope.drawNeonCar(
         }
         fill(f.points, lit(base, f.normal))
       }
+    for (side in nearSides) {
+      for ((s2, zc) in shape.wheelCenters) if (s2 == side) fill(shape.archLiner(side, zc), solid.trim)
+    }
     wheels(nearSides)
+    for (side in nearSides) polyline(shape.sideCamera(side), solid.trim, width = style.lineWidth * 1.6f)
   }
 
   // Interior effects (neon: seen through the glass, drawn first; solid: on top of the glass).
@@ -450,23 +456,40 @@ fun DrawScope.drawNeonCar(
   val breathe = if (solid != null) 1f else .72f + .28f * sin(t * 1.3f)
   // Wake: the light bars light up from the middle outwards.
   val wakeLight = wakeP?.let { (it * 2.2f).coerceIn(0f, 1f) }
-  if (solid != null) {
-    // Dark lenses behind the light strips.
-    shape.headlights.forEach { polyline(it, solid.trim, width = style.lineWidth * 3.4f) }
-    polyline(shape.taillight, Color(0xFF3A0B0E), width = style.lineWidth * 3.4f)
+  // The real cars' light signature (lenses, strips, light bars). Neon draws it as glowing lines (seen through
+  // the car), the solid body only on the side facing the viewer.
+  val front = V3(0f, .2f, 1f)
+  val back = V3(0f, .2f, -1f)
+  fun visible(normal: V3, limit: Float) = solid == null || camera.facing(normal) > limit
+  val headLines: List<List<V3>> = buildList {
+    shape.headLenses.filter { visible(it.normal, -.15f) }.forEach { add(it.strip) }
+    shape.frontBar?.takeIf { visible(front, -.2f) }?.let { add(it) }
   }
-  shape.headlights.forEach { polyline(it, style.white, width = style.lineWidth * 1.3f, alpha = breathe) }
-  polyline(shape.taillight, style.red, width = style.lineWidth * 1.3f, alpha = (.75f + .25f * breathe) + .1f * lightBoost)
+  val tailLines: List<List<V3>> = buildList {
+    shape.tailLenses.filter { visible(it.normal, -.15f) }.forEach { add(it.strip) }
+    shape.rearBar?.takeIf { visible(back, -.2f) }?.let { add(it) }
+  }
+  if (solid != null) {
+    shape.headLenses.filter { visible(it.normal, -.15f) }.forEach { fill(it.outline, solid.trim) }
+    shape.tailLenses.filter { visible(it.normal, -.15f) }.forEach { fill(it.outline, Color(0xFF5A0A10)) }
+  } else {
+    // Lens outlines as faint lines around the light strips.
+    shape.headLenses.forEach { polyline(it.outline + it.outline.first(), style.white, width = style.lineWidth * .7f, alpha = .35f) }
+    shape.tailLenses.forEach { polyline(it.outline + it.outline.first(), style.red, width = style.lineWidth * .7f, alpha = .35f) }
+  }
+  headLines.forEach { polyline(it, style.white, width = style.lineWidth * 1.3f, alpha = breathe) }
+  tailLines.forEach { polyline(it, style.red, width = style.lineWidth * 1.3f, alpha = (.75f + .25f * breathe) + .1f * lightBoost) }
   if (wakeLight != null) {
     val fade = 1f - (((wakeP ?: 1f) - .5f) / .5f).coerceIn(0f, 1f)
-    shape.headlights.forEach { polyline(it.take((it.size * wakeLight).toInt().coerceAtLeast(2)), style.white, width = style.lineWidth * 2.4f, alpha = fade) }
-    val tail = shape.taillight
-    val mid = tail.size / 2
-    val half = (mid * wakeLight).toInt()
-    polyline(tail.subList((mid - half).coerceAtLeast(0), (mid + half + 1).coerceAtMost(tail.size)), style.red, width = style.lineWidth * 2.4f, alpha = fade)
+    headLines.forEach { polyline(it.take((it.size * wakeLight).toInt().coerceAtLeast(2)), style.white, width = style.lineWidth * 2.4f, alpha = fade) }
+    tailLines.forEach { tail ->
+      val mid = tail.size / 2
+      val half = (mid * wakeLight).toInt()
+      polyline(tail.subList((mid - half).coerceAtLeast(0), (mid + half + 1).coerceAtMost(tail.size)), style.red, width = style.lineWidth * 2.4f, alpha = fade)
+    }
   }
-  if (drive != null) shape.headlights.forEach { polyline(it, style.white, width = style.lineWidth * 2.2f, alpha = sin(drive * PI).toFloat()) }
-  if (lightBoost > 0f) {
+  if (drive != null) headLines.forEach { polyline(it, style.white, width = style.lineWidth * 2.2f, alpha = sin(drive * PI).toFloat()) }
+  if (lightBoost > 0f && (solid == null || camera.facing(front) > -.1f)) {
     for (p in listOf(shape.headlightLeft, shape.headlightRight)) {
       val c = camera.project(p)
       val r = area.minDimension * .16f

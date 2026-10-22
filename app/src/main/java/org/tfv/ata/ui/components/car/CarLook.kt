@@ -49,7 +49,8 @@ fun rememberCarLook(vehicle: Vehicle?, dark: Boolean = AtaColors.current.isDark,
   }
   val neon = Color((vehicle?.carNeon ?: org.tfv.ata.core.NeonColor.BLUE).argb)
   return CarLook(
-    style = NeonStyle(line = if (dark) neon else lerp(neon, Color.Black, .35f), glow = dark, lineWidth = if (dark) lineWidth else lineWidth + .6f),
+    // On light backgrounds the lines get darker and a bit stronger, so they read like ink instead of light.
+    style = NeonStyle(line = if (dark) neon else lerp(neon, Color(0xFF06121F), .5f), glow = dark, lineWidth = if (dark) lineWidth else lineWidth + 1f),
     flat = FlatStyle(palette.carBody, palette.carGlass, palette.accent, dark),
     material = false,
   )

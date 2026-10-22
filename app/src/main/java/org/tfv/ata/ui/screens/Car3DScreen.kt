@@ -91,6 +91,7 @@ import org.tfv.ata.ui.components.iconFor
 import kotlin.math.roundToInt
 
 private val SHOWROOM = Color(0xFF04060B)
+private val SHOWROOM_LIGHT = Color(0xFFEEF2F7)
 
 /** Animation demo: what plays one after another (drawing only, nothing is sent to the car). */
 private val DEMO_STEPS: List<List<AtaAction>> = listOf(
@@ -199,11 +200,16 @@ fun Car3DScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit) {
   val status = CarStatus(snapshot?.charging == true, snapshot?.climateOn == true, snapshot?.sentry == true, if (known) snapshot?.batteryPercent else null)
   val palette = AtaColors.current
   val material = palette.material
-  // Neon: always the dark showroom; Material: the app's surface in light or dark.
-  val look = rememberCarLook(state.selected, dark = if (material) palette.isDark else true, lineWidth = 3f)
+  // Neon: dark or light showroom; Material: the app's surface. Both follow the light / dark theme.
+  val dark = palette.isDark
+  val look = rememberCarLook(state.selected, dark = dark, lineWidth = 3f)
   val scheme = MaterialTheme.colorScheme
-  val bg = if (material) scheme.surface else SHOWROOM
-  val fg = if (material) scheme.onSurface else Color.White
+  val bg = when {
+    material -> scheme.surface
+    dark -> SHOWROOM
+    else -> SHOWROOM_LIGHT
+  }
+  val fg = if (material || !dark) scheme.onSurface else Color.White
   val accent = look.style.line
   val pulse by rememberInfiniteTransition(label = "spots").animateFloat(
     initialValue = .85f,
@@ -241,7 +247,7 @@ fun Car3DScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit) {
         if (threeD) drawNeonCar(shape, camera, yaw, fx, status, now, look.style)
         else drawFlatCar(shape, camera, fx, status, now, look.flat)
         if (known) {
-          drawBatteryRing(Offset(size.width / 2f, size.height * .86f), size.minDimension * .07f, snapshot?.batteryPercent, status.charging, now, !material, accent, width = 8f, material = material)
+          drawBatteryRing(Offset(size.width / 2f, size.height * .86f), size.minDimension * .07f, snapshot?.batteryPercent, status.charging, now, !material && dark, accent, width = 8f, material = material)
         }
       }
 
@@ -265,7 +271,16 @@ fun Car3DScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit) {
             } else {
               Box(Modifier.size(34.dp).background(accent.copy(alpha = .22f), CircleShape).border(1.5.dp, accent, CircleShape))
             }
-            Icon(spotIcon(spot), contentDescription = stringResource(titleFor(spot)), tint = if (material) scheme.onPrimaryContainer else Color.White, modifier = Modifier.size(18.dp))
+            Icon(
+              spotIcon(spot),
+              contentDescription = stringResource(titleFor(spot)),
+              tint = when {
+                material -> scheme.onPrimaryContainer
+                dark -> Color.White
+                else -> accent
+              },
+              modifier = Modifier.size(18.dp),
+            )
           }
         }
       }

@@ -66,6 +66,9 @@ adb shell am start -S -W -n org.tfv.ata/.ui.MainActivity -a android.intent.actio
 demo "demo-2d"
 restart; tap "Settings"; scroll; tap "3D vehicle view"
 
+# From here on a Model Y (the Cybertruck VIN stays, the type is set by hand).
+restart; tap "Settings"; tap "Vehicles"; tap "Edit vehicle"; tap "Model Y"; tap "Save"
+
 # README: vehicle view with the BLE action tiles (BLE features on).
 restart; tap "Vehicle"; tapswitch
 for b in "Allow" "While using the app" "Allow" "While using the app"; do tap "$b"; done
@@ -73,7 +76,7 @@ restart; tap "Vehicle"; sleep 3; shot "readme-vehicle"
 
 for THEME in Dark Light; do
   t=$(echo $THEME | tr A-Z a-z)
-  restart; tap "Settings"; tap "$THEME"
+  restart; tap "Settings"; scroll; tap "$THEME"
   restart; shot "$t-1-home"
   tap "Vehicle"; shot "$t-2-vehicle"; scroll; shot "$t-2b-vehicle"
   tap "Settings"; shot "$t-3-settings"; scroll; shot "$t-4-settings-2"; scroll; shot "$t-5-settings-3"
@@ -89,6 +92,7 @@ for THEME in Dark Light; do
   restart; tap "Settings"; scroll; scroll; scroll; tap "Set up NFC key card"; sleep 3; shot "$t-19-keycard"; scroll; shot "$t-20-keycard-2"
   adb shell am start -S -W -n org.tfv.ata/.ui.MainActivity -a android.intent.action.VIEW -d ata://car3d >/dev/null; sleep 6; shot "$t-21-car3d"
   adb shell input swipe 300 1200 900 1200 600; sleep 2; shot "$t-22-car3d-turned"
+  tap "Show animations"; sleep 0.5; for n in 1 2 3 4 5 6 7; do sleep 3.2; shot "$t-demo-$n"; done
   adb shell am start -S -W -n org.tfv.ata/.shortcut.CreateShortcutActivity >/dev/null; sleep 3; shot "$t-9-create-shortcut"
 done
 # Material design in dark and light (Model Y in its default paint).
@@ -96,7 +100,7 @@ for THEME in Dark Light; do
   t=$(echo $THEME | tr A-Z a-z)
   restart; tap "Settings"; scroll; tap "Material"; tap "$THEME"
   if [ "$t" = dark ]; then
-    restart; tap "Settings"; tap "Vehicles"; tap "Edit vehicle"; tap "Model Y"; shot "m-$t-4-editor"; tap "Save"
+    restart; tap "Settings"; tap "Vehicles"; tap "Edit vehicle"; shot "m-$t-4-editor"; tap "Cancel"
   else
     restart; tap "Settings"; tap "Vehicles"; tap "Edit vehicle"; shot "m-$t-4-editor"; tap "Cancel"
   fi

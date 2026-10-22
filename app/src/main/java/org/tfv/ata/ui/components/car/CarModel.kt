@@ -40,6 +40,19 @@ data class BodySpec(
   val angular: Boolean = false,
   /** Four doors (false: coupé, no rear seats). */
   val rearDoors: Boolean = true,
+  /** Light design of the real car (used by the Material design). */
+  val lights: Lights = Lights(),
+)
+
+/**
+ * Which lights the real car has: slim swept headlights, a light bar across the front, taillights wrapping
+ * round the rear corners and/or a light bar across the back.
+ */
+data class Lights(
+  val sweptHeads: Boolean = true,
+  val frontBar: Boolean = false,
+  val wrapTails: Boolean = true,
+  val rearBar: Boolean = false,
 )
 
 object CarModel {
@@ -53,6 +66,7 @@ object CarModel {
       2.37f, .98f, .40f,
       listOf(2.40f to .80f, 1.50f to .98f, .90f to 1.30f, .30f to 1.58f, -.70f to 1.60f, -1.45f to 1.52f, -2.05f to 1.25f, -2.37f to 1.08f), .56f,
       .80f, 1.04f, 1.08f, .30f, -1.35f, .62f, 1.60f, 1.25f, -2.0f, 1.45f, -1.45f, .36f, -.28f,
+      lights = Lights(frontBar = true, wrapTails = false, rearBar = true),
     ),
     BodyStyle.MODEL_S to BodySpec(
       2.5f, .98f, .35f,
@@ -68,11 +82,13 @@ object CarModel {
       2.85f, 1.0f, .48f,
       listOf(2.88f to .98f, 1.95f to 1.12f, .05f to 1.92f, -2.85f to 1.22f), .62f,
       .98f, 1.08f, 1.22f, .30f, -.25f, .55f, 1.90f, 1.95f, -.90f, 1.85f, -1.85f, .42f, -.45f, angular = true,
+      lights = Lights(sweptHeads = false, frontBar = true, wrapTails = false, rearBar = true),
     ),
     BodyStyle.ROADSTER to BodySpec(
       2.15f, .98f, .32f,
       listOf(2.17f to .60f, 1.30f to .78f, .65f to 1.02f, .05f to 1.15f, -.65f to 1.13f, -1.45f to .98f, -2.15f to .82f), .52f,
       .60f, .86f, .84f, .10f, -.60f, .52f, 1.15f, .95f, -1.45f, 1.35f, -1.35f, .34f, -.45f, rearDoors = false,
+      lights = Lights(wrapTails = false, rearBar = true),
     ),
   )
   private val shapes = HashMap<BodyStyle, CarShape>()
@@ -186,12 +202,6 @@ class CarShape(private val s: BodySpec) {
     }
   }
 
-  val headlights: List<List<V3>> =
-    if (s.angular) listOf(listOf(V3(-w * .7f, s.beltFront + .02f, l + .02f), V3(w * .7f, s.beltFront + .02f, l + .02f)))
-    else listOf(1f, -1f).map { side ->
-      CarModel.smooth(listOf(V3(side * .30f, s.beltFront + .06f, l), V3(side * .64f * w, s.beltFront + .09f, l - .1f), V3(side * .9f * w, s.beltFront + .14f, l - .45f)))
-    }
-  val taillight: List<V3> = line(listOf(V3(-w * .8f, s.beltRear, -l + .08f), V3(0f, s.beltRear + .01f, -l - .03f), V3(w * .8f, s.beltRear, -l + .08f)))
 
   /** Front edge of the front doors: behind the windscreen base and the front wheel arch. */
   val doorFront = minOf(s.windscreenBase - .08f, s.wheelFront - s.wheelRadius - .12f)
@@ -459,6 +469,61 @@ class CarShape(private val s: BodySpec) {
     return listOf(lines[2][0], lines[2][1], lines[1][1]) + lines[3].reversed()
   }
   fun doorWindow(side: Float): List<V3> = listOf(frontDoor(side)[1][1]) + frontDoor(side)[3].reversed()
+
+  // ---- Light signatures of the current cars (Model 3 "Highland", Model Y "Juniper" …) ----
+
+  /** A light lens: its outline and which way it faces (for hiding it when the car is turned away). */
+  class Lens(val outline: List<V3>, val normal: V3, val strip: List<V3>)
+
+  private val bf = s.beltFront
+  private val br = s.beltRear
+
+  /** Slim headlights sweeping back into the fenders, with the daytime-running-light strip on top. */
+  val headLenses: List<Lens> = if (!s.lights.sweptHeads) emptyList() else listOf(-1f, 1f).map { side ->
+    val low = if (s.lights.frontBar) -.05f else 0f
+    val top = listOf(V3(side * .36f * w, bf + .02f + low, l - .02f), V3(side * .62f * w, bf + .06f + low, l - .12f), V3(side * .88f * w, bf + .1f + low, l - .42f))
+    val bottom = listOf(V3(side * .9f * w, bf + .03f + low, l - .46f), V3(side * .66f * w, bf - .03f + low, l - .15f), V3(side * .4f * w, bf - .04f + low, l - .04f))
+    Lens(CarModel.smooth(top, steps = 4) + bottom, V3(side * .45f, .25f, .85f), CarModel.smooth(top, steps = 4))
+  }
+
+  /** Light bar across the nose (new Model Y, Cybertruck). */
+  val frontBar: List<V3>? = if (!s.lights.frontBar) null else line(
+    listOf(V3(-.86f * w, bf + .06f, l - .3f), V3(-.5f * w, bf + .07f, l - .02f), V3(0f, bf + .07f, l + .04f), V3(.5f * w, bf + .07f, l - .02f), V3(.86f * w, bf + .06f, l - .3f)),
+  )
+
+  /** Taillights wrapping round the rear corners onto the sides. */
+  val tailLenses: List<Lens> = if (!s.lights.wrapTails) emptyList() else listOf(-1f, 1f).map { side ->
+    val outline = listOf(
+      V3(side * .42f * w, br - .02f, -l - .01f), V3(side * .78f * w, br, -l + .08f), V3(side * .97f * w, br - .02f, -l * .82f),
+      V3(side * .99f * w, br - .11f, -l * .8f), V3(side * .8f * w, br - .13f, -l + .1f), V3(side * .44f * w, br - .12f, -l),
+    )
+    // C-shaped light signature (Model 3 "Highland"): along the top, round the corner and back along the bottom.
+    val c = CarModel.smooth(
+      listOf(
+        V3(side * .5f * w, br - .03f, -l - .005f), V3(side * .84f * w, br - .02f, -l + .1f), V3(side * .975f * w, br - .05f, -l * .815f),
+        V3(side * .96f * w, br - .1f, -l * .81f), V3(side * .82f * w, br - .115f, -l + .1f), V3(side * .52f * w, br - .105f, -l - .005f),
+      ),
+      steps = 4,
+    )
+    Lens(outline, V3(side * .5f, .1f, -.85f), c)
+  }
+
+  /** Light bar across the back. */
+  val rearBar: List<V3>? = if (!s.lights.rearBar) null else line(
+    listOf(V3(-.9f * w, br - .03f, -l + .12f), V3(-.5f * w, br - .02f, -l - .01f), V3(0f, br - .02f, -l - .03f), V3(.5f * w, br - .02f, -l - .01f), V3(.9f * w, br - .03f, -l + .12f)),
+  )
+
+  /** Dark wheel-arch liner above each tyre. */
+  fun archLiner(side: Float, zc: Float): List<V3> {
+    val r = s.wheelRadius + .08f
+    return CarModel.circleYZ(side * w * 1.01f, s.wheelRadius + .03f, zc, r, 14, 0.0, PI) + V3(side * w * 1.01f, s.sill, zc - r) + V3(side * w * 1.01f, s.sill, zc + r)
+  }
+
+  /** Side camera on the front fender. */
+  fun sideCamera(side: Float): List<V3> {
+    val z = s.wheelFront - s.wheelRadius - .12f
+    return listOf(V3(side * (w + .01f), s.beltMid - .1f, z + .05f), V3(side * (w + .01f), s.beltMid - .1f, z - .05f))
+  }
 
   /** Where the tappable spot of [spot] sits on this body. */
   fun anchor(spot: CarHotspot): V3 = when (spot) {

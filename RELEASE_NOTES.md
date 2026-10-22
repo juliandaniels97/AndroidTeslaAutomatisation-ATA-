@@ -1,26 +1,17 @@
-## ATA v1.8.1 — Material Design, Farbwahl, Lenkrad links
+## ATA v1.8.2 — Echte Lichtsignaturen, Neon hell, realistischeres Material-Auto
 
-### Neues Design: Material
-- Unter **Einstellungen → Darstellung → Design** gibt es jetzt **Neon (Standard)** und **Material**, beide **hell und dunkel**.
-- **Material** stellt die ganze App um: ruhige Material-3-Flächen, flache Kacheln mit Symbol auf Tonfläche, ein gleichmäßiger Akku-Ring und eine weiche Ripple-Animation beim Ausführen.
-- **Das Fahrzeug in Material:**
-  - Ein lackiertes 3D-Auto, das dem echten nahekommt: schwarzes Glasdach, dunkle Scheiben, schwarze Schweller, Frontschürze und Diffusor, dunkle Aero-Felgen, Scheinwerfer mit Tagfahrlicht-Leiste, weicher Schatten und Klarlack-Glanz beim Drehen.
-  - Alle sechs Modelle, in 3D und in der 2D-Seitenansicht.
-- **Animationen in Material:**
-  - Türen, Frunk, Kofferraum und Ladeklappe öffnen sich als lackierte Teile, dahinter ist die dunkle Öffnung zu sehen.
-  - Spiegel klappen ein und aus.
-  - Licht, Ladekabel, Luftstrom, Musik, Wächter, Bioschutz, Aufwecken und Herbeirufen gibt es weiterhin, in Material-Farben ohne Leuchten.
+### Lichtsignaturen der aktuellen Teslas
+- **Model 3 (Highland):** schmale, nach hinten gezogene Scheinwerfer mit Tagfahrlicht-Leiste und **C-förmige Rückleuchten**, die um die Ecken laufen.
+- **Model Y (Juniper):** **Lichtleiste quer über die Front** mit tiefer liegenden Scheinwerfern und **durchgehende Lichtleiste hinten**.
+- **Model S / X:** schmale Scheinwerfer und Rückleuchten um die Ecken. **Cybertruck:** Lichtleisten vorne und hinten. **Roadster:** schmale Scheinwerfer und Leiste hinten.
+- Gilt für **Neon** (leuchtende Linien) und **Material** (Linsen und Leuchtstreifen).
 
-### Farbwahl pro Fahrzeug
-- In **Einstellungen → Fahrzeuge → Bearbeiten**:
-  - **Material:** Tesla-Lackierung wählen: Pearl White, Solid Black, Stealth Grey, Midnight Silver, Quicksilver, Deep Blue, Ultra Red oder Stainless (Standard beim Cybertruck).
-  - **Neon:** Linienfarbe wählen: Blau, Cyan, Lila, Pink, Rot, Grün, Bernstein oder Weiß.
+### Material: noch näher am echten Auto
+- Dunkle Radhausschalen über den Reifen und Seitenkamera am vorderen Kotflügel.
+- Lichter werden nur noch gezeichnet, wenn die Seite zum Betrachter zeigt, also nicht mehr durch die Karosserie.
 
-### Fahrzeug
-- **Lenkrad links** (Linkslenker). Fahrertür und Ladeklappe sitzen jetzt ebenfalls korrekt auf der linken Seite. Die 2D-Ansicht zeigt die Fahrerseite.
-- **Drehen folgt dem Finger:** Das Fahrzeug dreht sich jetzt in die Richtung, in die du wischst.
-
-### Menü & Widgets
-- Übersicht mit **Untermenüs**: Menü beim Icon, Samsung Routinen, Feste Werte und Aktionen-Widget, jeweils mit Anzeige, wie viele gewählt sind.
+### Neon im hellen Modus
+- Die Vollbild-Ansicht folgt jetzt dem hellen Modus: heller Showroom mit dunkleren Neon-Linien.
+- Die README-Screenshots für Neon hell zeigen jetzt wirklich den hellen Modus.
 
 NFC-Schlüsselkarte (Handy und Uhr) bleibt **BETA**.
