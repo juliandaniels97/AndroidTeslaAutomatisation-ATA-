@@ -6,7 +6,7 @@
     <string name="in_development">Diese Funktion ist in Entwicklung.</string>
     <string name="error_no_app">Keine passende App installiert.</string>
     <string name="onboarding_title">Willkommen bei ATA</string>
-    <string name="onboarding_body">ATA steuert und automatisiert deinen Tesla — ohne Konto, ohne Fleet API, ohne Cloud.\n\n▸ BASISFUNKTIONEN\nTesla-App öffnen; zu Laden/Klima/Steuerung/Standort springen (BETA — öffnet ggf. nur die App). Nach Hause/Arbeit oder zu jeder Adresse navigieren (an die Tesla-App gesendet, oder Google Maps/Waze). Ziel teilen.\n\n▸ BLE-FUNKTIONEN\nUnter Einstellungen → Bluetooth &amp; NFC aktivieren, Fahrzeug (VIN) hinzufügen und Telefonschlüssel koppeln. Dann ver-/entriegeln, Klima, Laden, Kofferraum/Frunk, Fenster, Wächtermodus u. v. m. über Bluetooth — plus Live-Status (Akku, Reichweite, Temperaturen).\n\n▸ ANPASSEN\nAuf dem Aktionen-Tab eine Kachel lange drücken: per Drag anordnen, löschen, mit + wieder hinzufügen, dann Darstellung speichern. Fahrzeugaktionen über den Stern im Fahrzeug-Tab oder die +-Liste hinzufügen. Jede Aktion als Shortcut, App-Icon-Menü oder Widget anheften (bis zu 8 Kacheln).\n\n▸ AUTOMATISIERUNG\nAktionen aus Samsung Routines oder Tasker auslösen und auf den Fahrzeugstatus (Akku, Laden, verriegelt …) über ATA-Broadcasts reagieren.\n\nTipp: Heimat-/Arbeitsadresse unter Einstellungen → Adressen festlegen — Navigation funktioniert auch ohne gespeichertes Fahrzeug.</string>
+    <string name="onboarding_body">ATA steuert und automatisiert deinen Tesla — ohne Konto, ohne Fleet API, ohne Cloud.\n\n▸ BASISFUNKTIONEN\nTesla-App öffnen; zu Laden/Klima/Steuerung/Standort springen (öffnet ggf. nur die App). Nach Hause/Arbeit oder zu jeder Adresse navigieren (an die Tesla-App gesendet, oder Google Maps/Waze). Ziel teilen.\n\n▸ BLE-FUNKTIONEN\nUnter Einstellungen → Bluetooth &amp; NFC aktivieren, Fahrzeug (VIN) hinzufügen und Telefonschlüssel koppeln. Dann ver-/entriegeln, Klima, Laden, Kofferraum/Frunk, Fenster, Wächtermodus u. v. m. über Bluetooth — plus Live-Status (Akku, Reichweite, Temperaturen).\n\n▸ ANPASSEN\nAuf dem Aktionen-Tab eine Kachel lange drücken: per Drag anordnen, löschen, mit + wieder hinzufügen, dann Darstellung speichern. Fahrzeugaktionen über den Stern im Fahrzeug-Tab oder die +-Liste hinzufügen. Jede Aktion als Shortcut, App-Icon-Menü oder Widget anheften (bis zu 8 Kacheln).\n\n▸ AUTOMATISIERUNG\nAktionen aus Samsung Routines oder Tasker auslösen und auf den Fahrzeugstatus (Akku, Laden, verriegelt …) über ATA-Broadcasts reagieren.\n\nTipp: Heimat-/Arbeitsadresse unter Einstellungen → Adressen festlegen — Navigation funktioniert auch ohne gespeichertes Fahrzeug.</string>
     <string name="onboarding_cta">Los geht\'s</string>
 
     <string name="tab_home">Aktionen</string>
@@ -51,7 +51,7 @@
     <string name="settings_car3d_desc">Drehendes Neon-Fahrzeug, mit dem Finger drehbar. Aus: statische Seitenansicht (2D).</string>
 
     <string name="section_navigation">Navigation</string>
-    <string name="nav_tesla">Tesla · BETA</string>
+    <string name="nav_tesla">Tesla</string>
     <string name="nav_gmaps">Google Maps</string>
     <string name="nav_waze">Waze</string>
 

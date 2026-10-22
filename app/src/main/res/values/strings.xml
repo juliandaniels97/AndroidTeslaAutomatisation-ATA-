@@ -6,7 +6,7 @@
     <string name="in_development">This feature is in development.</string>
     <string name="error_no_app">No matching app installed.</string>
     <string name="onboarding_title">Welcome to ATA</string>
-    <string name="onboarding_body">ATA controls and automates your Tesla — no account, no Fleet API, no cloud.\n\n▸ BASIC FEATURES\nOpen the Tesla app; jump to Charging/Climate/Controls/Location (BETA — may just open the app). Navigate Home/Work or any address (sent to the Tesla app, or Google Maps/Waze). Share a destination.\n\n▸ BLE FEATURES\nEnable under Settings → Bluetooth &amp; NFC, add your vehicle (VIN) and pair the phone key. Then lock/unlock, climate, charging, trunk/frunk, windows, sentry and more over Bluetooth, plus live status (battery, range, temperatures).\n\n▸ MAKE IT YOURS\nOn the Actions tab, long-press a tile to edit: drag to reorder, delete, re-add with +, then Save layout. Add vehicle actions via the star on the Vehicle tab or the + list. Pin any action as a shortcut, app-icon menu entry or widget (up to 8 tiles).\n\n▸ AUTOMATION\nTrigger actions from Samsung Routines or Tasker, and react to the car status (battery, charging, locked…) via ATA broadcasts.\n\nTip: set Home/Work addresses under Settings → Addresses — navigation works even without a saved vehicle.</string>
+    <string name="onboarding_body">ATA controls and automates your Tesla — no account, no Fleet API, no cloud.\n\n▸ BASIC FEATURES\nOpen the Tesla app; jump to Charging/Climate/Controls/Location (may just open the app). Navigate Home/Work or any address (sent to the Tesla app, or Google Maps/Waze). Share a destination.\n\n▸ BLE FEATURES\nEnable under Settings → Bluetooth &amp; NFC, add your vehicle (VIN) and pair the phone key. Then lock/unlock, climate, charging, trunk/frunk, windows, sentry and more over Bluetooth, plus live status (battery, range, temperatures).\n\n▸ MAKE IT YOURS\nOn the Actions tab, long-press a tile to edit: drag to reorder, delete, re-add with +, then Save layout. Add vehicle actions via the star on the Vehicle tab or the + list. Pin any action as a shortcut, app-icon menu entry or widget (up to 8 tiles).\n\n▸ AUTOMATION\nTrigger actions from Samsung Routines or Tasker, and react to the car status (battery, charging, locked…) via ATA broadcasts.\n\nTip: set Home/Work addresses under Settings → Addresses — navigation works even without a saved vehicle.</string>
     <string name="onboarding_cta">Let\'s go</string>
 
     <string name="tab_home">Actions</string>
@@ -51,7 +51,7 @@
     <string name="settings_car3d_desc">Turning neon car that you can rotate with a finger. Off: static side view (2D).</string>
 
     <string name="section_navigation">Navigation</string>
-    <string name="nav_tesla">Tesla · BETA</string>
+    <string name="nav_tesla">Tesla</string>
     <string name="nav_gmaps">Google Maps</string>
     <string name="nav_waze">Waze</string>
 
