@@ -1,10 +1,14 @@
 package org.tfv.ata.ui.screens
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -12,9 +16,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -31,16 +37,25 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.unit.dp
 import org.tfv.ata.R
+import org.tfv.ata.core.BodyStyle
 import org.tfv.ata.core.Vehicle
 import org.tfv.ata.core.Vin
 import org.tfv.ata.ui.AtaUiState
 import org.tfv.ata.ui.AtaViewModel
+import org.tfv.ata.ui.components.car.CarCamera
+import org.tfv.ata.ui.components.car.CarFxState
+import org.tfv.ata.ui.components.car.CarModel
+import org.tfv.ata.ui.components.car.CarStatus
+import org.tfv.ata.ui.components.car.NeonStyle
+import org.tfv.ata.ui.components.car.drawNeonCar
+import org.tfv.ata.ui.theme.AtaColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -75,10 +90,10 @@ fun VehiclesScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit) {
           Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
               Text(v.name, style = MaterialTheme.typography.titleMedium)
-              Text(v.vin, style = MaterialTheme.typography.bodySmall)
+              Text("${bodyLabel(v.body)} · ${v.vin}", style = MaterialTheme.typography.bodySmall)
             }
             IconButton(onClick = { editing = v; showForm = true }) {
-              Icon(Icons.Filled.Add, contentDescription = null)
+              Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.vehicle_edit))
             }
             IconButton(onClick = { vm.deleteVehicle(v.id) }) {
               Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.delete))
@@ -92,10 +107,10 @@ fun VehiclesScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit) {
   if (showForm) {
     VehicleFormDialog(
       existing = editing,
-      onSave = { name, vin, home, work ->
+      onSave = { name, vin, home, work, body ->
         val e = editing
-        if (e == null) vm.addVehicle(name, vin, home, work)
-        else vm.saveVehicle(e.copy(name = name, vin = vin, navHome = home, navWork = work))
+        if (e == null) vm.addVehicle(name, vin, home, work, body)
+        else vm.saveVehicle(e.copy(name = name, vin = vin, navHome = home, navWork = work, bodyStyle = body))
         showForm = false
       },
       onDismiss = { showForm = false },
@@ -103,17 +118,31 @@ fun VehiclesScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit) {
   }
 }
 
+/** Product names are not translated. */
+fun bodyLabel(style: BodyStyle): String = when (style) {
+  BodyStyle.MODEL_3 -> "Model 3"
+  BodyStyle.MODEL_Y -> "Model Y"
+  BodyStyle.MODEL_S -> "Model S"
+  BodyStyle.MODEL_X -> "Model X"
+  BodyStyle.CYBERTRUCK -> "Cybertruck"
+  BodyStyle.ROADSTER -> "Roadster"
+}
+
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun VehicleFormDialog(
   existing: Vehicle?,
-  onSave: (String, String, String, String) -> Unit,
+  onSave: (name: String, vin: String, home: String, work: String, bodyStyle: String) -> Unit,
   onDismiss: () -> Unit,
 ) {
   var name by remember { mutableStateOf(existing?.name ?: "") }
   var vin by remember { mutableStateOf(existing?.vin ?: "") }
   var home by remember { mutableStateOf(existing?.navHome ?: "") }
   var work by remember { mutableStateOf(existing?.navWork ?: "") }
+  var body by remember { mutableStateOf(existing?.bodyStyle ?: "") }
   val vinValid = Vin.isValid(vin)
+  val shown = Vehicle("", name, vin, bodyStyle = body).body
+  val palette = AtaColors.current
 
   AlertDialog(
     onDismissRequest = onDismiss,
@@ -136,12 +165,33 @@ private fun VehicleFormDialog(
         )
         OutlinedTextField(home, { home = it }, label = { Text(stringResource(R.string.vehicle_home)) }, singleLine = true, modifier = Modifier.fillMaxWidth())
         OutlinedTextField(work, { work = it }, label = { Text(stringResource(R.string.vehicle_work)) }, singleLine = true, modifier = Modifier.fillMaxWidth())
+        Text(stringResource(R.string.vehicle_body), style = MaterialTheme.typography.titleSmall)
+        Canvas(Modifier.fillMaxWidth().height(80.dp).clipToBounds()) {
+          val shape = CarModel.shape(shown)
+          // About three quarters of the width, whatever the dialog height.
+          val zoom = 1.45f * size.width / minOf(size.width * 1.25f, size.height * 1.9f) * shape.fit
+          drawNeonCar(
+            shape, CarCamera.side(size.width, size.height, zoom), CarCamera.SIDE_YAW, CarFxState(), CarStatus(), 0L,
+            NeonStyle(line = palette.accent, glow = false, lineWidth = 2f),
+          )
+        }
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+          val auto = BodyStyle.fromVin(vin)
+          FilterChip(
+            selected = body.isEmpty(),
+            onClick = { body = "" },
+            label = { Text(stringResource(R.string.vehicle_body_auto, auto?.let(::bodyLabel) ?: "–")) },
+          )
+          BodyStyle.entries.forEach { style ->
+            FilterChip(selected = body == style.name, onClick = { body = style.name }, label = { Text(bodyLabel(style)) })
+          }
+        }
       }
     },
     confirmButton = {
       TextButton(
         enabled = name.isNotBlank() && vinValid,
-        onClick = { onSave(name.trim(), vin, home.trim(), work.trim()) },
+        onClick = { onSave(name.trim(), vin, home.trim(), work.trim(), body) },
       ) { Text(stringResource(R.string.save)) }
     },
     dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } },

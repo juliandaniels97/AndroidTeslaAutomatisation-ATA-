@@ -47,6 +47,8 @@
     <string name="theme_light">Hell</string>
     <string name="theme_dark">Dunkel</string>
     <string name="settings_dynamic_color">Dynamische Farben (Material You)</string>
+    <string name="settings_car3d">3D-Fahrzeugansicht</string>
+    <string name="settings_car3d_desc">Drehendes Neon-Fahrzeug, mit dem Finger drehbar. Aus: statische Seitenansicht (2D).</string>
 
     <string name="section_navigation">Navigation</string>
     <string name="nav_tesla">Tesla · BETA</string>
@@ -94,6 +96,8 @@
     <string name="vehicle_ble_name">BLE-Name: %1$s</string>
     <string name="vehicle_home">Heimadresse (Navigation)</string>
     <string name="vehicle_work">Arbeitsadresse (Navigation)</string>
+    <string name="vehicle_body">Fahrzeugtyp</string>
+    <string name="vehicle_body_auto">Automatisch (VIN: %1$s)</string>
 
     <string name="menu_launcher_title">Menü beim Icon (lange drücken)</string>
     <string name="menu_launcher_desc">Bis zu 4 Aktionen beim langen Drücken auf das App-Icon.</string>
@@ -449,7 +453,8 @@
     <string name="hs_lights">Licht &amp; Ton</string>
     <string name="hs_climate">Klima &amp; Innenraum</string>
     <string name="hs_general">Allgemein</string>
-    <string name="car3d_hint">Ziehen zum Drehen · leuchtende Punkte antippen</string>
-    <string name="car3d_open">Fahrzeug in 3D öffnen</string>
+    <string name="car3d_hint">Ziehen zum Drehen, zwei Finger zum Zoomen · leuchtende Punkte antippen</string>
+    <string name="car2d_hint">Zum Zoomen zwei Finger spreizen · leuchtende Punkte antippen</string>
+    <string name="car3d_open">Fahrzeug im Vollbild öffnen</string>
     <string name="car3d_reset">Ansicht zurücksetzen</string>
 </resources>

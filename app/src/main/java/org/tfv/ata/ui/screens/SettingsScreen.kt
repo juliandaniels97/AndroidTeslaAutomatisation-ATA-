@@ -46,6 +46,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -127,6 +129,9 @@ fun SettingsScreen(
       }
       SwitchRow(stringResource(R.string.settings_dynamic_color), null, s.dynamicColor) {
         vm.updateSettings { it.copy(dynamicColor = it.dynamicColor.not()) }
+      }
+      SwitchRow(stringResource(R.string.settings_car3d), stringResource(R.string.settings_car3d_desc), s.car3d) {
+        vm.updateSettings { it.copy(car3d = it.car3d.not()) }
       }
 
       HorizontalDivider()
@@ -275,12 +280,15 @@ private fun AddressField(label: String, value: String, onCommit: (String) -> Uni
 
 @Composable
 private fun SwitchRow(title: String, desc: String?, checked: Boolean, onToggle: () -> Unit) {
-  Row(Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+  Row(
+    Modifier.fillMaxWidth().toggleable(checked, role = Role.Switch) { onToggle() }.padding(vertical = 6.dp),
+    verticalAlignment = Alignment.CenterVertically,
+  ) {
     Column(Modifier.weight(1f)) {
       Text(title, style = MaterialTheme.typography.bodyLarge)
       if (desc != null) Text(desc, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
-    Switch(checked = checked, onCheckedChange = { onToggle() })
+    Switch(checked = checked, onCheckedChange = null)
   }
 }
 

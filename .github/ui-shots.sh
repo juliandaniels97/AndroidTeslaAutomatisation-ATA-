@@ -32,6 +32,23 @@ sleep 4
 shot 00-onboarding
 tap "Let's go"
 
+# Vehicle types: add a car, preview every body style in the editor, then the 3D and 2D views.
+restart; tap "Settings"; tap "Vehicles"; tap "Add vehicle"
+tap "Name"; adb shell input text "Neon"
+tap "VIN (17 characters)"; adb shell input text "7G2CEHED1RA123456"
+adb shell input keyevent 4; sleep 1
+shot "body-0-auto"
+for M in "Model 3" "Model Y" "Model S" "Model X" "Cybertruck" "Roadster"; do
+  tap "$M"; shot "body-$(echo "$M" | tr -cd 'a-zA-Z0-9' | tr A-Z a-z)"
+done
+tap "Automatic (VIN: Cybertruck)"; tap "Save"
+restart; tap "Vehicle"; sleep 2; shot "body-3d-tab"
+adb shell am start -S -W -n org.tfv.ata/.ui.MainActivity -a android.intent.action.VIEW -d ata://car3d >/dev/null; sleep 6; shot "body-3d-full"
+restart; tap "Settings"; scroll; tap "3D vehicle view"; shot "body-settings-2d"
+restart; tap "Vehicle"; sleep 2; shot "body-2d-tab"
+adb shell am start -S -W -n org.tfv.ata/.ui.MainActivity -a android.intent.action.VIEW -d ata://car3d >/dev/null; sleep 6; shot "body-2d-full"
+restart; tap "Settings"; scroll; tap "3D vehicle view"
+
 for THEME in Dark Light; do
   t=$(echo $THEME | tr A-Z a-z)
   restart; tap "Settings"; tap "$THEME"

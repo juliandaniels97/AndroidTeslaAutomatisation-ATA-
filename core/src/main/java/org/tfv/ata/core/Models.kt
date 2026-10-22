@@ -9,7 +9,30 @@ data class Vehicle(
   val vin: String,
   val navHome: String = "",
   val navWork: String = "",
-)
+  /** [BodyStyle] name, empty = derived from the VIN. */
+  val bodyStyle: String = "",
+) {
+  /** The chosen body style, else the one encoded in the VIN, else Model 3. */
+  val body: BodyStyle get() = BodyStyle.entries.firstOrNull { it.name == bodyStyle } ?: BodyStyle.fromVin(vin) ?: BodyStyle.MODEL_3
+}
+
+/** Tesla body styles, used for the neon drawing of the car. */
+enum class BodyStyle {
+  MODEL_3, MODEL_Y, MODEL_S, MODEL_X, CYBERTRUCK, ROADSTER;
+
+  companion object {
+    /** The 4th VIN character is the model line (5YJ3…, 7SAY…, LRWY…, 5YJS…, 5YJX…, 7G2C…, 5YJR…). */
+    fun fromVin(vin: String): BodyStyle? = when (vin.trim().uppercase().getOrNull(3)) {
+      '3' -> MODEL_3
+      'Y' -> MODEL_Y
+      'S' -> MODEL_S
+      'X' -> MODEL_X
+      'C' -> CYBERTRUCK
+      'R' -> ROADSTER
+      else -> null
+    }
+  }
+}
 
 @Serializable
 data class VehicleSnapshot(
@@ -45,6 +68,8 @@ data class AtaSettings(
   val onboarded: Boolean = false,
   val directionFx: Boolean = false,
   val nfcKeyCard: Boolean = false,
+  /** Turning 3D car; off = static side view. */
+  val car3d: Boolean = true,
   // Automation (Samsung Routines, Tasker, shortcuts, widgets, NFC tags, watch). See ActionPolicy.
   /** Run non-critical BLE actions from ATA shortcuts/widgets/watch while the phone is locked. */
   val automationWhenLocked: Boolean = true,

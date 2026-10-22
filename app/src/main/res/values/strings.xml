@@ -47,6 +47,8 @@
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
     <string name="settings_dynamic_color">Dynamic color (Material You)</string>
+    <string name="settings_car3d">3D vehicle view</string>
+    <string name="settings_car3d_desc">Turning neon car that you can rotate with a finger. Off: static side view (2D).</string>
 
     <string name="section_navigation">Navigation</string>
     <string name="nav_tesla">Tesla · BETA</string>
@@ -94,6 +96,8 @@
     <string name="vehicle_ble_name">BLE name: %1$s</string>
     <string name="vehicle_home">Home address (navigation)</string>
     <string name="vehicle_work">Work address (navigation)</string>
+    <string name="vehicle_body">Vehicle type</string>
+    <string name="vehicle_body_auto">Automatic (VIN: %1$s)</string>
 
     <string name="menu_launcher_title">Launcher menu (long-press icon)</string>
     <string name="menu_launcher_desc">Up to 4 actions shown when long-pressing the app icon.</string>
@@ -449,7 +453,8 @@
     <string name="hs_lights">Lights &amp; sound</string>
     <string name="hs_climate">Climate &amp; cabin</string>
     <string name="hs_general">General</string>
-    <string name="car3d_hint">Drag to turn · tap the glowing spots</string>
-    <string name="car3d_open">Open the car in 3D</string>
+    <string name="car3d_hint">Drag to turn, pinch to zoom · tap the glowing spots</string>
+    <string name="car2d_hint">Pinch to zoom · tap the glowing spots</string>
+    <string name="car3d_open">Open the car full screen</string>
     <string name="car3d_reset">Reset view</string>
 </resources>

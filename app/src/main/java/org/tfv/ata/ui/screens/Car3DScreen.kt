@@ -10,7 +10,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -69,11 +69,13 @@ import org.tfv.ata.R
 import org.tfv.ata.action.ActionInfo
 import org.tfv.ata.core.ActionPolicy
 import org.tfv.ata.core.AtaAction
+import org.tfv.ata.core.BodyStyle
 import org.tfv.ata.ui.ActionHost
 import org.tfv.ata.ui.AtaUiState
 import org.tfv.ata.ui.AtaViewModel
 import org.tfv.ata.ui.components.car.CarCamera
 import org.tfv.ata.ui.components.car.CarHotspot
+import org.tfv.ata.ui.components.car.CarModel
 import org.tfv.ata.ui.components.car.CarStatus
 import org.tfv.ata.ui.components.car.NeonStyle
 import org.tfv.ata.ui.components.car.drawBatteryRing
@@ -85,9 +87,14 @@ import kotlin.math.roundToInt
 private val SHOWROOM = Color(0xFF04060B)
 private val NEON = Color(0xFF4FB4FF)
 
-/** What each tappable spot on the car offers. */
-private fun actionsFor(spot: CarHotspot?): List<AtaAction> = when (spot) {
-  CarHotspot.DRIVER_DOOR -> listOf(AtaAction.DOOR_DRIVER_OPEN, AtaAction.UNLOCK, AtaAction.LOCK, AtaAction.REMOTE_DRIVE)
+private const val MIN_ZOOM = .7f
+private const val MAX_ZOOM = 3f
+
+/** What each tappable spot on the car offers; in the side view ([sideView]) the far door is reached from the near one. */
+private fun actionsFor(spot: CarHotspot?, sideView: Boolean): List<AtaAction> = when (spot) {
+  CarHotspot.DRIVER_DOOR -> listOfNotNull(
+    AtaAction.DOOR_DRIVER_OPEN, AtaAction.DOOR_PASSENGER_OPEN.takeIf { sideView }, AtaAction.UNLOCK, AtaAction.LOCK, AtaAction.REMOTE_DRIVE,
+  )
   CarHotspot.PASSENGER_DOOR -> listOf(AtaAction.DOOR_PASSENGER_OPEN, AtaAction.UNLOCK, AtaAction.LOCK)
   CarHotspot.FRUNK -> listOf(AtaAction.FRUNK)
   CarHotspot.TRUNK -> listOf(AtaAction.TRUNK, AtaAction.TRUNK_CLOSE)
@@ -131,7 +138,7 @@ private fun titleFor(spot: CarHotspot?): Int = when (spot) {
 }
 
 /**
- * Full-screen 3D car: turn it with a finger, tap the glowing spots on the car (doors, lids, charge port,
+ * Full-screen car: turn it with a finger (3D) or look at the side view (2D), pinch to zoom, tap the glowing spots on the car (doors, lids, charge port,
  * windows, lights, climate) or "General" to run actions right there. Effects play on the car after each action.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -141,6 +148,10 @@ fun Car3DScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit) {
   val now by rememberFrameClock()
   var yaw by remember { mutableFloatStateOf(-35f) }
   var pitch by remember { mutableFloatStateOf(18f) }
+  var zoom by remember { mutableFloatStateOf(1f) }
+  var pan by remember { mutableStateOf(Offset.Zero) }
+  val threeD = state.settings.car3d
+  val shape = CarModel.shape(state.selected?.body ?: BodyStyle.MODEL_3)
   var sheet by remember { mutableStateOf<Pair<Boolean, CarHotspot?>?>(null) }
   val snapshot = state.snapshot
   val known = snapshot != null && snapshot.updatedAt > 0
@@ -158,19 +169,28 @@ fun Car3DScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit) {
       val density = LocalDensity.current
       val w = constraints.maxWidth.toFloat()
       val h = constraints.maxHeight.toFloat()
-      val camera = CarCamera(yaw, pitch, w, h, zoom = 1.35f)
+      val camera = if (threeD) CarCamera(yaw, pitch, w, h, zoom = 1.35f * shape.fit * zoom, pan = pan)
+      else CarCamera.side(w, h, zoom = 1.3f * shape.fit * zoom, pan = pan)
 
       Canvas(
         Modifier.fillMaxSize()
-          .pointerInput(Unit) {
-            detectDragGestures { change, drag ->
-              change.consume()
-              yaw += drag.x * .35f
-              pitch = (pitch - drag.y * .15f).coerceIn(4f, 55f)
+          .pointerInput(threeD) {
+            // One finger turns the car (3D) or moves it (2D); two fingers zoom and move.
+            detectTransformGestures { centroid, drag, scale, _ ->
+              val newZoom = (zoom * scale).coerceIn(MIN_ZOOM, MAX_ZOOM)
+              val fromCenter = centroid - Offset(w / 2f, h / 2f)
+              if (scale != 1f) pan = fromCenter - (fromCenter - pan) * (newZoom / zoom)
+              zoom = newZoom
+              if (threeD && scale == 1f) {
+                yaw += drag.x * .35f
+                pitch = (pitch - drag.y * .15f).coerceIn(4f, 55f)
+              } else {
+                pan += drag
+              }
             }
           },
       ) {
-        drawNeonCar(camera, yaw, fx, status, now, style)
+        drawNeonCar(shape, camera, if (threeD) yaw else CarCamera.SIDE_YAW, fx, status, now, style)
         if (known) {
           drawBatteryRing(Offset(size.width / 2f, size.height * .86f), size.minDimension * .07f, snapshot?.batteryPercent, status.charging, now, true, NEON, width = 8f)
         }
@@ -180,13 +200,13 @@ fun Car3DScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit) {
       CarHotspot.entries.forEach { spot ->
         val facing = camera.facing(spot.normal)
         if (facing > -.15f) {
-          val p = camera.project(spot.anchor).offset
+          val p = camera.project(shape.anchor(spot)).offset
           val sizePx = with(density) { 44.dp.toPx() }
           Box(
             Modifier
               .offset { IntOffset((p.x - sizePx / 2).roundToInt(), (p.y - sizePx / 2).roundToInt()) }
               .size(44.dp)
-              .alpha(((facing + .15f) / .5f).coerceIn(.25f, 1f))
+              .alpha(if (threeD) ((facing + .15f) / .5f).coerceIn(.25f, 1f) else 1f)
               .scale(pulse)
               .clickable { sheet = true to spot },
             contentAlignment = Alignment.Center,
@@ -209,7 +229,7 @@ fun Car3DScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit) {
             Text("${snapshot.batteryPercent}% · ${snapshot.rangeKm} km", color = NEON, style = MaterialTheme.typography.labelLarge)
           }
         }
-        IconButton(onClick = { yaw = -35f; pitch = 18f }) {
+        IconButton(onClick = { yaw = -35f; pitch = 18f; zoom = 1f; pan = Offset.Zero }) {
           Icon(Icons.Filled.CenterFocusStrong, contentDescription = stringResource(R.string.car3d_reset), tint = Color.White)
         }
       }
@@ -229,7 +249,7 @@ fun Car3DScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit) {
           Text(stringResource(R.string.hs_general), color = Color.White, fontWeight = FontWeight.Medium)
         }
         Text(
-          stringResource(R.string.car3d_hint),
+          stringResource(if (threeD) R.string.car3d_hint else R.string.car2d_hint),
           color = Color.White.copy(alpha = .6f),
           style = MaterialTheme.typography.labelMedium,
           textAlign = TextAlign.Center,
@@ -253,7 +273,7 @@ fun Car3DScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit) {
           modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
         )
         LazyColumn(Modifier.padding(bottom = 24.dp)) {
-          items(actionsFor(spot)) { action ->
+          items(actionsFor(spot, !threeD)) { action ->
             val critical = ActionPolicy.isCritical(action)
             ListItem(
               headlineContent = { Text(stringResource(ActionInfo.labelRes(action))) },

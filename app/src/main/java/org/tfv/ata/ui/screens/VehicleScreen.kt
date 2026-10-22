@@ -42,6 +42,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.tfv.ata.R
+import org.tfv.ata.core.BodyStyle
 import org.tfv.ata.core.AtaAction
 import org.tfv.ata.core.AtaCategory
 import org.tfv.ata.core.Vin
@@ -139,7 +140,13 @@ fun VehicleScreen(
         header = {
           Column(Modifier.fillMaxWidth()) {
             val carFx by vm.carFx.collectAsStateWithLifecycle()
-            VehicleArt(snapshot, fx = carFx, onOpen = if (experimental) onOpen3d else null)
+            VehicleArt(
+              snapshot,
+              fx = carFx,
+              body = state.selected?.body ?: BodyStyle.MODEL_3,
+              threeD = state.settings.car3d,
+              onOpen = if (experimental) onOpen3d else null,
+            )
             Row(Modifier.fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.SpaceEvenly) {
               StatBox(stringResource(R.string.stat_battery), snapshot?.let { "${it.batteryPercent}%" } ?: "--")
               StatBox(stringResource(R.string.stat_range), snapshot?.let { "${it.rangeKm} km" } ?: "--")

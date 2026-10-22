@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AcUnit
 import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.OpenInFull
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.Shield
@@ -39,8 +40,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import org.tfv.ata.R
+import org.tfv.ata.core.BodyStyle
 import org.tfv.ata.core.VehicleSnapshot
 import org.tfv.ata.ui.components.car.CarCamera
+import org.tfv.ata.ui.components.car.CarModel
 import org.tfv.ata.ui.components.car.CarFxState
 import org.tfv.ata.ui.components.car.CarStatus
 import org.tfv.ata.ui.components.car.NeonStyle
@@ -52,16 +55,19 @@ import kotlin.math.min
 import kotlin.math.sin
 
 /**
- * The neon car inside its battery ring. It turns slowly, shows doors, lids and effects after actions, and a tap
- * ([onOpen]) opens the full-screen 3D view.
+ * The neon car ([body] style) inside its battery ring. In 3D ([threeD]) it turns slowly, otherwise it is a static
+ * side view. Shows doors, lids and effects after actions; a tap ([onOpen]) opens the full-screen view.
  */
 @Composable
 fun VehicleArt(
   snapshot: VehicleSnapshot?,
   modifier: Modifier = Modifier,
   fx: CarFxState = CarFxState(),
+  body: BodyStyle = BodyStyle.MODEL_3,
+  threeD: Boolean = true,
   onOpen: (() -> Unit)? = null,
 ) {
+  val shape = CarModel.shape(body)
   val known = snapshot != null && snapshot.updatedAt > 0
   val charging = snapshot?.charging == true
   val climate = snapshot?.climateOn == true
@@ -86,11 +92,11 @@ fun VehicleArt(
       val radius = min(size.width, size.height) / 2f - 10f
       drawBatteryRing(center, radius, if (known) snapshot?.batteryPercent else null, charging, now, palette.isDark, palette.muted)
       // Gentle idle turn so the car reads as 3D; the full-screen view turns with the finger.
-      val yaw = -35f + 14f * sin(now / 4000f)
+      val yaw = if (threeD) -35f + 14f * sin(now / 4000f) else CarCamera.SIDE_YAW
       val inner = radius * 2f * .92f
-      val camera = CarCamera(yaw, 20f, inner, inner, zoom = 1.35f)
+      val camera = if (threeD) CarCamera(yaw, 20f, inner, inner, zoom = 1.35f * shape.fit) else CarCamera.side(inner, inner, zoom = 1.3f * shape.fit)
       translate(center.x - inner / 2f, center.y - inner / 2f) {
-        drawNeonCar(camera, yaw, fx, status, now, style, androidx.compose.ui.geometry.Size(inner, inner))
+        drawNeonCar(shape, camera, yaw, fx, status, now, style, androidx.compose.ui.geometry.Size(inner, inner))
       }
     }
     if (onOpen != null) {
@@ -99,7 +105,7 @@ fun VehicleArt(
           .clip(CircleShape).background(palette.accent.copy(alpha = .18f)),
         contentAlignment = Alignment.Center,
       ) {
-        Icon(Icons.Filled._3dRotation, contentDescription = stringResource(R.string.car3d_open), tint = palette.accent, modifier = Modifier.size(20.dp))
+        Icon(if (threeD) Icons.Filled._3dRotation else Icons.Filled.OpenInFull, contentDescription = stringResource(R.string.car3d_open), tint = palette.accent, modifier = Modifier.size(20.dp))
       }
     }
     if (known) {

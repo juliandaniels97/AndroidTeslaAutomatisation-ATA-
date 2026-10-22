@@ -43,6 +43,7 @@ private val CHARGE_GREEN = Color(0xFF39FF88)
  * bioweapon defence fog around (never inside) the car.
  */
 fun DrawScope.drawNeonCar(
+  shape: CarShape,
   camera: CarCamera,
   yawDeg: Float,
   fx: CarFxState,
@@ -58,7 +59,7 @@ fun DrawScope.drawNeonCar(
   // Floor glow.
   val floor = (0..32).map { i ->
     val a = 2 * PI * i / 32
-    camera.project(V3((1.6 * cos(a)).toFloat(), 0f, (2.9 * sin(a)).toFloat())).offset
+    camera.project(V3((1.6 * cos(a)).toFloat(), 0f, (2.9 * shape.stretch * sin(a)).toFloat())).offset
   }
   val minX = floor.minOf { it.x }; val maxX = floor.maxOf { it.x }
   val minY = floor.minOf { it.y }; val maxY = floor.maxOf { it.y }
@@ -88,7 +89,7 @@ fun DrawScope.drawNeonCar(
     for (i in 0 until 18) {
       val a = 2 * PI * i / 18 + t * .15 + sin(t * .4 + i) * .2
       val ring = 1.18f + .12f * sin(t * .7f + i * 1.3f)
-      val p = camera.project(V3((1.05 * ring * cos(a)).toFloat(), .35f + .55f * ((i % 3) / 2f), (2.45 * ring * sin(a)).toFloat()))
+      val p = camera.project(V3((1.05 * ring * cos(a)).toFloat(), .35f + .55f * ((i % 3) / 2f), (2.45 * shape.stretch * ring * sin(a)).toFloat()))
       val r = area.minDimension * (.10f + .03f * sin(t * .9f + i))
       drawCircle(
         Brush.radialGradient(listOf(style.green.copy(alpha = .20f * bio), Color.Transparent), center = p.offset, radius = r),
@@ -101,7 +102,7 @@ fun DrawScope.drawNeonCar(
 
   // Reflection on the floor.
   val reflection = style.line.copy(alpha = if (style.glow) .13f else .07f)
-  (CarModel.body + CarModel.wheels).forEach { line ->
+  (shape.body + shape.wheels).forEach { line ->
     val path = Path()
     line.forEachIndexed { i, p -> camera.projectReflection(p).offset.let { if (i == 0) path.moveTo(it.x, it.y) else path.lineTo(it.x, it.y) } }
     drawPath(path, reflection, style = Stroke(style.lineWidth))
@@ -130,7 +131,7 @@ fun DrawScope.drawNeonCar(
   // Interior effects first (seen through the glass).
   val climate = maxOf(fx.openness(CarEffect.CLIMATE, now, 1200), if (status.climate) 1f else 0f)
   if (climate > 0f) {
-    val c = camera.project(CarModel.cabinCenter)
+    val c = camera.project(shape.cabinCenter)
     val r = area.minDimension * .22f
     drawCircle(
       Brush.radialGradient(listOf(style.line.copy(alpha = .30f * climate * (.8f + .2f * sin(t * 2))), Color.Transparent), center = c.offset, radius = r),
@@ -140,40 +141,40 @@ fun DrawScope.drawNeonCar(
     )
   }
   val wheelHeat = fx.openness(CarEffect.WHEEL_HEAT, now, 1200)
-  polyline(CarModel.steeringWheel, lerp(style.line, style.warm, wheelHeat), alpha = .45f + .55f * wheelHeat * (.75f + .25f * sin(t * 3)))
+  polyline(shape.steeringWheel, lerp(style.line, style.warm, wheelHeat), alpha = .45f + .55f * wheelHeat * (.75f + .25f * sin(t * 3)))
   val defrost = fx.openness(CarEffect.DEFROST, now, 1500)
-  if (defrost > 0f) CarModel.defrostLines.forEachIndexed { i, line -> polyline(line, style.warm, alpha = defrost * (.55f + .45f * sin(t * 2.5f + i))) }
+  if (defrost > 0f) shape.defrostLines.forEachIndexed { i, line -> polyline(line, style.warm, alpha = defrost * (.55f + .45f * sin(t * 2.5f + i))) }
 
   // Body.
-  CarModel.body.forEach { polyline(it, style.line) }
-  CarModel.wheels.forEach { polyline(it, style.line, alpha = .85f) }
+  shape.body.forEach { polyline(it, style.line) }
+  shape.wheels.forEach { polyline(it, style.line, alpha = .85f) }
 
   // Doors: seams when closed, the door swung open around its hinge when opened.
   for ((effect, side) in listOf(CarEffect.DOOR_DRIVER to -1f, CarEffect.DOOR_PASSENGER to 1f)) {
     val open = fx.openness(effect, now)
     val angle = -side * 60f * open
-    val hinge = CarModel.frontDoorHinge(side)
-    CarModel.frontDoor(side).forEach { line ->
+    val hinge = shape.frontDoorHinge(side)
+    shape.frontDoor(side).forEach { line ->
       polyline(line.map { rotateY(it, hinge, angle) }, style.line, alpha = .35f + .65f * open)
     }
   }
   // Frunk and trunk lids.
   val frunk = fx.openness(CarEffect.FRUNK, now)
-  polyline(CarModel.hood.map { rotateX(it, CarModel.hoodHinge, -55f * frunk) }, style.line, alpha = .35f + .65f * frunk)
+  polyline(shape.hood.map { rotateX(it, shape.hoodHinge, -55f * frunk) }, style.line, alpha = .35f + .65f * frunk)
   val trunk = fx.openness(CarEffect.TRUNK, now)
-  polyline(CarModel.trunkLid.map { rotateX(it, CarModel.trunkHinge, 50f * trunk) }, style.line, alpha = .35f + .65f * trunk)
+  polyline(shape.trunkLid.map { rotateX(it, shape.trunkHinge, 50f * trunk) }, style.line, alpha = .35f + .65f * trunk)
   // Charge port flap.
   val port = fx.openness(CarEffect.CHARGE_PORT, now)
-  polyline(CarModel.chargePort.map { rotateY(it, CarModel.chargePortHinge, 80f * port) }, if (status.charging) CHARGE_GREEN else style.line, alpha = .5f + .5f * port)
+  polyline(shape.chargePort.map { rotateY(it, shape.chargePortHinge, 80f * port) }, if (status.charging) CHARGE_GREEN else style.line, alpha = .5f + .5f * port)
   if (status.charging || port > 0f) {
-    val c = camera.project(CarModel.chargePortCenter)
+    val c = camera.project(shape.chargePortCenter)
     val pulse = if (status.charging) .55f + .45f * sin(t * 3) else port * .6f
     val r = area.minDimension * .07f
     drawCircle(Brush.radialGradient(listOf(CHARGE_GREEN.copy(alpha = .8f * pulse), Color.Transparent), center = c.offset, radius = r), r, c.offset, blendMode = blend)
   }
   // Windows lowered: the glass edge drops to the belt line.
   val windows = fx.openness(CarEffect.WINDOWS, now)
-  if (windows > 0f) for (side in listOf(-1f, 1f)) polyline(CarModel.windowDown(side), style.white, alpha = windows)
+  if (windows > 0f) for (side in listOf(-1f, 1f)) polyline(shape.windowDown(side), style.white, alpha = windows)
 
   // Lights.
   val lockPulse = fx.pulse(CarEffect.LOCK, now, 700)
@@ -185,10 +186,10 @@ fun DrawScope.drawNeonCar(
     lockPulse != null -> 1f - lockPulse
     else -> 0f
   }
-  CarModel.headlights.forEach { polyline(it, style.white, width = style.lineWidth * 1.3f) }
-  polyline(CarModel.taillight, style.red, width = style.lineWidth * 1.3f, alpha = .9f + .1f * lightBoost)
+  shape.headlights.forEach { polyline(it, style.white, width = style.lineWidth * 1.3f) }
+  polyline(shape.taillight, style.red, width = style.lineWidth * 1.3f, alpha = .9f + .1f * lightBoost)
   if (lightBoost > 0f) {
-    for (p in listOf(CarModel.headlightLeft, CarModel.headlightRight)) {
+    for (p in listOf(shape.headlightLeft, shape.headlightRight)) {
       val c = camera.project(p)
       val r = area.minDimension * .16f
       drawCircle(Brush.radialGradient(listOf(style.white.copy(alpha = .85f * lightBoost), Color.Transparent), center = c.offset, radius = r), r, c.offset, blendMode = blend)
@@ -196,7 +197,7 @@ fun DrawScope.drawNeonCar(
   }
   // Horn: sound arcs in front of the car.
   fx.pulse(CarEffect.HONK, now, 1200)?.let { p ->
-    val c = camera.project(CarModel.frontCenter).offset
+    val c = camera.project(shape.frontCenter).offset
     for (k in 0..2) {
       val q = (p * 1.6f - k * .3f).coerceIn(0f, 1f)
       if (q > 0f && q < 1f) {
@@ -207,7 +208,7 @@ fun DrawScope.drawNeonCar(
   }
   // Boombox: little clouds puffing out at the back.
   fx.pulse(CarEffect.PUFF, now, 2200)?.let { p ->
-    val rear = CarModel.rearCenter
+    val rear = shape.rearCenter
     for (k in 0 until 6) {
       val q = (p * 1.3f - k * .06f).coerceIn(0f, 1f)
       val drift = V3(sin(k * 1.7f) * .5f * q, .2f * q + k * .05f, -1.2f * q)
@@ -219,7 +220,7 @@ fun DrawScope.drawNeonCar(
   // Sentry: a red eye on the B-pillars.
   if (status.sentry) {
     for (side in listOf(-1f, 1f)) {
-      val c = camera.project(V3(side * .97f, 1.0f, -.28f))
+      val c = camera.project(shape.sentryEye(side))
       val r = area.minDimension * .025f * (1.2f + .3f * sin(t * 4))
       drawCircle(style.red.copy(alpha = .9f), r, c.offset, blendMode = blend)
     }

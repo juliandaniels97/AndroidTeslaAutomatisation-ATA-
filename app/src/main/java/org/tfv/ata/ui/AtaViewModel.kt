@@ -192,8 +192,8 @@ class AtaViewModel(app: Application) : AndroidViewModel(app) {
     pushWearConfig()
   }
 
-  fun addVehicle(name: String, vin: String, home: String, work: String) =
-    saveVehicle(Vehicle(UUID.randomUUID().toString(), name, vin, home, work))
+  fun addVehicle(name: String, vin: String, home: String, work: String, bodyStyle: String = "") =
+    saveVehicle(Vehicle(UUID.randomUUID().toString(), name, vin, home, work, bodyStyle))
 
   fun deleteVehicle(id: String) = viewModelScope.launch {
     val remaining = store.vehicles.first().filter { it.id != id }
