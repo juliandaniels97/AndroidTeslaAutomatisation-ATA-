@@ -22,10 +22,10 @@ ATA is free for personal use. If it saves you a few taps every day, you can supp
 
 ## Downloads
 
-Latest release **v1.8.2** — phone APK for **64‑bit ARM (arm64‑v8a)**, watch APK for **64‑ and 32‑bit ARM (arm64‑v8a + armeabi‑v7a)**:
+Latest release **v1.9.0** — phone APK for **64‑bit ARM (arm64‑v8a)**, watch APK for **64‑ and 32‑bit ARM (arm64‑v8a + armeabi‑v7a)**:
 
-- 📱 Phone APK: **[ATA-phone-v1.8.2-arm64-v8a.apk](https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-/releases/download/v1.8.2/ATA-phone-v1.8.2-arm64-v8a.apk)**
-- ⌚ Wear OS APK: **[ATA-wear-v1.8.2.apk](https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-/releases/download/v1.8.2/ATA-wear-v1.8.2.apk)**
+- 📱 Phone APK: **[ATA-phone-v1.9.0-arm64-v8a.apk](https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-/releases/download/v1.9.0/ATA-phone-v1.9.0-arm64-v8a.apk)**
+- ⌚ Wear OS APK: **[ATA-wear-v1.9.0.apk](https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-/releases/download/v1.9.0/ATA-wear-v1.9.0.apk)**
 
 All releases are listed under [Releases](https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-/releases).
 All release builds are signed with the same release key, so new versions install as an update over

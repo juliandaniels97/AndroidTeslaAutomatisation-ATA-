@@ -1,17 +1,43 @@
-## ATA v1.8.2 — Echte Lichtsignaturen, Neon hell, realistischeres Material-Auto
+## ATA v1.9.0 — alle Neuerungen und Fixes zusammen
 
-### Lichtsignaturen der aktuellen Teslas
-- **Model 3 (Highland):** schmale, nach hinten gezogene Scheinwerfer mit Tagfahrlicht-Leiste und **C-förmige Rückleuchten**, die um die Ecken laufen.
-- **Model Y (Juniper):** **Lichtleiste quer über die Front** mit tiefer liegenden Scheinwerfern und **durchgehende Lichtleiste hinten**.
-- **Model S / X:** schmale Scheinwerfer und Rückleuchten um die Ecken. **Cybertruck:** Lichtleisten vorne und hinten. **Roadster:** schmale Scheinwerfer und Leiste hinten.
-- Gilt für **Neon** (leuchtende Linien) und **Material** (Linsen und Leuchtstreifen).
+Diese Version fasst alles seit 1.5 zusammen. Nur die versionierten Releases werden noch veröffentlicht, die rollende Vorabversion „APK build (main)“ entfällt.
 
-### Material: noch näher am echten Auto
-- Dunkle Radhausschalen über den Reifen und Seitenkamera am vorderen Kotflügel.
-- Lichter werden nur noch gezeichnet, wenn die Seite zum Betrachter zeigt, also nicht mehr durch die Karosserie.
+### Fahrzeug
+- **Sechs Modelle:** Model 3, Model Y, Model S, Model X, Cybertruck, Roadster. Erkennung über die VIN, manuell änderbar mit Live-Vorschau.
+- **Echte Lichtsignaturen** der aktuellen Modelle (Model 3 Highland, Model Y Juniper …), in Neon und Material.
+- **3D-Ansicht:**
+  - Drehen folgt dem Finger, Pinch-to-Zoom, antippbare Punkte direkt am Fahrzeug.
+  - Lenkrad, Fahrertür und Ladeklappe links (Linkslenker).
+- **2D-Seitenansicht** als Alternative (Einstellungen → Darstellung).
+- **Viele Animationen:**
+  - Türen, Frunk, Kofferraum, Ladeklappe mit Kabel, Fenster, Spiegel.
+  - Licht, Aufwecken, Entriegeln mit Umfeldbeleuchtung, Klima mit Luftstrom, Musik, Wächter-Radar, Herbeirufen, Bioschutz-Nebel.
+  - **„Animationen zeigen“** spielt alle Effekte vor, ohne Befehle ans Auto zu senden.
 
-### Neon im hellen Modus
-- Die Vollbild-Ansicht folgt jetzt dem hellen Modus: heller Showroom mit dunkleren Neon-Linien.
-- Die README-Screenshots für Neon hell zeigen jetzt wirklich den hellen Modus.
+### Design
+- **Neon (Standard)** oder **Material**, jeweils hell und dunkel.
+- **Material** stellt die ganze App auf ruhige Material-3-Flächen um. Das Auto ist lackiert und kommt dem echten nahe.
+- **Farbwahl pro Fahrzeug:**
+  - Material: Tesla-Lackierungen.
+  - Neon: Linienfarben.
+
+### Widgets und Uhr
+- **Status-Widget** mit allen Werten, responsiv von 1×1 bis 4×2.
+- **Wear OS:**
+  - Große Kacheln im Raster (rund 1/2/1 oder 2/3/2, eckig 2×2 oder 3×3). Nach links wischen für weitere Aktionen.
+  - Status am Rand.
+  - **Komplikationen** für Akku, Reichweite, Temperaturen und Schloss, dazu vier Aktions-Plätze. Alles am Handy einstellbar.
+
+### Bedienung
+- **Menü & Widgets** mit Untermenüs (Icon-Menü, Samsung Routinen, Feste Werte, Aktionen-Widget).
+- Schalter in den Einstellungen reagieren auf die ganze Zeile.
+
+### Bluetooth
+- Direkte Steuerung ohne BETA-Hinweis.
+- Zusätzliche Aktionen:
+  - Fahrertür oder Beifahrertür öffnen, Kofferraum schließen.
+  - Bioschutz, Überhitzungsschutz, Medien.
+  - Furz- und Ortungston.
+- Manche Funktionen sind fahrzeugspezifisch.
 
 NFC-Schlüsselkarte (Handy und Uhr) bleibt **BETA**.
