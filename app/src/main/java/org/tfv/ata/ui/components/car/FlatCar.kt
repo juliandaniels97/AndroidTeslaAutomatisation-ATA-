@@ -285,18 +285,9 @@ fun DrawScope.drawFlatCar(shape: CarShape, camera: CarCamera, fx: CarFxState, st
   val sentry = maxOf(fx.openness(CarEffect.SENTRY, now, 800), if (status.sentry) 1f else 0f)
   if (sentry > 0f) drawCircle(style.red.copy(alpha = sentry), unit * .04f * (1.1f + .3f * sin(t * 4)), p(s.doorRear + .2f + (s.windscreenBase - s.doorRear), s.beltMid - .05f))
 
-  // Horn, locate and music: calm rings in front of / above the car.
+  // Horn and music: calm rings in front of / above the car.
   fx.pulse(CarEffect.HONK, now, 1200)?.let { rings(p(l + .2f, s.beltFront), unit, it, style.accent) }
-  fx.pulse(CarEffect.LOCATE, now, 2400)?.let { rings(p(0f, s.roofHeight + .2f), unit, it, style.accent) }
   fx.pulse(CarEffect.MEDIA, now, 2600)?.let { rings(p((s.roofFront + s.roofRear) / 2f, s.roofHeight + .1f), unit, it, style.accent) }
-  // Boombox: little clouds at the back.
-  fx.pulse(CarEffect.PUFF, now, 2200)?.let { q0 ->
-    for (k in 0 until 5) {
-      val q = (q0 * 1.3f - k * .06f).coerceIn(0f, 1f)
-      val c = p(-l - .2f - 1.0f * q, s.sill + .2f + .25f * q + k * .04f)
-      drawCircle(style.green.copy(alpha = .35f * (1 - q)), unit * (.06f + .12f * q), c)
-    }
-  }
 }
 
 private fun DrawScope.rings(center: Offset, unit: Float, p: Float, color: Color) {

@@ -62,7 +62,7 @@
     <string name="settings_biometric">Biometrische Sperre</string>
     <string name="settings_biometric_desc">Vor kritischen Aktionen Fingerabdruck/Gesicht verlangen, in der App und beim Bestätigen einer Automation.</string>
     <string name="nfc_keycard">NFC-Schlüsselkarte (Handy als Karte)</string>
-    <string name="nfc_keycard_desc">Das Handy funktioniert als Tesla-NFC-Schlüsselkarte mit eigenem Schlüssel. Standardmäßig aus, Einrichtung über den Assistenten unten. Funktioniert nur bei entsperrtem Handy. BETA.</string>
+    <string name="nfc_keycard_desc">Das Handy funktioniert als Tesla-NFC-Schlüsselkarte mit eigenem Schlüssel. Standardmäßig aus, Einrichtung über den Assistenten unten. Funktioniert nur bei entsperrtem Handy.</string>
     <string name="settings_wear">Wear OS Uhr</string>
     <string name="settings_wear_desc">Lege fest, welche Aktionen auf der Uhr erscheinen.</string>
     <string name="settings_nfc">NFC-Tags</string>
@@ -150,7 +150,7 @@
     <string name="ble_pair_desc">Einmalig, mit einer Schlüsselkarte am Auto. Der Assistent führt dich Schritt für Schritt.</string>
     <string name="section_experimental">Bluetooth &amp; NFC</string>
     <string name="settings_experimental_ble">Direkte BLE-Steuerung</string>
-    <string name="settings_experimental_ble_desc">Steuert das Auto direkt per Bluetooth (nach einmaligem Koppeln des Handys). Manche Funktionen sind fahrzeugspezifisch, z. B. Türen öffnen, elektrische Heckklappe oder Boombox-Geräusche, und funktionieren nicht bei jedem Modell.</string>
+    <string name="settings_experimental_ble_desc">Steuert das Auto direkt per Bluetooth (nach einmaligem Koppeln des Handys). Manche Funktionen sind fahrzeugspezifisch, z. B. Türen öffnen oder die elektrische Heckklappe, und funktionieren nicht bei jedem Modell.</string>
     <string name="ble_enable_title">BLE-Features aktivieren</string>
     <string name="ble_enable_desc">Direkte Bluetooth-Steuerung deines Tesla. Wieder ausschalten unter Einstellungen → Bluetooth &amp; NFC.</string>
     <string name="activate">Aktivieren</string>
@@ -295,7 +295,7 @@
     <string name="guide_wear_steps">ATA auf der Uhr installieren (Play Store auf der Uhr oder Wear-APK).\nUnter „Wear OS Uhr“ die Aktionen für die Uhr wählen: Sie werden automatisch übertragen.\nTaps auf der Uhr werden auf dem Handy ausgeführt, „Tesla App öffnen“ öffnet sie auf dem Handy.\nOptional, damit die Uhr ohne Handy funktioniert: „Wear OS Uhr“ → „Uhr koppeln“ (Assistent auf dem Handy).</string>
     <string name="guide_ble_title">Bluetooth-Steuerung</string>
     <string name="guide_ble_steps">„Direkte BLE-Steuerung“ einschalten und ein Fahrzeug mit VIN anlegen.\nDas Handy einmalig mit dem Assistenten koppeln (dafür brauchst du eine funktionierende Schlüsselkarte).\nDanach können Fahrzeug-Tab, Widgets und Automationen direkt per Bluetooth ver- und entriegeln, klimatisieren und mehr.</string>
-    <string name="guide_keycard_steps">Optional und BETA: Das Handy funktioniert als NFC-Schlüsselkarte.\nIn den Einstellungen „NFC-Schlüsselkarte“ einschalten und im Auto wie eine Karte anlernen (Steuerung → Schlösser → Schlüssel hinzufügen).\nDas Handy antwortet nur, wenn es entsperrt ist.</string>
+    <string name="guide_keycard_steps">Optional: Das Handy funktioniert als NFC-Schlüsselkarte.\nIn den Einstellungen „NFC-Schlüsselkarte“ einschalten und im Auto wie eine Karte anlernen (Steuerung → Schlösser → Schlüssel hinzufügen).\nDas Handy antwortet nur, wenn es entsperrt ist.</string>
     <string name="guide_keycard_steps_tesla">Die Tesla-App ist installiert und antwortet bereits am Kartenleser. Lass die NFC-Schlüsselkarte von ATA AUS, dann erscheint keine App-Auswahl.\nSchaltest du sie trotzdem ein, antwortet ATA nur, solange ATA geöffnet ist. Sonst antwortet wie gewohnt die Tesla-App.\nFragt Android trotzdem? In den NFC-Einstellungen die Standard-App für kontaktlose Nutzung prüfen.</string>
     <string name="nfc_settings_open">NFC-Einstellungen öffnen</string>
     <string name="nfc_keycard_hint">Das Handy antwortet am Kartenleser des Autos, solange es entsperrt ist.</string>
@@ -361,7 +361,7 @@
     <string name="pair_done_text">Bluetooth-Aktionen funktionieren. Neu koppeln ist nur nötig, wenn der Schlüssel im Auto entfernt wurde.</string>
     <string name="pair_repair">Trotzdem neu koppeln</string>
     <string name="keycard_title">NFC-Schlüsselkarte einrichten</string>
-    <string name="keycard_intro">Das Handy funktioniert wie eine Tesla-Schlüsselkarte: an die B-Säule halten zum Entriegeln, auf den Kartenleser legen zum Losfahren. Es nutzt einen eigenen Schlüssel, getrennt von der Bluetooth-Kopplung, und antwortet nur bei entsperrtem Handy. BETA.</string>
+    <string name="keycard_intro">Das Handy funktioniert wie eine Tesla-Schlüsselkarte: an die B-Säule halten zum Entriegeln, auf den Kartenleser legen zum Losfahren. Es nutzt einen eigenen Schlüssel, getrennt von der Bluetooth-Kopplung, und antwortet nur bei entsperrtem Handy.</string>
     <string name="keycard_check_nfc">Handy hat NFC</string>
     <string name="keycard_check_nfc_on">NFC eingeschaltet</string>
     <string name="keycard_check_hce">Kartenemulation wird unterstützt</string>
@@ -381,7 +381,7 @@
     <string name="nfc_off_text">NFC in den Android-Einstellungen einschalten, sonst funktionieren NFC-Tags und die NFC-Schlüsselkarte nicht.</string>
     <string name="wear_keycard_title">Uhr als NFC-Schlüsselkarte</string>
     <string name="wear_keycard_card_desc">Mit der Uhr entriegeln und losfahren, wie mit einer Schlüsselkarte. Einrichtung von hier aus.</string>
-    <string name="wear_keycard_intro">Die Uhr funktioniert wie eine Tesla-Schlüsselkarte: an die B-Säule halten zum Entriegeln, auf den Kartenleser zum Losfahren. Sie nutzt einen eigenen Schlüssel und antwortet nur, wenn sie entsperrt am Handgelenk ist. Dieser Assistent steuert die Uhr von hier aus. BETA.</string>
+    <string name="wear_keycard_intro">Die Uhr funktioniert wie eine Tesla-Schlüsselkarte: an die B-Säule halten zum Entriegeln, auf den Kartenleser zum Losfahren. Sie nutzt einen eigenen Schlüssel und antwortet nur, wenn sie entsperrt am Handgelenk ist. Dieser Assistent steuert die Uhr von hier aus.</string>
     <string name="wear_keycard_check_nfc">Uhr hat NFC</string>
     <string name="wear_keycard_no_nfc">Diese Uhr hat kein NFC.</string>
     <string name="wear_keycard_check_nfc_on">NFC auf der Uhr eingeschaltet</string>
@@ -441,9 +441,7 @@
     <string name="a_media_toggle">Musik Play/Pause</string>
     <string name="a_media_next">Nächster Titel</string>
     <string name="a_media_previous">Vorheriger Titel</string>
-    <string name="vehicle_specific_hint">Manche Funktionen sind fahrzeugspezifisch (z. B. Türen öffnen, elektrische Heckklappe, Boombox) und funktionieren nicht bei jedem Modell.</string>
-    <string name="a_boombox_fart">Furzgeräusch</string>
-    <string name="a_boombox_locate">Ortungston</string>
+    <string name="vehicle_specific_hint">Manche Funktionen sind fahrzeugspezifisch (z. B. Türen öffnen, elektrische Heckklappe) und funktionieren nicht bei jedem Modell.</string>
     <string name="hs_driver_door">Fahrertür</string>
     <string name="hs_passenger_door">Beifahrertür</string>
     <string name="hs_frunk">Frunk</string>

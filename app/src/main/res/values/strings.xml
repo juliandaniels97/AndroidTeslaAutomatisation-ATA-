@@ -62,7 +62,7 @@
     <string name="settings_biometric">Biometric lock</string>
     <string name="settings_biometric_desc">Require fingerprint/face before critical actions, in the app and when confirming an automation.</string>
     <string name="nfc_keycard">NFC key card (phone as card)</string>
-    <string name="nfc_keycard_desc">The phone acts as a Tesla NFC key card with its own key. Off by default; set it up with the assistant below. Works only while the phone is unlocked. BETA.</string>
+    <string name="nfc_keycard_desc">The phone acts as a Tesla NFC key card with its own key. Off by default; set it up with the assistant below. Works only while the phone is unlocked.</string>
     <string name="settings_wear">Wear OS watch</string>
     <string name="settings_wear_desc">Choose which actions appear on the watch.</string>
     <string name="settings_nfc">NFC tags</string>
@@ -150,7 +150,7 @@
     <string name="ble_pair_desc">Once, with a key card at the car. The assistant guides you step by step.</string>
     <string name="section_experimental">Bluetooth &amp; NFC</string>
     <string name="settings_experimental_ble">Direct BLE control</string>
-    <string name="settings_experimental_ble_desc">Controls the car directly over Bluetooth (after pairing the phone once). Some functions depend on the vehicle, e.g. opening doors, the power liftgate or the boombox sounds, and don\'t work on every model.</string>
+    <string name="settings_experimental_ble_desc">Controls the car directly over Bluetooth (after pairing the phone once). Some functions depend on the vehicle, e.g. opening doors or the power liftgate, and don\'t work on every model.</string>
     <string name="ble_enable_title">Enable BLE features</string>
     <string name="ble_enable_desc">Direct Bluetooth control of your Tesla. You can turn it off again under Settings → Bluetooth &amp; NFC.</string>
     <string name="activate">Activate</string>
@@ -295,7 +295,7 @@
     <string name="guide_wear_steps">Install ATA on the watch (Play Store on the watch or the wear APK).\nPick the actions for the watch under \"Wear OS watch\": they sync automatically.\nTaps on the watch run on the phone; \"Open Tesla app\" opens it on the phone.\nOptional, so the watch works without the phone: \"Wear OS watch\" → \"Pair watch\" (assistant on the phone).</string>
     <string name="guide_ble_title">Bluetooth control</string>
     <string name="guide_ble_steps">Turn on \"Direct BLE control\" and add a car with VIN.\nPair the phone once with the assistant (you need a working key card).\nThen the car tab, widgets and automations can lock, unlock, climate and more directly over Bluetooth.</string>
-    <string name="guide_keycard_steps">Optional and BETA: the phone acts as an NFC key card.\nTurn on \"NFC key card\" in settings, then add it in the car like a card (Controls → Locks → Add key).\nThe phone only answers while it is unlocked.</string>
+    <string name="guide_keycard_steps">Optional: the phone acts as an NFC key card.\nTurn on \"NFC key card\" in settings, then add it in the car like a card (Controls → Locks → Add key).\nThe phone only answers while it is unlocked.</string>
     <string name="guide_keycard_steps_tesla">The Tesla app is installed and already answers at the card reader. Keep ATA\'s NFC key card OFF: then there is no app chooser.\nIf you turn it on anyway, ATA only answers while ATA is open on screen. Otherwise the Tesla app answers as usual.\nDoes Android still ask? Open the NFC settings and check the default app for contactless use.</string>
     <string name="nfc_settings_open">Open NFC settings</string>
     <string name="nfc_keycard_hint">The phone answers at the car\'s card reader while it is unlocked.</string>
@@ -361,7 +361,7 @@
     <string name="pair_done_text">Bluetooth actions work. Pairing again is only needed if the key was removed in the car.</string>
     <string name="pair_repair">Pair again anyway</string>
     <string name="keycard_title">Set up NFC key card</string>
-    <string name="keycard_intro">The phone works like a Tesla key card: hold it to the B-pillar to unlock, place it on the card reader to drive. It uses its own key, separate from the Bluetooth pairing, and only answers while the phone is unlocked. BETA.</string>
+    <string name="keycard_intro">The phone works like a Tesla key card: hold it to the B-pillar to unlock, place it on the card reader to drive. It uses its own key, separate from the Bluetooth pairing, and only answers while the phone is unlocked.</string>
     <string name="keycard_check_nfc">Phone has NFC</string>
     <string name="keycard_check_nfc_on">NFC turned on</string>
     <string name="keycard_check_hce">Card emulation supported</string>
@@ -381,7 +381,7 @@
     <string name="nfc_off_text">Turn on NFC in the Android settings, otherwise NFC tags and the NFC key card don\'t work.</string>
     <string name="wear_keycard_title">Watch as NFC key card</string>
     <string name="wear_keycard_card_desc">Unlock and drive with the watch, like a key card. Set up from here.</string>
-    <string name="wear_keycard_intro">The watch works like a Tesla key card: hold it to the B-pillar to unlock, place it on the card reader to drive. It uses its own key and only answers while it is unlocked on your wrist. This assistant controls the watch from here. BETA.</string>
+    <string name="wear_keycard_intro">The watch works like a Tesla key card: hold it to the B-pillar to unlock, place it on the card reader to drive. It uses its own key and only answers while it is unlocked on your wrist. This assistant controls the watch from here.</string>
     <string name="wear_keycard_check_nfc">Watch has NFC</string>
     <string name="wear_keycard_no_nfc">This watch has no NFC.</string>
     <string name="wear_keycard_check_nfc_on">NFC on the watch turned on</string>
@@ -441,9 +441,7 @@
     <string name="a_media_toggle">Media play/pause</string>
     <string name="a_media_next">Next track</string>
     <string name="a_media_previous">Previous track</string>
-    <string name="vehicle_specific_hint">Some functions depend on the vehicle (e.g. opening doors, power liftgate, boombox) and don\'t work on every model.</string>
-    <string name="a_boombox_fart">Fart sound</string>
-    <string name="a_boombox_locate">Locate sound</string>
+    <string name="vehicle_specific_hint">Some functions depend on the vehicle (e.g. opening doors, power liftgate) and don\'t work on every model.</string>
     <string name="hs_driver_door">Driver door</string>
     <string name="hs_passenger_door">Passenger door</string>
     <string name="hs_frunk">Frunk</string>

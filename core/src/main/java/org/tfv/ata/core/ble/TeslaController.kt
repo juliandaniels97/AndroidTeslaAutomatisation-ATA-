@@ -77,6 +77,7 @@ object TeslaController {
           CommandResult.NotImplemented
         }
       withVehicle<CommandResult>(context, vin, onError = { code, msg -> CommandResult.Failure(msg, code) }) { conn ->
+        BleLog.add("--- command ${action.id}${value?.let { " = $it" } ?: ""} ---")
         val routing = newId()
         val infotainment = command.domain == Domain.INFOTAINMENT
         if (infotainment) ensureAwake(conn, vin, routing)

@@ -7,7 +7,7 @@ enum class CarEffect {
   DOOR_DRIVER, DOOR_PASSENGER, TRUNK, FRUNK, CHARGE_PORT, WINDOWS, DEFROST, WHEEL_HEAT, BIOWEAPON, CLIMATE,
   CHARGING, SENTRY, MIRRORS_FOLDED,
   // One-shot effects:
-  LIGHTS, HONK, WAKE, LOCK, UNLOCK, PUFF, LOCATE, DRIVE, MEDIA, AIRFLOW,
+  LIGHTS, HONK, WAKE, LOCK, UNLOCK, DRIVE, MEDIA, AIRFLOW,
 }
 
 /** A part that is open / on: since when, and until when it is shown (the car doesn't report every part back). */
@@ -73,8 +73,6 @@ data class CarFxState(
       AtaAction.REMOTE_DRIVE -> pulse(CarEffect.DRIVE)
       AtaAction.MEDIA_TOGGLE, AtaAction.MEDIA_NEXT, AtaAction.MEDIA_PREVIOUS -> pulse(CarEffect.MEDIA)
       AtaAction.SET_TEMPERATURE, AtaAction.OVERHEAT_PROTECTION_ON -> pulse(CarEffect.AIRFLOW)
-      AtaAction.BOOMBOX_FART -> pulse(CarEffect.PUFF)
-      AtaAction.BOOMBOX_LOCATE -> pulse(CarEffect.LOCATE)
       else -> this
     }
   }
