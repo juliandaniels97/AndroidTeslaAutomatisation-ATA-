@@ -22,10 +22,10 @@ ATA is free for personal use. If it saves you a few taps every day, you can supp
 
 ## Downloads
 
-Latest release **v1.9.0** — phone APK for **64‑bit ARM (arm64‑v8a)**, watch APK for **64‑ and 32‑bit ARM (arm64‑v8a + armeabi‑v7a)**:
+Latest release **v1.9.1** — phone APK for **64‑bit ARM (arm64‑v8a)**, watch APK for **64‑ and 32‑bit ARM (arm64‑v8a + armeabi‑v7a)**:
 
-- 📱 Phone APK: **[ATA-phone-v1.9.0-arm64-v8a.apk](https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-/releases/download/v1.9.0/ATA-phone-v1.9.0-arm64-v8a.apk)**
-- ⌚ Wear OS APK: **[ATA-wear-v1.9.0.apk](https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-/releases/download/v1.9.0/ATA-wear-v1.9.0.apk)**
+- 📱 Phone APK: **[ATA-phone-v1.9.1-arm64-v8a.apk](https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-/releases/download/v1.9.1/ATA-phone-v1.9.1-arm64-v8a.apk)**
+- ⌚ Wear OS APK: **[ATA-wear-v1.9.1.apk](https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-/releases/download/v1.9.1/ATA-wear-v1.9.1.apk)**
 
 All releases are listed under [Releases](https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-/releases).
 All release builds are signed with the same release key, so new versions install as an update over
@@ -87,7 +87,7 @@ verification, AES‑GCM command signing, metadata serialization) is implemented 
 **verified byte‑for‑byte against Tesla's published test vectors**.
 
 They are **off by default**. Enable them under **Settings → Bluetooth & NFC → Direct BLE control**.
-Some functions are **vehicle‑specific** (e.g. opening single doors, the power liftgate or the boombox)
+Some functions are **vehicle‑specific** (e.g. opening single doors or the power liftgate)
 and don't work on every model. Then:
 
 1. Add your vehicle (VIN) under **Settings → Vehicles**.
@@ -98,8 +98,7 @@ and don't work on every model. Then:
 3. The BLE buttons then send commands over BLE: lock/unlock, open driver or passenger door, climate
    (on/off, temperature, keeper/dog/camp, defrost, steering‑wheel heater, bioweapon defence, cabin
    overheat protection), charging (start/stop, limit, amps, charge port), trunk/frunk, windows,
-   sentry, honk, flash, wake, remote drive, media (play/pause, next, previous) and the boombox (fart
-   and locate sound).
+   sentry, honk, flash, wake, remote drive and media (play/pause, next, previous).
 
 #### Live status
 
@@ -148,6 +147,15 @@ The Vehicle tab shows your car inside a **battery ring** (dark blue 100–80 %, 
   defence surrounds the car (not the cabin) with green fog. **Show animations** in the full‑screen view
   plays them all without sending anything to the car.
 
+#### Unlock when walking up
+
+**Settings → Unlock when approaching** unlocks the car once when you walk up to it with the phone. ATA watches
+the strength of the car's Bluetooth signal (filtered by the car's BLE name, so it also works with the screen off,
+or read from the Tesla app's existing connection) and unlocks when it rises above the distance you set
+(about 2–20 m). It only fires after you were away from the car, never right after starting next to it and not twice
+within two minutes. With the phone locked, ATA asks with a notification first, unless you allow it while locked.
+A quiet notification shows while it is on.
+
 ## Security
 
 ATA can open your car, so every request is checked by one policy (`ActionPolicy`) before it runs.
@@ -159,6 +167,7 @@ The trust level comes **only** from ATA's own per‑install token — never from
 | **ATA shortcuts, widgets, Samsung Routines, Tasker with token** | ✅ | ✅ — also while the phone is locked (switchable) | Notification **"Run …?"** → tap (+ biometrics if enabled). Per action you can allow it without asking (phone unlocked; optionally also locked) |
 | ATA watch app | ✅ | ✅ | ✅ after a confirming second tap on the unlocked watch |
 | NFC tag written by ATA | ✅ | ✅ | always asks via notification |
+| Proximity unlock (walking up to the car) | — | — | **Unlock only**: straight away with the phone unlocked; with the phone locked a notification asks first (unless allowed) |
 | Other apps, links, foreign tags (no token) | ✅ | only actions you allow under **Settings → Automation**, phone unlocked | ❌ never |
 
 - The BLE features stay off until you turn them on under **Settings → Bluetooth & NFC**, and
@@ -293,7 +302,7 @@ and **Settings → Automation → Invalidate all NFC tags** revokes every tag at
 read and copy a tag, critical actions from a tag (e.g. an *Unlock* tag) always ask for confirmation
 first.
 
-### Tesla key card emulation — phone *as* the card (BETA)
+### Tesla key card emulation — phone *as* the card
 
 **Settings → Bluetooth & NFC → NFC key card** turns the phone itself into a Tesla **key card** via host
 card emulation (HCE). The car's center‑console reader talks to the phone over NFC exactly as it would
@@ -327,19 +336,17 @@ until the car confirms. After that, tap to lock/unlock like a card.
   activation animation toward the car's last‑known spot — the spot is remembered whenever a BLE
   command succeeds (i.e. when you were next to the car).
 - **Active toggle** for routines; **multi‑vehicle** (name, VIN, home & work addresses).
-- **Bluetooth & NFC → Direct BLE control** and **NFC key card** (phone as a Tesla key card, BETA).
+- **Bluetooth & NFC → Direct BLE control** and **NFC key card** (phone as a Tesla key card).
 - **3D vehicle view** on or off (off: solid 2D side view); vehicle **type** per vehicle.
 - **Status interval**: how often ATA polls the car for a battery/range/climate snapshot over BLE
   (Off, or 15 min and up). Requires the BLE features.
-- **Proximity unlock (BETA)** is reserved for an upcoming release (see known limitations) and currently has no
-  effect.
 
 ## Known limitations
 
-- **Vehicle‑specific functions** (single doors, power liftgate, boombox …) only work on cars that
+- **Vehicle‑specific functions** (single doors, power liftgate, bioweapon defence …) only work on cars that
   have them.
-- The **NFC key card** (phone and watch) is still **BETA** and not yet verified on a real car.
-- **Proximity unlock** is not implemented — the setting is a placeholder and has no effect.
+- The **boombox** (fart and locate sound) is not part of Tesla's Bluetooth protocol (only the cloud API
+  offers it), so ATA can't trigger it.
 - **Seat heater** has no BLE command mapped yet; the tile reports it as unavailable.
 - **Samsung Routines** only lists ATA's published app shortcuts (icon menu + routine actions, see
   above); whether the extra routine actions appear depends on the One UI version.

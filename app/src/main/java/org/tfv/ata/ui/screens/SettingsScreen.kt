@@ -83,6 +83,11 @@ fun SettingsScreen(
   ) { result ->
     if (result.values.any { it }) vm.updateSettings { it.copy(directionFx = true) }
   }
+  val proximityLauncher = rememberLauncherForActivityResult(
+    ActivityResultContracts.RequestMultiplePermissions(),
+  ) { result ->
+    if (result.values.all { it }) vm.updateSettings { it.copy(proximityUnlock = true) }
+  }
   Scaffold(
     topBar = { TopAppBar(title = { Text(stringResource(R.string.tab_settings)) }) },
   ) { padding ->
@@ -230,19 +235,31 @@ fun SettingsScreen(
 
       HorizontalDivider()
       SectionTitle(stringResource(R.string.section_proximity))
-      SwitchRow(stringResource(R.string.settings_proximity), stringResource(R.string.settings_proximity_desc), s.proximityUnlock) {
-        vm.updateSettings { it.copy(proximityUnlock = it.proximityUnlock.not()) }
+      SwitchRow(stringResource(R.string.settings_proximity), stringResource(R.string.settings_proximity_desc), s.proximityUnlock && s.experimentalBle) {
+        when {
+          s.proximityUnlock -> vm.updateSettings { it.copy(proximityUnlock = false) }
+          !s.experimentalBle -> android.widget.Toast.makeText(context, R.string.proximity_needs_ble, android.widget.Toast.LENGTH_LONG).show()
+          // Bluetooth scanning and location (Android only reports the car's advertisement with location access).
+          org.tfv.ata.core.ble.TeslaController.BLE_PERMISSIONS.any {
+            androidx.core.content.ContextCompat.checkSelfPermission(context, it) != android.content.pm.PackageManager.PERMISSION_GRANTED
+          } -> proximityLauncher.launch(org.tfv.ata.core.ble.TeslaController.BLE_PERMISSIONS)
+          else -> vm.updateSettings { it.copy(proximityUnlock = true) }
+        }
       }
-      if (s.proximityUnlock) {
-        var proxLocal by remember(s.proximityMeters) { mutableFloatStateOf(s.proximityMeters.toFloat()) }
-        Text(stringResource(R.string.settings_proximity_meters, proxLocal.toInt()), style = MaterialTheme.typography.titleSmall)
+      if (s.proximityUnlock && s.experimentalBle) {
+        var meters by remember(s.proximityMeters) { mutableFloatStateOf(s.proximityMeters.coerceIn(2, 20).toFloat()) }
+        Text(stringResource(R.string.settings_proximity_meters, meters.toInt()), style = MaterialTheme.typography.titleSmall)
         Slider(
-          value = proxLocal,
-          valueRange = 5f..100f,
-          steps = 18,
-          onValueChange = { proxLocal = (it / 5f).toInt() * 5f },
-          onValueChangeFinished = { vm.updateSettings { it.copy(proximityMeters = proxLocal.toInt()) } },
+          value = meters,
+          valueRange = 2f..20f,
+          steps = 17,
+          onValueChange = { meters = it },
+          onValueChangeFinished = { vm.updateSettings { it.copy(proximityMeters = meters.toInt()) } },
         )
+        SwitchRow(stringResource(R.string.settings_proximity_locked), stringResource(R.string.settings_proximity_locked_desc), s.proximityWhenLocked) {
+          vm.updateSettings { it.copy(proximityWhenLocked = it.proximityWhenLocked.not()) }
+        }
+        Text(stringResource(R.string.settings_proximity_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
       }
 
       HorizontalDivider()

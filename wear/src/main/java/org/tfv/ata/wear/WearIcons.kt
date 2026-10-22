@@ -9,7 +9,6 @@ import androidx.compose.material.icons.filled.AcUnit
 import androidx.compose.material.icons.filled.Air
 import androidx.compose.material.icons.filled.BatteryFull
 import androidx.compose.material.icons.filled.Bolt
-import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.DeviceThermostat
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.DoorBack
@@ -20,12 +19,12 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
+import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.Luggage
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Masks
 import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material.icons.filled.Nightlight
-import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.OpenInNew
 import androidx.compose.material.icons.filled.Pets
 import androidx.compose.material.icons.filled.PlayArrow
@@ -103,7 +102,7 @@ private fun iconFor(action: AtaAction): ImageVector = when (action) {
   AtaAction.CHARGE_PORT_OPEN -> Icons.Filled.EvStation
   AtaAction.CHARGE_PORT_CLOSE -> Icons.Filled.EvStation
   AtaAction.TRUNK -> Icons.Filled.Luggage
-  AtaAction.FRUNK -> Icons.Filled.Luggage
+  AtaAction.FRUNK -> Icons.Filled.Inventory2
   AtaAction.VENT_WINDOWS -> Icons.Filled.Window
   AtaAction.CLOSE_WINDOWS -> Icons.Filled.Window
   AtaAction.HONK -> Icons.Filled.VolumeUp
@@ -127,6 +126,4 @@ private fun iconFor(action: AtaAction): ImageVector = when (action) {
   AtaAction.MEDIA_TOGGLE -> Icons.Filled.PlayArrow
   AtaAction.MEDIA_NEXT -> Icons.Filled.SkipNext
   AtaAction.MEDIA_PREVIOUS -> Icons.Filled.SkipPrevious
-  AtaAction.BOOMBOX_FART -> Icons.Filled.Cloud
-  AtaAction.BOOMBOX_LOCATE -> Icons.Filled.NotificationsActive
 }

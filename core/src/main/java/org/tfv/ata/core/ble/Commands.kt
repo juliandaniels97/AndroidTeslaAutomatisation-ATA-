@@ -52,9 +52,6 @@ internal object Commands {
     AtaAction.MEDIA_TOGGLE -> infotainment(15, ByteArray(0))
     AtaAction.MEDIA_NEXT -> infotainment(19, ByteArray(0))
     AtaAction.MEDIA_PREVIOUS -> infotainment(20, ByteArray(0))
-    // BoomboxAction (external pedestrian speaker): sound 0 = fart, 2000 = locate ping.
-    AtaAction.BOOMBOX_FART -> infotainment(65, buildProto { varint(1, 0) })
-    AtaAction.BOOMBOX_LOCATE -> infotainment(65, buildProto { varint(1, 2000) })
     else -> null
   }
 

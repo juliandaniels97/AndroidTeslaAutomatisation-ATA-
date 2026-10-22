@@ -1,43 +1,40 @@
-## ATA v1.9.0 — alle Neuerungen und Fixes zusammen
+## ATA v1.9.1 — Entriegeln bei Annäherung, neuer Kompass, NFC-Schlüsselkarte fertig
 
-Diese Version fasst alles seit 1.5 zusammen. Nur die versionierten Releases werden noch veröffentlicht, die rollende Vorabversion „APK build (main)“ entfällt.
+### Entriegeln bei Annäherung (neu)
+- **Einstellungen → Entriegeln bei Annäherung:** Das Auto entriegelt einmal, wenn du mit dem Handy darauf zugehst.
+- **So funktioniert es:**
+  - ATA misst die Stärke des Bluetooth-Signals des Autos, auch bei ausgeschaltetem Bildschirm.
+  - Hält die Tesla-App bereits die Verbindung, liest ATA die Signalstärke direkt daraus.
+- **Entfernung** einstellbar von ca. 2 bis 20 m.
+- **Nur einmal pro Annäherung:** erst nachdem du weg warst, nie direkt nach dem Start neben dem Auto, und nicht zweimal innerhalb von zwei Minuten.
+- **Sicherheit:**
+  - Bei gesperrtem Handy fragt ATA per Benachrichtigung, außer du erlaubst es ausdrücklich („Auch bei gesperrtem Handy“).
+  - Es wird ausschließlich entriegelt, nie etwas anderes geöffnet.
+- Eine stille Benachrichtigung zeigt, solange die Funktion aktiv ist. Sie startet nach einem Neustart automatisch wieder.
 
-### Fahrzeug
-- **Sechs Modelle:** Model 3, Model Y, Model S, Model X, Cybertruck, Roadster. Erkennung über die VIN, manuell änderbar mit Live-Vorschau.
-- **Echte Lichtsignaturen** der aktuellen Modelle (Model 3 Highland, Model Y Juniper …), in Neon und Material.
-- **3D-Ansicht:**
-  - Drehen folgt dem Finger, Pinch-to-Zoom, antippbare Punkte direkt am Fahrzeug.
-  - Lenkrad, Fahrertür und Ladeklappe links (Linkslenker).
-- **2D-Seitenansicht** als Alternative (Einstellungen → Darstellung).
-- **Viele Animationen:**
-  - Türen, Frunk, Kofferraum, Ladeklappe mit Kabel, Fenster, Spiegel.
-  - Licht, Aufwecken, Entriegeln mit Umfeldbeleuchtung, Klima mit Luftstrom, Musik, Wächter-Radar, Herbeirufen, Bioschutz-Nebel.
-  - **„Animationen zeigen“** spielt alle Effekte vor, ohne Befehle ans Auto zu senden.
+### Kompass „Auto finden“ fertig
+- **Richtige Richtung:**
+  - Berücksichtigt die Bildschirmdrehung und ob das Handy flach liegt oder aufrecht gehalten wird.
+  - Bezieht sich auf **geografisch Nord**, mit Missweisungs-Korrektur am aktuellen Standort.
+- **Kompassrose:** dreht sich mit, das Auto ist am Rand markiert, dazu ein großer Pfeil. Er dreht immer den kurzen Weg, ruhig und geglättet.
+- **Kurze Vibration**, wenn das Handy genau Richtung Auto zeigt.
+- **Hinweise:**
+  - Kalibrieren nötig (Handy in Form einer Acht schwenken).
+  - GPS-Position noch zu ungenau.
+  - Ungefähre Gehzeit zum Auto.
+- Die Richtungs-Animation beim Ausführen von Aktionen nutzt denselben, korrigierten Kompass.
 
-### Design
-- **Neon (Standard)** oder **Material**, jeweils hell und dunkel.
-- **Material** stellt die ganze App auf ruhige Material-3-Flächen um. Das Auto ist lackiert und kommt dem echten nahe.
-- **Farbwahl pro Fahrzeug:**
-  - Material: Tesla-Lackierungen.
-  - Neon: Linienfarben.
+### NFC-Schlüsselkarte
+- Die **NFC-Schlüsselkarte** (Handy und Uhr) ist **kein BETA mehr**. Sie funktioniert am Fahrzeug.
+- Auch sonst gibt es in der App **keine BETA-Hinweise mehr**, z. B. bei der Navigations-App „Tesla“.
 
-### Widgets und Uhr
-- **Status-Widget** mit allen Werten, responsiv von 1×1 bis 4×2.
-- **Wear OS:**
-  - Große Kacheln im Raster (rund 1/2/1 oder 2/3/2, eckig 2×2 oder 3×3). Nach links wischen für weitere Aktionen.
-  - Status am Rand.
-  - **Komplikationen** für Akku, Reichweite, Temperaturen und Schloss, dazu vier Aktions-Plätze. Alles am Handy einstellbar.
+### Boombox entfernt
+- **Furzgeräusch und Ortungston** sind entfernt. Tesla bietet die Boombox nur über die Cloud (Fleet API) an, nicht über Bluetooth.
+- Die bisher gesendete Nachricht war im Tesla-Protokoll der Befehl für den **Gastmodus**. Das Fahrzeug hat ihn korrekt mit „insufficient privileges“ abgelehnt.
+- Alle übrigen Bluetooth-Befehle wurden mit Teslas offiziellem Protokoll abgeglichen und stimmen.
 
-### Bedienung
-- **Menü & Widgets** mit Untermenüs (Icon-Menü, Samsung Routinen, Feste Werte, Aktionen-Widget).
-- Schalter in den Einstellungen reagieren auf die ganze Zeile.
+### Symbole
+- **Frunk** und **Kofferraum** haben jetzt **verschiedene Symbole**: Box für den Frunk, Koffer für den Kofferraum. Das gilt in App, Vollbild-Ansicht, Widgets und auf der Uhr.
 
-### Bluetooth
-- Direkte Steuerung ohne BETA-Hinweis.
-- Zusätzliche Aktionen:
-  - Fahrertür oder Beifahrertür öffnen, Kofferraum schließen.
-  - Bioschutz, Überhitzungsschutz, Medien.
-  - Furz- und Ortungston.
-- Manche Funktionen sind fahrzeugspezifisch.
-
-NFC-Schlüsselkarte (Handy und Uhr) bleibt **BETA**.
+### Fehlerbericht
+- Das Bluetooth-Protokoll im Fehlerbericht zeigt jetzt bei jedem Befehl, **welche Aktion** gesendet wurde.

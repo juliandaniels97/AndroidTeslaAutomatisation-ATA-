@@ -33,6 +33,7 @@ import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.DoorFront
 import androidx.compose.material.icons.filled.EvStation
 import androidx.compose.material.icons.filled.FlashOn
+import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.Luggage
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Stop
@@ -110,7 +111,6 @@ private val DEMO_STEPS: List<List<AtaAction>> = listOf(
     AtaAction.CLOSE_WINDOWS, AtaAction.TRUNK_CLOSE, AtaAction.CHARGE_STOP, AtaAction.CHARGE_PORT_CLOSE, AtaAction.CLIMATE_OFF,
     AtaAction.DEFROST_OFF, AtaAction.STEERING_WHEEL_HEATER_OFF, AtaAction.BIOWEAPON_OFF, AtaAction.SENTRY_OFF, AtaAction.REMOTE_DRIVE,
   ),
-  listOf(AtaAction.BOOMBOX_FART),
   listOf(AtaAction.LOCK),
 )
 private const val DEMO_STEP_MS = 2500L
@@ -131,7 +131,7 @@ private fun actionsFor(spot: CarHotspot?, sideView: Boolean): List<AtaAction> = 
     AtaAction.CHARGE_LIMIT, AtaAction.CHARGING_AMPS,
   )
   CarHotspot.WINDOWS -> listOf(AtaAction.VENT_WINDOWS, AtaAction.CLOSE_WINDOWS)
-  CarHotspot.LIGHTS -> listOf(AtaAction.FLASH_LIGHTS, AtaAction.HONK, AtaAction.BOOMBOX_FART, AtaAction.BOOMBOX_LOCATE)
+  CarHotspot.LIGHTS -> listOf(AtaAction.FLASH_LIGHTS, AtaAction.HONK)
   CarHotspot.CLIMATE -> listOf(
     AtaAction.CLIMATE_ON, AtaAction.CLIMATE_OFF, AtaAction.SET_TEMPERATURE, AtaAction.DEFROST, AtaAction.DEFROST_OFF,
     AtaAction.STEERING_WHEEL_HEATER, AtaAction.STEERING_WHEEL_HEATER_OFF, AtaAction.CLIMATE_KEEP, AtaAction.DOG_MODE,
@@ -146,7 +146,8 @@ private fun actionsFor(spot: CarHotspot?, sideView: Boolean): List<AtaAction> = 
 
 private fun spotIcon(spot: CarHotspot): ImageVector = when (spot) {
   CarHotspot.DRIVER_DOOR, CarHotspot.PASSENGER_DOOR -> Icons.Filled.DoorFront
-  CarHotspot.FRUNK, CarHotspot.TRUNK -> Icons.Filled.Luggage
+  CarHotspot.FRUNK -> Icons.Filled.Inventory2
+  CarHotspot.TRUNK -> Icons.Filled.Luggage
   CarHotspot.CHARGE_PORT -> Icons.Filled.EvStation
   CarHotspot.WINDOWS -> Icons.Filled.Window
   CarHotspot.LIGHTS -> Icons.Filled.FlashOn

@@ -6,7 +6,7 @@
     <string name="in_development">Diese Funktion ist in Entwicklung.</string>
     <string name="error_no_app">Keine passende App installiert.</string>
     <string name="onboarding_title">Willkommen bei ATA</string>
-    <string name="onboarding_body">ATA steuert und automatisiert deinen Tesla — ohne Konto, ohne Fleet API, ohne Cloud.\n\n▸ BASISFUNKTIONEN\nTesla-App öffnen; zu Laden/Klima/Steuerung/Standort springen (BETA — öffnet ggf. nur die App). Nach Hause/Arbeit oder zu jeder Adresse navigieren (an die Tesla-App gesendet, oder Google Maps/Waze). Ziel teilen.\n\n▸ BLE-FUNKTIONEN\nUnter Einstellungen → Bluetooth &amp; NFC aktivieren, Fahrzeug (VIN) hinzufügen und Telefonschlüssel koppeln. Dann ver-/entriegeln, Klima, Laden, Kofferraum/Frunk, Fenster, Wächtermodus u. v. m. über Bluetooth — plus Live-Status (Akku, Reichweite, Temperaturen).\n\n▸ ANPASSEN\nAuf dem Aktionen-Tab eine Kachel lange drücken: per Drag anordnen, löschen, mit + wieder hinzufügen, dann Darstellung speichern. Fahrzeugaktionen über den Stern im Fahrzeug-Tab oder die +-Liste hinzufügen. Jede Aktion als Shortcut, App-Icon-Menü oder Widget anheften (bis zu 8 Kacheln).\n\n▸ AUTOMATISIERUNG\nAktionen aus Samsung Routines oder Tasker auslösen und auf den Fahrzeugstatus (Akku, Laden, verriegelt …) über ATA-Broadcasts reagieren.\n\nTipp: Heimat-/Arbeitsadresse unter Einstellungen → Adressen festlegen — Navigation funktioniert auch ohne gespeichertes Fahrzeug.</string>
+    <string name="onboarding_body">ATA steuert und automatisiert deinen Tesla — ohne Konto, ohne Fleet API, ohne Cloud.\n\n▸ BASISFUNKTIONEN\nTesla-App öffnen; zu Laden/Klima/Steuerung/Standort springen (öffnet ggf. nur die App). Nach Hause/Arbeit oder zu jeder Adresse navigieren (an die Tesla-App gesendet, oder Google Maps/Waze). Ziel teilen.\n\n▸ BLE-FUNKTIONEN\nUnter Einstellungen → Bluetooth &amp; NFC aktivieren, Fahrzeug (VIN) hinzufügen und Telefonschlüssel koppeln. Dann ver-/entriegeln, Klima, Laden, Kofferraum/Frunk, Fenster, Wächtermodus u. v. m. über Bluetooth — plus Live-Status (Akku, Reichweite, Temperaturen).\n\n▸ ANPASSEN\nAuf dem Aktionen-Tab eine Kachel lange drücken: per Drag anordnen, löschen, mit + wieder hinzufügen, dann Darstellung speichern. Fahrzeugaktionen über den Stern im Fahrzeug-Tab oder die +-Liste hinzufügen. Jede Aktion als Shortcut, App-Icon-Menü oder Widget anheften (bis zu 8 Kacheln).\n\n▸ AUTOMATISIERUNG\nAktionen aus Samsung Routines oder Tasker auslösen und auf den Fahrzeugstatus (Akku, Laden, verriegelt …) über ATA-Broadcasts reagieren.\n\nTipp: Heimat-/Arbeitsadresse unter Einstellungen → Adressen festlegen — Navigation funktioniert auch ohne gespeichertes Fahrzeug.</string>
     <string name="onboarding_cta">Los geht\'s</string>
 
     <string name="tab_home">Aktionen</string>
@@ -51,7 +51,7 @@
     <string name="settings_car3d_desc">Drehendes Neon-Fahrzeug, mit dem Finger drehbar. Aus: statische Seitenansicht (2D).</string>
 
     <string name="section_navigation">Navigation</string>
-    <string name="nav_tesla">Tesla · BETA</string>
+    <string name="nav_tesla">Tesla</string>
     <string name="nav_gmaps">Google Maps</string>
     <string name="nav_waze">Waze</string>
 
@@ -62,7 +62,7 @@
     <string name="settings_biometric">Biometrische Sperre</string>
     <string name="settings_biometric_desc">Vor kritischen Aktionen Fingerabdruck/Gesicht verlangen, in der App und beim Bestätigen einer Automation.</string>
     <string name="nfc_keycard">NFC-Schlüsselkarte (Handy als Karte)</string>
-    <string name="nfc_keycard_desc">Das Handy funktioniert als Tesla-NFC-Schlüsselkarte mit eigenem Schlüssel. Standardmäßig aus, Einrichtung über den Assistenten unten. Funktioniert nur bei entsperrtem Handy. BETA.</string>
+    <string name="nfc_keycard_desc">Das Handy funktioniert als Tesla-NFC-Schlüsselkarte mit eigenem Schlüssel. Standardmäßig aus, Einrichtung über den Assistenten unten. Funktioniert nur bei entsperrtem Handy.</string>
     <string name="settings_wear">Wear OS Uhr</string>
     <string name="settings_wear_desc">Lege fest, welche Aktionen auf der Uhr erscheinen.</string>
     <string name="settings_nfc">NFC-Tags</string>
@@ -76,10 +76,6 @@
     <string name="settings_poll">Status-Intervall: %1$d Min</string>
     <string name="settings_poll_desc">Benötigt die BLE-Features. 0 deaktiviert Hintergrund-Abfragen (Minimum 15 Min). Hintergrund-Abfragen wecken das Auto nie: Schläft es, wird nur der Verriegelungsstatus aktualisiert.</string>
 
-    <string name="section_proximity">Entriegeln bei Annäherung</string>
-    <string name="settings_proximity">Bei Annäherung entriegeln</string>
-    <string name="settings_proximity_desc">Experimentell. Standardmäßig aus. Benötigt direktes BLE (in Entwicklung).</string>
-    <string name="settings_proximity_meters">Auslöse-Entfernung: %1$d m</string>
 
     <string name="settings_about">Über</string>
     <string name="about_version">Version %1$s</string>
@@ -150,7 +146,7 @@
     <string name="ble_pair_desc">Einmalig, mit einer Schlüsselkarte am Auto. Der Assistent führt dich Schritt für Schritt.</string>
     <string name="section_experimental">Bluetooth &amp; NFC</string>
     <string name="settings_experimental_ble">Direkte BLE-Steuerung</string>
-    <string name="settings_experimental_ble_desc">Steuert das Auto direkt per Bluetooth (nach einmaligem Koppeln des Handys). Manche Funktionen sind fahrzeugspezifisch, z. B. Türen öffnen, elektrische Heckklappe oder Boombox-Geräusche, und funktionieren nicht bei jedem Modell.</string>
+    <string name="settings_experimental_ble_desc">Steuert das Auto direkt per Bluetooth (nach einmaligem Koppeln des Handys). Manche Funktionen sind fahrzeugspezifisch, z. B. Türen öffnen oder die elektrische Heckklappe, und funktionieren nicht bei jedem Modell.</string>
     <string name="ble_enable_title">BLE-Features aktivieren</string>
     <string name="ble_enable_desc">Direkte Bluetooth-Steuerung deines Tesla. Wieder ausschalten unter Einstellungen → Bluetooth &amp; NFC.</string>
     <string name="activate">Aktivieren</string>
@@ -295,7 +291,7 @@
     <string name="guide_wear_steps">ATA auf der Uhr installieren (Play Store auf der Uhr oder Wear-APK).\nUnter „Wear OS Uhr“ die Aktionen für die Uhr wählen: Sie werden automatisch übertragen.\nTaps auf der Uhr werden auf dem Handy ausgeführt, „Tesla App öffnen“ öffnet sie auf dem Handy.\nOptional, damit die Uhr ohne Handy funktioniert: „Wear OS Uhr“ → „Uhr koppeln“ (Assistent auf dem Handy).</string>
     <string name="guide_ble_title">Bluetooth-Steuerung</string>
     <string name="guide_ble_steps">„Direkte BLE-Steuerung“ einschalten und ein Fahrzeug mit VIN anlegen.\nDas Handy einmalig mit dem Assistenten koppeln (dafür brauchst du eine funktionierende Schlüsselkarte).\nDanach können Fahrzeug-Tab, Widgets und Automationen direkt per Bluetooth ver- und entriegeln, klimatisieren und mehr.</string>
-    <string name="guide_keycard_steps">Optional und BETA: Das Handy funktioniert als NFC-Schlüsselkarte.\nIn den Einstellungen „NFC-Schlüsselkarte“ einschalten und im Auto wie eine Karte anlernen (Steuerung → Schlösser → Schlüssel hinzufügen).\nDas Handy antwortet nur, wenn es entsperrt ist.</string>
+    <string name="guide_keycard_steps">Optional: Das Handy funktioniert als NFC-Schlüsselkarte.\nIn den Einstellungen „NFC-Schlüsselkarte“ einschalten und im Auto wie eine Karte anlernen (Steuerung → Schlösser → Schlüssel hinzufügen).\nDas Handy antwortet nur, wenn es entsperrt ist.</string>
     <string name="guide_keycard_steps_tesla">Die Tesla-App ist installiert und antwortet bereits am Kartenleser. Lass die NFC-Schlüsselkarte von ATA AUS, dann erscheint keine App-Auswahl.\nSchaltest du sie trotzdem ein, antwortet ATA nur, solange ATA geöffnet ist. Sonst antwortet wie gewohnt die Tesla-App.\nFragt Android trotzdem? In den NFC-Einstellungen die Standard-App für kontaktlose Nutzung prüfen.</string>
     <string name="nfc_settings_open">NFC-Einstellungen öffnen</string>
     <string name="nfc_keycard_hint">Das Handy antwortet am Kartenleser des Autos, solange es entsperrt ist.</string>
@@ -361,7 +357,7 @@
     <string name="pair_done_text">Bluetooth-Aktionen funktionieren. Neu koppeln ist nur nötig, wenn der Schlüssel im Auto entfernt wurde.</string>
     <string name="pair_repair">Trotzdem neu koppeln</string>
     <string name="keycard_title">NFC-Schlüsselkarte einrichten</string>
-    <string name="keycard_intro">Das Handy funktioniert wie eine Tesla-Schlüsselkarte: an die B-Säule halten zum Entriegeln, auf den Kartenleser legen zum Losfahren. Es nutzt einen eigenen Schlüssel, getrennt von der Bluetooth-Kopplung, und antwortet nur bei entsperrtem Handy. BETA.</string>
+    <string name="keycard_intro">Das Handy funktioniert wie eine Tesla-Schlüsselkarte: an die B-Säule halten zum Entriegeln, auf den Kartenleser legen zum Losfahren. Es nutzt einen eigenen Schlüssel, getrennt von der Bluetooth-Kopplung, und antwortet nur bei entsperrtem Handy.</string>
     <string name="keycard_check_nfc">Handy hat NFC</string>
     <string name="keycard_check_nfc_on">NFC eingeschaltet</string>
     <string name="keycard_check_hce">Kartenemulation wird unterstützt</string>
@@ -381,7 +377,7 @@
     <string name="nfc_off_text">NFC in den Android-Einstellungen einschalten, sonst funktionieren NFC-Tags und die NFC-Schlüsselkarte nicht.</string>
     <string name="wear_keycard_title">Uhr als NFC-Schlüsselkarte</string>
     <string name="wear_keycard_card_desc">Mit der Uhr entriegeln und losfahren, wie mit einer Schlüsselkarte. Einrichtung von hier aus.</string>
-    <string name="wear_keycard_intro">Die Uhr funktioniert wie eine Tesla-Schlüsselkarte: an die B-Säule halten zum Entriegeln, auf den Kartenleser zum Losfahren. Sie nutzt einen eigenen Schlüssel und antwortet nur, wenn sie entsperrt am Handgelenk ist. Dieser Assistent steuert die Uhr von hier aus. BETA.</string>
+    <string name="wear_keycard_intro">Die Uhr funktioniert wie eine Tesla-Schlüsselkarte: an die B-Säule halten zum Entriegeln, auf den Kartenleser zum Losfahren. Sie nutzt einen eigenen Schlüssel und antwortet nur, wenn sie entsperrt am Handgelenk ist. Dieser Assistent steuert die Uhr von hier aus.</string>
     <string name="wear_keycard_check_nfc">Uhr hat NFC</string>
     <string name="wear_keycard_no_nfc">Diese Uhr hat kein NFC.</string>
     <string name="wear_keycard_check_nfc_on">NFC auf der Uhr eingeschaltet</string>
@@ -441,9 +437,7 @@
     <string name="a_media_toggle">Musik Play/Pause</string>
     <string name="a_media_next">Nächster Titel</string>
     <string name="a_media_previous">Vorheriger Titel</string>
-    <string name="vehicle_specific_hint">Manche Funktionen sind fahrzeugspezifisch (z. B. Türen öffnen, elektrische Heckklappe, Boombox) und funktionieren nicht bei jedem Modell.</string>
-    <string name="a_boombox_fart">Furzgeräusch</string>
-    <string name="a_boombox_locate">Ortungston</string>
+    <string name="vehicle_specific_hint">Manche Funktionen sind fahrzeugspezifisch (z. B. Türen öffnen, elektrische Heckklappe) und funktionieren nicht bei jedem Modell.</string>
     <string name="hs_driver_door">Fahrertür</string>
     <string name="hs_passenger_door">Beifahrertür</string>
     <string name="hs_frunk">Frunk</string>
@@ -482,4 +476,18 @@
     <string name="design_material">Material</string>
     <string name="vehicle_paint">Lackierung</string>
     <string name="vehicle_neon_color">Neon-Farbe</string>
+    <string name="finder_direction">%1$s · ca. %2$d min zu Fuß</string>
+    <string name="finder_calibrate">Der Kompass ist unsicher: Handy ein paarmal in Form einer Acht schwenken.</string>
+    <string name="finder_no_compass">Dieses Handy hat keinen Kompass: Der Pfeil geht davon aus, dass die Oberkante nach Norden zeigt.</string>
+    <string name="finder_gps_rough">Position noch ungenau (±%1$d m), die Richtung kann abweichen. Kurz warten oder ins Freie gehen.</string>
+    <string name="section_proximity">Entriegeln bei Annäherung</string>
+    <string name="settings_proximity">Bei Annäherung entriegeln</string>
+    <string name="settings_proximity_desc">Entriegelt das Auto einmal, wenn du mit dem Handy darauf zugehst, gemessen an der Stärke des Bluetooth-Signals des Autos. Nur nachdem du weg warst, nie zweimal hintereinander.</string>
+    <string name="settings_proximity_meters">Entriegeln ab ca. %1$d m</string>
+    <string name="settings_proximity_locked">Auch bei gesperrtem Handy</string>
+    <string name="settings_proximity_locked_desc">Aus: Bei gesperrtem Handy fragt ATA vorher per Benachrichtigung.</string>
+    <string name="settings_proximity_hint">Die Entfernung ist ungefähr (die Signalstärke hängt von Auto, Handy, Tasche und Umgebung ab): einfach ausprobieren und anpassen. Solange die Funktion an ist, zeigt eine stille Benachrichtigung das an. Braucht Bluetooth und Standortzugriff.</string>
+    <string name="proximity_needs_ble">Zuerst die direkte Bluetooth-Steuerung einschalten.</string>
+    <string name="proximity_notif_title">Entriegeln bei Annäherung</string>
+    <string name="proximity_notif_text">Achtet auf das Auto in der Nähe</string>
 </resources>

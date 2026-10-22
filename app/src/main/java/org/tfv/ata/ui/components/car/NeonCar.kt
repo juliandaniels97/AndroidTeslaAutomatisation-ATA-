@@ -137,13 +137,6 @@ fun DrawScope.drawNeonCar(
 
   // Wake: a ring running out over the floor.
   fx.pulse(CarEffect.WAKE, now, 1600)?.let { p -> floorRing(camera, 1.2f + 3.5f * p, style.line.copy(alpha = (1 - p) * .9f), blend, style.lineWidth * 1.5f) }
-  // Locate sound: three rings.
-  fx.pulse(CarEffect.LOCATE, now, 2400)?.let { p ->
-    for (k in 0..2) {
-      val q = ((p * 1.5f) - k * .25f).coerceIn(0f, 1f)
-      if (q > 0f && q < 1f) floorRing(camera, 1.0f + 4f * q, style.white.copy(alpha = (1 - q) * .8f), blend, style.lineWidth)
-    }
-  }
 
   // Bioweapon defence: green fog drifting around the car, outside the body.
   val bio = fx.openness(CarEffect.BIOWEAPON, now, 1500)
@@ -505,17 +498,6 @@ fun DrawScope.drawNeonCar(
         val r = area.minDimension * (.06f + .25f * q)
         drawCircle(style.white.copy(alpha = (1 - q) * .8f), r, c, style = Stroke(style.lineWidth * 1.4f), blendMode = blend)
       }
-    }
-  }
-  // Boombox: little clouds puffing out at the back.
-  fx.pulse(CarEffect.PUFF, now, 2200)?.let { p ->
-    val rear = shape.rearCenter
-    for (k in 0 until 6) {
-      val q = (p * 1.3f - k * .06f).coerceIn(0f, 1f)
-      val drift = V3(sin(k * 1.7f) * .5f * q, .2f * q + k * .05f, -1.2f * q)
-      val c = camera.project(rear + drift)
-      val r = area.minDimension * (.03f + .08f * q)
-      drawCircle(Brush.radialGradient(listOf(style.green.copy(alpha = .35f * (1 - q)), Color.Transparent), center = c.offset, radius = r), r, c.offset, blendMode = blend)
     }
   }
   // Sentry: a red eye on the B-pillars.

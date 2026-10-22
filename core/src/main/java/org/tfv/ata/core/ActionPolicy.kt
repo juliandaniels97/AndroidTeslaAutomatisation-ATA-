@@ -17,6 +17,9 @@ enum class TriggerSource {
   /** An NFC tag written by ATA (its token is readable by anyone holding the tag). */
   NFC,
 
+  /** Proximity unlock: ATA itself noticed the phone walking up to the car (only ever unlocks). */
+  PROXIMITY,
+
   /** Anything else: other apps, links, foreign tags. */
   EXTERNAL,
 }
@@ -82,6 +85,13 @@ object ActionPolicy {
         } else {
           PolicyDecision.Confirm
         }
+
+      // Walking up to the car: unlock straight away while the phone is unlocked (or when allowed while locked),
+      // otherwise ask. Nothing but unlocking is ever triggered this way.
+      TriggerSource.PROXIMITY ->
+        if (action != AtaAction.UNLOCK || !settings.proximityUnlock) PolicyDecision.Deny(DenyReason.NOT_ALLOWED_EXTERNAL)
+        else if (!phoneLocked || settings.proximityWhenLocked) PolicyDecision.Allow
+        else PolicyDecision.Confirm
 
       // A tag can be read and copied by anyone: never open the car straight from a tag.
       TriggerSource.NFC ->
