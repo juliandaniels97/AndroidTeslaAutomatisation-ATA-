@@ -115,13 +115,18 @@ class AtaViewModel(app: Application) : AndroidViewModel(app) {
 
   /** Push the watch action list plus the selected vehicle's VIN/name, so the watch needs no VIN entry. */
   private fun pushWearConfig(actions: List<AtaAction>? = null) = viewModelScope.launch {
-    val resolved = actions ?: effectiveWearActions(store.settings.first())
+    val settings = store.settings.first()
+    val resolved = actions ?: effectiveWearActions(settings)
     val v = currentVehicle()
-    WearPush.pushConfig(getApplication(), resolved, v?.vin ?: "", v?.name ?: "")
+    val complications = settings.wearComplicationIds.map { id -> AtaAction.fromId(id)?.takeIf { it.enabled && !it.needsValue } ?: AtaAction.LOCK }
+    WearPush.pushConfig(getApplication(), resolved, v?.vin ?: "", v?.name ?: "", settings.wearGrid, complications)
   }
 
   fun updateSettings(transform: (AtaSettings) -> AtaSettings) = viewModelScope.launch {
+    val before = store.settings.first()
     store.updateSettings(transform)
+    val after = store.settings.first()
+    if (before.wearGrid != after.wearGrid || before.wearComplicationIds != after.wearComplicationIds) pushWearConfig()
     ShortcutSync.refresh(getApplication())
     StatusPoller.sync(getApplication(), store.settings.first())
     runCatching {

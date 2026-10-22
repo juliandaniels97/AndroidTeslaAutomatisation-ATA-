@@ -9,12 +9,22 @@ import org.tfv.ata.core.VehicleSnapshot
 import org.tfv.ata.core.WearContract
 
 object WearPush {
-  fun pushConfig(context: Context, actions: List<AtaAction>, vin: String = "", vehicleName: String = "") {
+  fun pushConfig(
+    context: Context,
+    actions: List<AtaAction>,
+    vin: String = "",
+    vehicleName: String = "",
+    grid: Int = WearContract.GRID_SMALL,
+    complications: List<AtaAction> = emptyList(),
+  ) {
     val ids = ArrayList(actions.map { it.id })
     val labels = ArrayList(actions.map { context.getString(ActionInfo.labelRes(it)) })
     val request = PutDataMapRequest.create(WearContract.PATH_CONFIG).apply {
       dataMap.putStringArrayList(WearContract.KEY_ACTION_IDS, ids)
       dataMap.putStringArrayList(WearContract.KEY_ACTION_LABELS, labels)
+      dataMap.putInt(WearContract.KEY_GRID, grid)
+      dataMap.putStringArrayList(WearContract.KEY_COMPLICATION_IDS, ArrayList(complications.map { it.id }))
+      dataMap.putStringArrayList(WearContract.KEY_COMPLICATION_LABELS, ArrayList(complications.map { context.getString(ActionInfo.labelRes(it)) }))
       dataMap.putString(WearContract.KEY_VIN, vin)
       dataMap.putString(WearContract.KEY_VEHICLE, vehicleName)
       dataMap.putLong(WearContract.KEY_UPDATED, System.currentTimeMillis())
@@ -27,6 +37,9 @@ object WearPush {
       dataMap.putInt(WearContract.KEY_BATTERY, snapshot.batteryPercent)
       dataMap.putInt(WearContract.KEY_RANGE, snapshot.rangeKm)
       dataMap.putBoolean(WearContract.KEY_CHARGING, snapshot.charging)
+      dataMap.putFloat(WearContract.KEY_INSIDE, snapshot.insideTempC)
+      dataMap.putFloat(WearContract.KEY_OUTSIDE, snapshot.outsideTempC)
+      dataMap.putBoolean(WearContract.KEY_CLIMATE, snapshot.climateOn)
       snapshot.locked?.let { dataMap.putBoolean(WearContract.KEY_LOCKED, it) } ?: dataMap.remove(WearContract.KEY_LOCKED)
       dataMap.putString(WearContract.KEY_VEHICLE, vehicleName)
       dataMap.putLong(WearContract.KEY_UPDATED, snapshot.updatedAt)

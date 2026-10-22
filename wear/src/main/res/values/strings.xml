@@ -35,4 +35,25 @@
     <string name="wear_keycard_on">NFC key card: on</string>
     <string name="wear_keycard_off">NFC key card: off</string>
     <string name="wear_keycard_setup_on_phone">Set up: phone → Wear OS watch</string>
+    <string name="c_battery">Battery</string>
+    <string name="c_range">Range</string>
+    <string name="c_inside">Inside</string>
+    <string name="c_outside">Outside</string>
+    <string name="c_lock">Lock</string>
+    <string name="c_locked">Locked</string>
+    <string name="c_unlocked">Open</string>
+    <string name="c_name_battery">ATA battery</string>
+    <string name="c_name_range">ATA range</string>
+    <string name="c_name_inside">ATA inside temperature</string>
+    <string name="c_name_outside">ATA outside temperature</string>
+    <string name="c_name_lock">ATA lock state</string>
+    <string name="c_name_action1">ATA action 1</string>
+    <string name="c_name_action2">ATA action 2</string>
+    <string name="c_name_action3">ATA action 3</string>
+    <string name="c_name_action4">ATA action 4</string>
+    <string name="wear_status_unknown">No status yet</string>
+    <string name="wear_status_temps">In %1$d° · Out %2$d°</string>
+    <string name="wear_more_actions">More actions</string>
+    <string name="wear_tap_again_short">Tap again</string>
+    <string name="wear_tap_to_confirm">Tap to confirm</string>
 </resources>

@@ -459,4 +459,19 @@
     <string name="car3d_reset">Reset view</string>
     <string name="car_demo">Show animations</string>
     <string name="car_demo_stop">Stop</string>
+    <string name="wear_layout_title">Watch layout</string>
+    <string name="wear_layout_desc">Big tiles on the watch\'s first screen. Round watches arrange them in rows of 1/2/1 or 2/3/2, square watches as 2×2 or 3×3. Swipe left on the watch for all other actions and the settings.</string>
+    <string name="wear_layout_small">4 tiles (square: 4)</string>
+    <string name="wear_layout_large">7 tiles (square: 9)</string>
+    <string name="wear_complications_title">Watch-face complications</string>
+    <string name="wear_complications_desc">On the watch, long-press the watch face → Edit → Complications → ATA. Status values are offered separately: battery, range, inside and outside temperature, lock state. The four action slots run the action chosen here.</string>
+    <string name="wear_complication_slot">ATA action %1$d</string>
+    <string name="wear_actions_title">Actions on the watch</string>
+    <string name="wear_actions_desc">The first %1$d chosen actions appear as tiles, the others in the list (swipe left).</string>
+    <string name="widget_status_inside">Inside</string>
+    <string name="widget_status_outside">Outside</string>
+    <string name="widget_status_range">Range</string>
+    <string name="widget_status_battery">Battery</string>
+    <string name="widget_status_unknown">Not read yet</string>
+    <string name="widget_status_description">Battery, range, inside and outside temperature, charging and lock state, in every size.</string>
 </resources>

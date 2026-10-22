@@ -459,4 +459,19 @@
     <string name="car3d_reset">Ansicht zurücksetzen</string>
     <string name="car_demo">Animationen zeigen</string>
     <string name="car_demo_stop">Stopp</string>
+    <string name="wear_layout_title">Layout auf der Uhr</string>
+    <string name="wear_layout_desc">Große Kacheln auf dem ersten Bildschirm der Uhr. Runde Uhren ordnen sie in Reihen 1/2/1 oder 2/3/2 an, eckige Uhren als 2×2 oder 3×3. Auf der Uhr nach links wischen für alle weiteren Aktionen und die Einstellungen.</string>
+    <string name="wear_layout_small">4 Kacheln (eckig: 4)</string>
+    <string name="wear_layout_large">7 Kacheln (eckig: 9)</string>
+    <string name="wear_complications_title">Komplikationen fürs Zifferblatt</string>
+    <string name="wear_complications_desc">Auf der Uhr das Zifferblatt lange drücken → Bearbeiten → Komplikationen → ATA. Statuswerte gibt es einzeln: Akku, Reichweite, Innen- und Außentemperatur, Verriegelung. Die vier Aktions-Plätze führen die hier gewählte Aktion aus.</string>
+    <string name="wear_complication_slot">ATA-Aktion %1$d</string>
+    <string name="wear_actions_title">Aktionen auf der Uhr</string>
+    <string name="wear_actions_desc">Die ersten %1$d gewählten Aktionen erscheinen als Kacheln, die übrigen in der Liste (nach links wischen).</string>
+    <string name="widget_status_inside">Innen</string>
+    <string name="widget_status_outside">Außen</string>
+    <string name="widget_status_range">Reichweite</string>
+    <string name="widget_status_battery">Akku</string>
+    <string name="widget_status_unknown">Noch nicht gelesen</string>
+    <string name="widget_status_description">Akku, Reichweite, Innen- und Außentemperatur, Laden und Verriegelung, in jeder Größe.</string>
 </resources>

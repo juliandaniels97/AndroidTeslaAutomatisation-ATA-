@@ -26,12 +26,13 @@ import org.tfv.ata.core.ble.TeslaController
  * The Data Layer only delivers messages from apps signed with the same key.
  */
 class WatchCommandListener : WearableListenerService() {
-  /** Keeps the car synced from the phone even while ATA isn't open on the watch. */
+  /** Keeps the car, the actions and the status synced from the phone even while ATA isn't open on the watch. */
   override fun onDataChanged(events: DataEventBuffer) {
     for (event in events) {
-      if (event.type == DataEvent.TYPE_CHANGED && event.dataItem.uri.path == WearContract.PATH_CONFIG) {
-        storeVehicle(applicationContext, event.dataItem)
-      }
+      if (event.type != DataEvent.TYPE_CHANGED) continue
+      // Actions, tiles and status for the app, the tile and the watch-face complications.
+      WearStore.apply(applicationContext, event.dataItem)
+      if (event.dataItem.uri.path == WearContract.PATH_CONFIG) storeVehicle(applicationContext, event.dataItem)
     }
   }
 

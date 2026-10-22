@@ -35,4 +35,25 @@
     <string name="wear_keycard_on">NFC-Schlüsselkarte: an</string>
     <string name="wear_keycard_off">NFC-Schlüsselkarte: aus</string>
     <string name="wear_keycard_setup_on_phone">Einrichten: Handy → Wear OS Uhr</string>
+    <string name="c_battery">Akku</string>
+    <string name="c_range">Reichweite</string>
+    <string name="c_inside">Innen</string>
+    <string name="c_outside">Außen</string>
+    <string name="c_lock">Schloss</string>
+    <string name="c_locked">Zu</string>
+    <string name="c_unlocked">Offen</string>
+    <string name="c_name_battery">ATA Akku</string>
+    <string name="c_name_range">ATA Reichweite</string>
+    <string name="c_name_inside">ATA Innentemperatur</string>
+    <string name="c_name_outside">ATA Außentemperatur</string>
+    <string name="c_name_lock">ATA Verriegelung</string>
+    <string name="c_name_action1">ATA-Aktion 1</string>
+    <string name="c_name_action2">ATA-Aktion 2</string>
+    <string name="c_name_action3">ATA-Aktion 3</string>
+    <string name="c_name_action4">ATA-Aktion 4</string>
+    <string name="wear_status_unknown">Noch kein Status</string>
+    <string name="wear_status_temps">Innen %1$d° · Außen %2$d°</string>
+    <string name="wear_more_actions">Weitere Aktionen</string>
+    <string name="wear_tap_again_short">Nochmal tippen</string>
+    <string name="wear_tap_to_confirm">Zum Bestätigen tippen</string>
 </resources>

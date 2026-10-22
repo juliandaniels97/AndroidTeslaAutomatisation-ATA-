@@ -41,4 +41,18 @@ object WearContract {
   const val KEY_CHARGING = "charging"
   const val KEY_LOCKED = "locked"
   const val KEY_VEHICLE = "vehicle"
+  const val KEY_INSIDE = "inside"
+  const val KEY_OUTSIDE = "outside"
+  const val KEY_CLIMATE = "climate"
+
+  /** Tiles on the watch's first screen (4 or 7). */
+  const val KEY_GRID = "grid"
+  /** Actions for the watch-face complications "ATA action 1 … [COMPLICATION_SLOTS]". */
+  const val KEY_COMPLICATION_IDS = "complication_ids"
+  const val KEY_COMPLICATION_LABELS = "complication_labels"
+  const val COMPLICATION_SLOTS = 4
+  val DEFAULT_COMPLICATION_IDS = listOf("lock", "unlock", "climate_on", "flash_lights")
+
+  const val GRID_SMALL = 4
+  const val GRID_LARGE = 7
 }

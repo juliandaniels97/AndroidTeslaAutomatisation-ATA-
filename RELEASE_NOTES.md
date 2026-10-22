@@ -1,28 +1,22 @@
-## ATA v1.7.0 — Detailreicheres 3D-Fahrzeug, mehr Animationen, ruhige 2D-Ansicht
+## ATA v1.8.0 — Status-Widget, Komplikationen und neues Uhr-Layout
 
-### 2D-Ansicht wieder ohne Neon
-- Ist die 3D-Ansicht ausgeschaltet, wird das Fahrzeug wieder **wie früher gezeichnet**: lackierte Karosserie, getönte Scheiben, Reifen mit Felgen, weicher Schatten, kein Neon-Leuchten.
-- Das gilt für alle sechs Fahrzeugtypen, im Fahrzeug-Tab, im Vollbild und in der Vorschau im Fahrzeug-Dialog.
-- Die Animationen gibt es auch hier, nur dezent: Tür, Frunk, Kofferraum, Ladeklappe mit Kabel, Fenster, Licht, Bioschutz, Wächter und weitere.
+### Status-Widget
+- Das Widget **ATA Status** zeigt jetzt **alle Werte**: Akku (mit Ladebalken), Reichweite, Innen- und Außentemperatur, Laden und Verriegelung.
+- **Responsiv:** Von 1×1 bis 4×2 sind in jeder Größe alle Werte sichtbar, nur anders angeordnet. Die große Variante zeigt zusätzlich, wann zuletzt gelesen wurde.
 
-### Mehr Details im Neon-3D-Fahrzeug
-- Felgen mit fünf Speichen, Außenspiegel, Türgriffe, B-Säulen und Glasdach-Steg, hintere Türfuge, Frontschürze und Diffusor.
-- Sitze und Armaturenbrett sind durch die Scheiben zu sehen.
-- **Akku im Fahrzeugboden:** Die Zellen leuchten passend zum Ladestand.
-- Dezentes Raster auf dem Showroom-Boden.
+### Wear OS: Komplikationen für jedes Zifferblatt
+- Statuswerte gibt es **einzeln** als Komplikation: **ATA Akku** (auch als Ring), **ATA Reichweite**, **ATA Innentemperatur**, **ATA Außentemperatur**, **ATA Verriegelung**.
+- Vier **Aktions-Komplikationen** (ATA-Aktion 1–4) für direkte Aktionen am Zifferblatt.
+  - Welche Aktion jeder Platz ausführt, stellst du am Handy ein: **Einstellungen → Wear OS-Uhr → Komplikationen fürs Zifferblatt**.
+  - Kritische Aktionen wie Entriegeln wollen einen zweiten Tipp zur Bestätigung.
+- Die Werte aktualisieren sich automatisch, sobald das Handy einen neuen Status liest.
 
-### Neue Animationen am Fahrzeug
-- **Aufwecken:** Die Lichtleisten fahren von der Mitte nach außen hoch, die Felgen blitzen auf.
-- **Entriegeln:** Türgriffe leuchten, Umfeldbeleuchtung unter den Spiegeln, die Spiegel klappen aus.
-- **Verriegeln:** Die Spiegel klappen ein.
-- **Laden:** Ladekabel mit fließender Energie, eine Welle läuft durch die Akkuzellen.
-- **Klima und Temperatur:** Luftströme aus den Düsen.
-- **Musik:** Equalizer auf dem Armaturenbrett und Schallringe über dem Dach.
-- **Wächter-Modus:** Ein roter Radarstrahl tastet den Boden ab.
-- **Herbeirufen (Remote Drive):** Die Räder drehen sich, Fahrtlinien ziehen am Fahrzeug vorbei.
-- Im Ruhezustand atmen die Tagfahrlichter leicht, und ab und zu läuft ein Lichtstreifen über die Gürtellinie.
-
-### Animationen zeigen
-- Neuer Button **„Animationen zeigen“** im Vollbild. Er spielt alle Effekte nacheinander ab, ohne einen Befehl ans Fahrzeug zu senden.
+### Wear OS: neues Layout
+- Der erste Bildschirm zeigt **große Kacheln mit Symbol im Raster**.
+  - **Runde Uhren:** 1/2/1 (4 Kacheln) oder 2/3/2 (7 Kacheln), wabenförmig bis an den Statusrand.
+  - **Eckige Uhren:** 2×2 oder 3×3.
+- **4 oder 7 (eckig: 9) Kacheln** stellst du am Handy ein: **Einstellungen → Wear OS-Uhr → Layout auf der Uhr**. Die ersten gewählten Aktionen werden zu Kacheln.
+- **Nach links wischen:** alle weiteren Aktionen als Liste, dazu Direktsteuerung, NFC-Schlüsselkarte und Koppeln.
+- **Status am Rand:** Akku und Reichweite oben neben der Uhrzeit, Innen-/Außentemperatur und Schloss unten entlang der Rundung.
 
 NFC-Schlüsselkarte (Handy und Uhr) bleibt **BETA**.

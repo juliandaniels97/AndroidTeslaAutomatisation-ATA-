@@ -89,6 +89,10 @@ data class AtaSettings(
   val homeActionIds: List<String> = emptyList(),
   val vehicleActionIds: List<String> = emptyList(),
   val wearActionIds: List<String> = emptyList(),
+  /** Tiles on the watch's first screen: 4 (round 1/2/1, square 2×2) or 7 (round 2/3/2, square 3×3 = 9). */
+  val wearGrid: Int = 4,
+  /** Actions offered by the watch-face complications "ATA action 1 … 4". */
+  val wearComplicationIds: List<String> = WearContract.DEFAULT_COMPLICATION_IDS,
   /**
    * Actions with a fixed value ("set_temperature|21"), published as app shortcuts so Samsung Routines and the
    * icon menu can run them without asking for the value.

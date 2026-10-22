@@ -18,8 +18,21 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.MenuAnchorType
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import org.tfv.ata.action.ActionInfo
+import org.tfv.ata.core.WearContract
+import org.tfv.ata.ui.components.iconFor
 import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -75,6 +88,14 @@ fun WearConfigScreen(
         text = stringResource(R.string.wear_keycard_card_desc),
         onOpen = onWatchKeyCard,
       )
+      WatchLayoutSection(state.settings.wearGrid) { grid -> vm.updateSettings { it.copy(wearGrid = grid) } }
+      WatchComplicationSection(state.settings.wearComplicationIds, funcA + funcB) { ids -> vm.updateSettings { it.copy(wearComplicationIds = ids) } }
+      SectionLabel(stringResource(R.string.wear_actions_title))
+      Text(
+        stringResource(R.string.wear_actions_desc, if (state.settings.wearGrid == WearContract.GRID_LARGE) 7 else 4),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+      )
       funcB.forEach { action -> ActionCheckRow(action, action.id in current) { toggle(action) } }
       Text(
         stringResource(R.string.menu_group_direct),
@@ -83,6 +104,73 @@ fun WearConfigScreen(
         modifier = Modifier.padding(top = 10.dp, bottom = 2.dp),
       )
       funcA.forEach { action -> ActionCheckRow(action, action.id in current) { toggle(action) } }
+    }
+  }
+}
+
+@Composable
+private fun SectionLabel(text: String) {
+  Text(
+    text,
+    style = MaterialTheme.typography.titleSmall,
+    color = MaterialTheme.colorScheme.primary,
+    modifier = Modifier.padding(top = 14.dp, bottom = 2.dp),
+  )
+}
+
+/** 4 or 7 big tiles on the watch's first screen (square watches: 2×2 or 3×3). */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun WatchLayoutSection(grid: Int, onChange: (Int) -> Unit) {
+  SectionLabel(stringResource(R.string.wear_layout_title))
+  Text(stringResource(R.string.wear_layout_desc), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+  FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 6.dp)) {
+    FilterChip(
+      selected = grid != WearContract.GRID_LARGE,
+      onClick = { onChange(WearContract.GRID_SMALL) },
+      label = { Text(stringResource(R.string.wear_layout_small)) },
+    )
+    FilterChip(
+      selected = grid == WearContract.GRID_LARGE,
+      onClick = { onChange(WearContract.GRID_LARGE) },
+      label = { Text(stringResource(R.string.wear_layout_large)) },
+    )
+  }
+}
+
+/** What the watch-face complications offer: status values are separate sources, actions sit in four slots. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun WatchComplicationSection(ids: List<String>, choices: List<AtaAction>, onChange: (List<String>) -> Unit) {
+  SectionLabel(stringResource(R.string.wear_complications_title))
+  Text(stringResource(R.string.wear_complications_desc), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+  val slots = (0 until WearContract.COMPLICATION_SLOTS).map { ids.getOrNull(it) ?: WearContract.DEFAULT_COMPLICATION_IDS[it] }
+  slots.forEachIndexed { index, id ->
+    var open by remember { mutableStateOf(false) }
+    val selected = AtaAction.fromId(id)
+    ExposedDropdownMenuBox(expanded = open, onExpandedChange = { open = it }, modifier = Modifier.padding(top = 6.dp)) {
+      OutlinedTextField(
+        value = selected?.let { stringResource(ActionInfo.labelRes(it)) } ?: id,
+        onValueChange = {},
+        readOnly = true,
+        label = { Text(stringResource(R.string.wear_complication_slot, index + 1)) },
+        leadingIcon = { selected?.let { Icon(iconFor(it), contentDescription = null) } },
+        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(open) },
+        singleLine = true,
+        modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryNotEditable),
+      )
+      ExposedDropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+        choices.forEach { action ->
+          DropdownMenuItem(
+            text = { Text(stringResource(ActionInfo.labelRes(action))) },
+            leadingIcon = { Icon(iconFor(action), contentDescription = null) },
+            onClick = {
+              open = false
+              onChange(slots.toMutableList().also { it[index] = action.id })
+            },
+          )
+        }
+      }
     }
   }
 }

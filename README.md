@@ -10,15 +10,23 @@ tap — or an automation — triggers exactly the action you want.
 > **Commercial use requires prior written permission** from the author — see [Legal](#legal).
 
 <img width="410" alt="Neon-ATA-Logo mit Flügelblitz" src="https://github.com/user-attachments/assets/bb4cdebf-f178-4cd7-a835-c01ea2eead8a" />
-<img width="200" alt="Screenshot_20261021_130000_ATA  Android Tesla Automatisation" src="https://github.com/user-attachments/assets/9fa60ba9-cd46-47d9-8e0d-c394c7df635b" />
+<img width="200" alt="ATA vehicle view: neon car in the battery ring with the action tiles" src="docs/screenshots/ata-vehicle.png" />
 
+
+## Support the project
+
+ATA is free for personal use. If it saves you a few taps every day, you can support the development:
+
+<a href="https://www.paypal.com/donate/?hosted_button_id=YHEH2ZKAV4E9Y"><img alt="Donate with PayPal" src="https://img.shields.io/badge/Donate-PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white" /></a>
+
+<a href="https://www.paypal.com/donate/?hosted_button_id=YHEH2ZKAV4E9Y"><img width="160" alt="QR code: donate with PayPal" src="docs/donate-paypal-qr.png" /></a>
 
 ## Downloads
 
-Latest release **v1.7.0** — phone APK for **64‑bit ARM (arm64‑v8a)**, watch APK for **64‑ and 32‑bit ARM (arm64‑v8a + armeabi‑v7a)**:
+Latest release **v1.8.0** — phone APK for **64‑bit ARM (arm64‑v8a)**, watch APK for **64‑ and 32‑bit ARM (arm64‑v8a + armeabi‑v7a)**:
 
-- 📱 Phone APK: **[ATA-phone-v1.7.0-arm64-v8a.apk](https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-/releases/download/v1.7.0/ATA-phone-v1.7.0-arm64-v8a.apk)**
-- ⌚ Wear OS APK: **[ATA-wear-v1.7.0.apk](https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-/releases/download/v1.7.0/ATA-wear-v1.7.0.apk)**
+- 📱 Phone APK: **[ATA-phone-v1.8.0-arm64-v8a.apk](https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-/releases/download/v1.8.0/ATA-phone-v1.8.0-arm64-v8a.apk)**
+- ⌚ Wear OS APK: **[ATA-wear-v1.8.0.apk](https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-/releases/download/v1.8.0/ATA-wear-v1.8.0.apk)**
 
 All releases are listed under [Releases](https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-/releases).
 All release builds are signed with the same release key, so new versions install as an update over
@@ -50,24 +58,27 @@ polling the vehicle over the internet.
 > supported by Tesla — only opening the app is guaranteed. ATA tries several candidate links and, if
 > none is handled by the installed Tesla‑app version, simply opens the app on its main screen.
 
-### BLE features — direct control over Bluetooth (experimental / BETA)
+### BLE features — direct control over Bluetooth
 
 The BLE features talk **directly to the car over Bluetooth Low Energy** using Tesla's publicly
 documented vehicle‑command protocol. The cryptographic layer (ECDH key agreement, HMAC session
 verification, AES‑GCM command signing, metadata serialization) is implemented from that spec and
 **verified byte‑for‑byte against Tesla's published test vectors**.
 
-They are **off by default**. Enable them under **Settings → Experimental → Direct BLE control
-(BETA)**. Then:
+They are **off by default**. Enable them under **Settings → Bluetooth & NFC → Direct BLE control**.
+Some functions are **vehicle‑specific** (e.g. opening single doors, the power liftgate or the boombox)
+and don't work on every model. Then:
 
 1. Add your vehicle (VIN) under **Settings → Vehicles**.
 2. On the **Vehicle** tab, tap **Pair this device**. On the first connection the car asks to trust
    this device's key — compare the fingerprint shown in ATA, tap your key card on the console and
    confirm in the car. ATA's key is an EC‑P‑256 key kept in the Android Keystore and never leaves
    the phone.
-3. The BLE buttons (lock/unlock, climate, charging, trunk/frunk, windows, sentry, climate
-   keeper/dog/camp, honk, flash, charge limit, charging amps, set temperature, defrost, wake) then
-   send commands over BLE.
+3. The BLE buttons then send commands over BLE: lock/unlock, open driver or passenger door, climate
+   (on/off, temperature, keeper/dog/camp, defrost, steering‑wheel heater, bioweapon defence, cabin
+   overheat protection), charging (start/stop, limit, amps, charge port), trunk/frunk, windows,
+   sentry, honk, flash, wake, remote drive, media (play/pause, next, previous) and the boombox (fart
+   and locate sound).
 
 #### Live status
 
@@ -79,8 +90,29 @@ asks the security controller (which stays awake) and, if the car sleeps, only re
 and keeps battery/range from the last reading ("car asleep" is shown). Only the manual refresh wakes
 the car. Polling only runs while the BLE features are on, the app is **active**, a vehicle is selected
 and Bluetooth permission is granted.
-The last snapshot is cached on device and shown on the Vehicle tab and the status widget, with a
-relative "updated X ago" timestamp.
+The last snapshot is cached on device and shown on the Vehicle tab, the status widget, the watch and
+its complications, with a relative "updated X ago" timestamp.
+
+## Vehicle view
+
+The Vehicle tab shows your car inside a **battery ring** (dark blue 100–80 %, blue 80–20 %, yellow
+20–10 %, red below 10 %, with a subtle animated glow).
+
+- **Six body styles:** Model 3, Model Y, Model S, Model X, Cybertruck and Roadster. ATA picks the
+  style from the VIN; you can override it under **Settings → Vehicles → Edit** (with a live preview).
+- **3D (default):** a minimalist neon car that turns slowly, with rims, mirrors, door handles, seats,
+  the battery pack in the floor (cells light up with the charge level) and a reflection on the floor.
+  Tap it for the **full‑screen view**: turn it with one finger, **pinch to zoom**, and tap the glowing
+  spots on the car (doors, frunk, trunk, charge port, windows, lights, climate) to run actions right
+  there.
+- **2D:** switch off **Settings → Appearance → 3D vehicle view** for a calm, solid side view of your
+  car instead.
+- **Animations after each action:** doors swing open, lids lift, the charge port opens and the cable
+  plugs in with flowing energy, windows go down, lights flash, wake lights up the light bars, unlock
+  lights the door handles and puddle lights, mirrors fold when locking, air flows from the vents,
+  music shows an equaliser, sentry sweeps a red radar beam, remote drive spins the wheels, bioweapon
+  defence surrounds the car (not the cabin) with green fog. **Show animations** in the full‑screen view
+  plays them all without sending anything to the car.
 
 ## Security
 
@@ -95,8 +127,8 @@ The trust level comes **only** from ATA's own per‑install token — never from
 | NFC tag written by ATA | ✅ | ✅ | always asks via notification |
 | Other apps, links, foreign tags (no token) | ✅ | only actions you allow under **Settings → Automation**, phone unlocked | ❌ never |
 
-- The BLE features stay behind **Settings → Experimental**, and automations only run while ATA is
-  **active**.
+- The BLE features stay off until you turn them on under **Settings → Bluetooth & NFC**, and
+  automations only run while ATA is **active**.
 - There is no web‑link (`BROWSABLE`) entry point, so a web page can't trigger commands.
 - **Settings → Automation** shows the token (copy it into Tasker), renews it (ATA re‑issues its own
   shortcuts and widgets) and can invalidate all NFC tags at once.
@@ -170,13 +202,27 @@ BLE commands run in a short foreground service (or a background job when Android
 service), so they also work while the phone is in your pocket.
 
 ### Widgets
-Two Glance widgets: a compact **status** widget and an **actions** widget (actions chosen in
-Settings → *Menu & widgets*, Basic and BLE).
+- **Status:** battery (with bar), range, inside and outside temperature, charging and lock state.
+  Responsive from 1×1 to 4×2 — every size shows every value, only arranged differently.
+- **Actions:** the actions chosen in Settings → *Menu & widgets* (Basic and BLE).
+- **Find my car:** distance and direction to where the car was last reached over Bluetooth.
 
 ## Wear OS
 
-The watch app (separate APK) shows your **live status** (battery, range, lock) and a list of action
-chips. Includes a **tile** and a tappable **complication**.
+The watch app (separate APK) controls the car from your wrist:
+
+- **Big tiles with icons** on the first screen. Round watches arrange them honeycomb‑style in rows of
+  **1/2/1** (4 tiles) or **2/3/2** (7 tiles), square watches as **2×2** or **3×3**. Choose 4 or 7 (9)
+  under **Settings → Wear OS watch → Watch layout** on the phone; the first actions you picked become
+  tiles.
+- **Swipe left** for all other actions as a list, plus direct control, the NFC key card and pairing.
+- **Status around the edge:** battery and range next to the time, inside/outside temperature and lock
+  state along the bottom of the rim.
+- **Complications for any watch face:** each status value is its own source (*ATA battery* — also
+  as a ring —, *ATA range*, *ATA inside/outside temperature*, *ATA lock state*), plus four action
+  slots *ATA action 1–4* whose actions you choose on the phone (**Settings → Wear OS watch →
+  Watch‑face complications**). Critical actions ask for a confirming tap.
+- A **tile** for the tile carousel.
 
 - **Relay mode (default):** tapping a chip sends the action to the phone running ATA, which performs
   it (Basic *and* BLE) and reports the result back to the watch.
@@ -215,7 +261,7 @@ first.
 
 ### Tesla key card emulation — phone *as* the card (BETA)
 
-**Settings → Experimental → NFC key card** turns the phone itself into a Tesla **key card** via host
+**Settings → Bluetooth & NFC → NFC key card** turns the phone itself into a Tesla **key card** via host
 card emulation (HCE). The car's center‑console reader talks to the phone over NFC exactly as it would
 to a plastic card, so no app has to be open — and it works alongside the BLE phone key, not instead
 of it. It only answers while the phone is **unlocked**.
@@ -247,7 +293,8 @@ until the car confirms. After that, tap to lock/unlock like a card.
   activation animation toward the car's last‑known spot — the spot is remembered whenever a BLE
   command succeeds (i.e. when you were next to the car).
 - **Active toggle** for routines; **multi‑vehicle** (name, VIN, home & work addresses).
-- **Experimental → Direct BLE control (BETA)** and **NFC key card** (phone as a Tesla key card, BETA).
+- **Bluetooth & NFC → Direct BLE control** and **NFC key card** (phone as a Tesla key card, BETA).
+- **3D vehicle view** on or off (off: solid 2D side view); vehicle **type** per vehicle.
 - **Status interval**: how often ATA polls the car for a battery/range/climate snapshot over BLE
   (Off, or 15 min and up). Requires the BLE features.
 - **Proximity unlock (BETA)** is reserved for an upcoming release (see known limitations) and currently has no
@@ -255,8 +302,9 @@ until the car confirms. After that, tap to lock/unlock like a card.
 
 ## Known limitations
 
-- The BLE commands, the NFC key card and direct watch control are built to Tesla's published
-  protocol but **not yet verified on a real car**, so they may not work until tested on the vehicle.
+- **Vehicle‑specific functions** (single doors, power liftgate, boombox …) only work on cars that
+  have them.
+- The **NFC key card** (phone and watch) is still **BETA** and not yet verified on a real car.
 - **Proximity unlock** is not implemented — the setting is a placeholder and has no effect.
 - **Seat heater** has no BLE command mapped yet; the tile reports it as unavailable.
 - **Samsung Routines** only lists ATA's published app shortcuts (icon menu + routine actions, see
@@ -280,7 +328,7 @@ Outputs: `app/build/outputs/apk/release/` and `wear/build/outputs/apk/release/`.
 |---|---|
 | `:core` | Shared models, action catalog + policy, Basic deep links, VIN helpers, BLE protocol/crypto (unit‑tested with Tesla's vectors: `./gradlew :core:testDebugUnitTest`) |
 | `:app` | Phone app (Compose UI, shortcuts, widgets, automation, Wear bridge) |
-| `:wear` | Wear OS app (Compose, tile, complication) |
+| `:wear` | Wear OS app (Compose tile grid, tile, complications) |
 
 ## Release signing
 
@@ -307,9 +355,19 @@ keytool -genkey -v -keystore release-keystore.jks -keyalg RSA -keysize 2048 \
 Keep the `.jks` file and its passwords safe and **out of git** — losing them means you can't ship
 signed updates that install over an existing install.
 
-## Screenshots:
-<img width="1832" height="800" alt="image-1792595409759" src="https://github.com/user-attachments/assets/17b9e633-1670-4330-b8b8-5beb92775a66" />
-<img width="1832" height="800" alt="image-1792595423405" src="https://github.com/user-attachments/assets/381bafba-b584-49ca-8475-b1e1b420e24b" />
+## Screenshots
+
+**Dark mode**
+
+<img width="1832" alt="ATA in dark mode: home, vehicle in 3D, full-screen car, settings, watch settings" src="docs/screenshots/ata-dark.png" />
+
+**Light mode**
+
+<img width="1832" alt="ATA in light mode: home, vehicle, full-screen car, settings, watch settings" src="docs/screenshots/ata-light.png" />
+
+**Wear OS**
+
+<img width="1832" alt="ATA on Wear OS: tile grid on round and square watches, action list" src="docs/screenshots/ata-wear.png" />
 
 
 

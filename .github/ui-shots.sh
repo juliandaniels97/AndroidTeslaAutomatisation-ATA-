@@ -19,6 +19,20 @@ PY
 )
   if [ -n "$xy" ]; then adb shell input tap $xy; sleep 2; else echo "not found: $1"; fi
 }
+tapswitch() { # tap the first switch (checkable node) on screen
+  adb shell uiautomator dump /sdcard/ui.xml >/dev/null 2>&1
+  adb pull /sdcard/ui.xml /tmp/ui.xml >/dev/null 2>&1
+  local xy
+  xy=$(python3 - <<'PY'
+import re, xml.etree.ElementTree as ET
+for n in ET.parse('/tmp/ui.xml').iter('node'):
+    if n.get('checkable') == 'true' and n.get('package') == 'org.tfv.ata':
+        x1, y1, x2, y2 = map(int, re.findall(r'\d+', n.get('bounds')))
+        print((x1 + x2) // 2, (y1 + y2) // 2); break
+PY
+)
+  if [ -n "$xy" ]; then adb shell input tap $xy; sleep 2; else echo "no switch"; fi
+}
 shot() { adb exec-out screencap -p > "$OUT/$1.png"; echo "shot $1"; }
 scroll() { adb shell input swipe 540 1800 540 700 400; sleep 1; }
 restart() { adb shell am start -S -W -n org.tfv.ata/.ui.MainActivity >/dev/null; sleep 6; }
@@ -51,6 +65,11 @@ restart; tap "Vehicle"; sleep 2; shot "body-2d-tab"
 adb shell am start -S -W -n org.tfv.ata/.ui.MainActivity -a android.intent.action.VIEW -d ata://car3d >/dev/null; sleep 6; shot "body-2d-full"
 demo "demo-2d"
 restart; tap "Settings"; scroll; tap "3D vehicle view"
+
+# README: vehicle view with the BLE action tiles (BLE features on).
+restart; tap "Vehicle"; tapswitch
+for b in "Allow" "While using the app" "Allow" "While using the app"; do tap "$b"; done
+restart; tap "Vehicle"; sleep 3; shot "readme-vehicle"
 
 for THEME in Dark Light; do
   t=$(echo $THEME | tr A-Z a-z)
