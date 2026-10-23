@@ -143,7 +143,9 @@ private fun StateChip(icon: ImageVector, tint: Color, text: String? = null, puls
     1f
   }
   Row(
-    Modifier.clip(RoundedCornerShape(50)).background(tint.copy(alpha = 0.16f)).padding(horizontal = 10.dp, vertical = 4.dp),
+    // Opaque, so the battery ring behind it doesn't run through the text.
+    Modifier.clip(RoundedCornerShape(50)).background(androidx.compose.material3.MaterialTheme.colorScheme.surface)
+      .background(tint.copy(alpha = 0.16f)).padding(horizontal = 10.dp, vertical = 4.dp),
     verticalAlignment = Alignment.CenterVertically,
   ) {
     Icon(icon, contentDescription = null, tint = tint.copy(alpha = glow), modifier = Modifier.size(18.dp))

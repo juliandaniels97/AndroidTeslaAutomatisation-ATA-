@@ -578,4 +578,8 @@ private fun ColumnScope.ChargingBody(
 }
 
 /** "1 h 20 min" / "35 min". */
-internal fun formatMinutes(m: Int): String = if (m >= 60) "${m / 60} h ${m % 60} min" else "$m min"
+internal fun formatMinutes(m: Int): String = when {
+  m < 60 -> "$m min"
+  m % 60 == 0 -> "${m / 60} h"
+  else -> "${m / 60} h ${m % 60} min"
+}

@@ -126,8 +126,10 @@ private fun DrawScope.drawChargeFlow(
       val fade = minOf(1f, f * 5f, (1f - f) * 4f).coerceIn(0f, 1f)
       val rad = Math.toRadians((-90f + sweep + empty - d).toDouble())
       val p = Offset(center.x + radius * kotlin.math.cos(rad).toFloat(), center.y + radius * kotlin.math.sin(rad).toFloat())
-      if (glow) drawCircle(green.copy(alpha = .3f * fade), width * .9f, p, blendMode = BlendMode.Plus)
-      drawCircle(green.copy(alpha = .95f * fade), width * (.22f + .1f * fade), p)
+      // At least ~3.5 dp, so the dots stay visible on the thin phone ring.
+      val dot = maxOf(width * .45f, 3.5f * density) * (.75f + .25f * fade)
+      if (glow) drawCircle(green.copy(alpha = .3f * fade), dot * 2.2f, p, blendMode = BlendMode.Plus)
+      drawCircle(green.copy(alpha = .95f * fade), dot, p)
     }
   }
   // Breathing tip at the current level.

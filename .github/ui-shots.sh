@@ -122,10 +122,10 @@ for THEME in Dark Light; do
   for n in 1 2 3 4 5 6 7; do sleep 3.2; shot "m-$t-demo-$n"; done
 done
 # Tablet (landscape): the car on the left, the tiles on the right.
-restart; tap "Settings"; tap "Design"; tap "Neon (standard)"; tap "Dark"
+restart; tap "Settings"; tapany "Design"; tapany "Neon (standard)"; tapany "Dark"
 adb shell wm size 2560x1600; adb shell wm density 320; sleep 3
 restart; tap "Vehicle"; sleep 3; shot "tablet-neon-dark"
-restart; tap "Settings"; tap "Design"; tap "Material"; tap "Light"
+restart; tap "Settings"; tapany "Design"; tapany "Material"; tapany "Light"
 restart; tap "Vehicle"; sleep 3; shot "tablet-material-light"
 adb shell wm size reset; adb shell wm density reset
 ls -la "$OUT"

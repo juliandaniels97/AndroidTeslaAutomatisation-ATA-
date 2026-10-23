@@ -496,7 +496,11 @@ private fun chargeLine(s: VehicleSnapshot): String = listOfNotNull(
   ("+" + String.format(java.util.Locale.getDefault(), "%.1f kWh", s.chargeEnergyAddedKwh)).takeIf { s.chargeEnergyAddedKwh > 0f },
 ).joinToString(" · ")
 
-private fun formatMinutes(m: Int): String = if (m >= 60) "${m / 60} h ${m % 60} min" else "$m min"
+private fun formatMinutes(m: Int): String = when {
+  m < 60 -> "$m min"
+  m % 60 == 0 -> "${m / 60} h"
+  else -> "${m / 60} h ${m % 60} min"
+}
 
 /**
  * Second page: the car as a card, like the phone's vehicle view. Battery ring (green dots flow into the charged
