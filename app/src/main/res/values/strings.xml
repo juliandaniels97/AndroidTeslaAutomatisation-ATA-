@@ -591,8 +591,8 @@
     <string name="backup_title">Back up settings</string>
     <string name="backup_export">Export</string>
     <string name="backup_import">Import</string>
-    <string name="backup_switch_hint_title">Switching from the GitHub version to the Play Store version</string>
-    <string name="backup_switch_hint_text">Export and import your layout and appearance settings and your VIN, made for switching from the GitHub version to the Play Store version. How it works: export in the GitHub version (1.9.7 or later), import in the Play Store version. Afterwards we recommend uninstalling the old app. Both apps can also stay installed side by side. The file is unencrypted and contains your VIN, so keep it safe and don\'t share it publicly. Vehicle keys are not included and need to be paired again once.</string>
+    <string name="backup_switch_hint_title">Switching between the GitHub and Play Store versions</string>
+    <string name="backup_switch_hint_text">Export and import your layout and appearance settings and your VIN, in both directions between the GitHub and Play Store versions. How it works: export in one app (1.9.7 or later), import in the other. This lets you switch to Play and back again. Afterwards you can uninstall the old app. Both apps can also stay installed side by side. The file is unencrypted and contains your VIN, so keep it safe and don\'t share it publicly. Vehicle keys are not included and need to be paired again once.</string>
     <string name="backup_error_not_ata">This is not an ATA file. Nothing was changed.</string>
     <string name="backup_error_newer">Please update ATA. This file is from a newer version. Nothing was changed.</string>
     <string name="backup_error_corrupt">The file is damaged or too large. Nothing was changed.</string>
