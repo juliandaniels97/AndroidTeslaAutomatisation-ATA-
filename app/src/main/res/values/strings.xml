@@ -586,4 +586,30 @@
     <string name="status_mode_interval_desc">At a fixed interval, also in the background (5 min to 3 h).</string>
     <string name="status_every">Every %1$s</string>
     <string name="status_never_wakes">Requires the BLE features. Automatic reads never wake the car: while it sleeps only the lock state is refreshed. Pulling down wakes it.</string>
+
+    <string name="settings_backup">Back up settings</string>
+    <string name="backup_title">Back up settings</string>
+    <string name="backup_export">Export</string>
+    <string name="backup_import">Import</string>
+    <string name="backup_switch_hint_title">Switching from the GitHub version to the Play Store version</string>
+    <string name="backup_switch_hint_text">Export and import your layout and appearance settings and your VIN, made for switching from the GitHub version to the Play Store version. How it works: export in the GitHub version (1.9.7 or later), import in the Play Store version. Afterwards we recommend uninstalling the old app. Both apps can also stay installed side by side. The file is unencrypted and contains your VIN, so keep it safe and don\'t share it publicly. Vehicle keys are not included and need to be paired again once.</string>
+    <string name="backup_error_not_ata">This is not an ATA file. Nothing was changed.</string>
+    <string name="backup_error_newer">Please update ATA. This file is from a newer version. Nothing was changed.</string>
+    <string name="backup_error_corrupt">The file is damaged or too large. Nothing was changed.</string>
+    <string name="backup_export_done">File saved.</string>
+    <string name="backup_export_failed">Export failed. Nothing was changed.</string>
+    <string name="backup_import_done">Settings imported.</string>
+    <string name="backup_import_done_partial">Settings imported. Please refresh widgets and the watch manually if needed.</string>
+    <string name="backup_preview_title">Import settings?</string>
+    <string name="backup_preview_summary">Appearance, %1$d tiles and %2$d watch actions will be replaced.</string>
+    <string name="backup_preview_vehicles_new">%1$d vehicles will be added.</string>
+    <string name="backup_preview_vehicles_updated">%1$d existing vehicles will be updated (name and look only).</string>
+    <string name="backup_drop_invalid">Not imported: %1$s (invalid VIN)</string>
+    <string name="backup_drop_duplicate">Not imported: %1$s (duplicate VIN)</string>
+    <string name="backup_drop_file_limit">Not imported: %1$s (at most 10 vehicles in the file)</string>
+    <string name="backup_drop_total_limit">Not imported: %1$s (limit of 10 vehicles in total)</string>
+    <string name="backup_drop_demo">Not imported: %1$s (demo vehicle is left unchanged)</string>
+    <string name="backup_preview_wmi">Unknown manufacturer code, imported anyway: %1$s</string>
+    <string name="backup_preview_check">Check digit differs, imported anyway: %1$s</string>
+    <string name="backup_preview_critical">Some imported tiles can run without asking, because that is already allowed on this device.</string>
 </resources>

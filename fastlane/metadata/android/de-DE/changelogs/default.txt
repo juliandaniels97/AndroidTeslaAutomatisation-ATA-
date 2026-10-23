@@ -1,7 +1,1 @@
-Erste Version im Play Store:
-• Steuerung per Bluetooth ohne Cloud und ohne Konto
-• Live-Status mit Ladeleistung, Zeit bis voll und nachgeladener Energie
-• Widgets, Samsung Routinen, Tasker und NFC-Tags
-• Wear OS mit Kacheln, Statusseite und Komplikationen
-• Neon- und Material-Design, hell und dunkel, 3D-Auto
-• Demo-Modus zum Ausprobieren ohne Auto
+Neu in 1.9.7: Export und Import der Einstellungen für Anordnung und Darstellung sowie der FIN, gedacht für den Wechsel von der GitHub-Version zur Play-Store-Version. In der GitHub-Version (ab 1.9.7) exportieren, hier importieren. Danach kannst du die alte App deinstallieren. Beide Apps können aber auch parallel installiert bleiben. Die Datei ist unverschlüsselt und enthält deine FIN, also sorgsam aufbewahren. Fahrzeugschlüssel sind nicht enthalten und müssen einmal neu angelernt werden.

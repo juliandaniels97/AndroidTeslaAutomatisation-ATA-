@@ -40,6 +40,30 @@ All release builds are signed with the same release key, so new versions install
 the old one. (Very early builds were signed with a public debug key; if ATA does not update over such a build,
 uninstall it once and pair the phone with the car again.)
 
+## Play Store release
+
+### Als Tester mitmachen (Google Play, interner Test)
+1. Schick eine E-Mail an [juliandigitalproducts+beta@gmail.com](mailto:juliandigitalproducts+beta@gmail.com) mit der Adresse deines Google-Kontos, das du im Play Store nutzt. Julian trägt dich in die Testerliste ein.
+2. Wenn du eingetragen bist, öffne mit genau diesem Google-Konto den Teilnahme-Link und tippe auf „Tester werden“:
+   - Handy: https://play.google.com/apps/internaltest/4700908852362636296
+   - Uhr (Wear OS, optional): https://play.google.com/apps/internaltest/4699692142762427331
+3. Installiere die App über den Link auf der Teilnahmeseite oder über https://play.google.com/store/apps/details?id=de.juliandigitalproducts.ata. Im Play Store muss dasselbe Konto aktiv sein. Bis die App auftaucht, können ein paar Minuten vergehen.
+4. Die Uhr-App installierst du über den Play Store auf der Uhr oder über „Auf Uhr installieren“ auf dem Handy.
+
+Hinweis: Solange Google die App noch nicht geprüft hat, erscheint sie im Play Store unter dem vorläufigen Namen „de.juliandigitalproducts.ata (unreviewed)“, ohne Icon und mit fast leerer Store-Seite. Das ist normal.
+Die Play-Version ist eine eigene App neben der GitHub-Version. Einstellungen und FIN kannst du ab 1.9.7 per Export und Import übernehmen. Die Fahrzeugschlüssel musst du einmal neu anlernen.
+
+### Join as a tester (Google Play, internal test)
+1. Email [juliandigitalproducts+beta@gmail.com](mailto:juliandigitalproducts+beta@gmail.com) with the address of the Google account you use in the Play Store. Julian will add you to the tester list.
+2. Once you're added, open the opt-in link while signed in with that exact Google account and tap "Become a tester":
+   - Phone: https://play.google.com/apps/internaltest/4700908852362636296
+   - Watch (Wear OS, optional): https://play.google.com/apps/internaltest/4699692142762427331
+3. Install the app from the opt-in page or via https://play.google.com/store/apps/details?id=de.juliandigitalproducts.ata. The same account must be active in the Play Store. It can take a few minutes to show up.
+4. Install the watch app from the Play Store on your watch or via "Install on watch" on your phone.
+
+Note: Until Google has reviewed the app, it appears in the Play Store under the temporary name "de.juliandigitalproducts.ata (unreviewed)", without an icon and with an almost empty store page. That's expected.
+The Play version is a separate app next to the GitHub version. From 1.9.7 you can carry over settings and VIN via export/import. Vehicle keys need to be paired again once.
+
 ## Screenshots
 
 **Neon — dark mode**

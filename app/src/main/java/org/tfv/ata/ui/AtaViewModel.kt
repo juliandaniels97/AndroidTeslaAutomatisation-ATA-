@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.tfv.ata.core.AtaSettings
+import org.tfv.ata.core.SettingsBackup
 import org.tfv.ata.core.Vehicle
 import org.tfv.ata.core.VehicleSnapshot
 import org.tfv.ata.data.AtaStore
@@ -295,7 +296,62 @@ class AtaViewModel(app: Application) : AndroidViewModel(app) {
   }
 
   fun rememberTab(route: String) = updateSettings { if (it.lastTab == route) it else it.copy(lastTab = route) }
+
+  suspend fun exportBackup(appVersion: String): String {
+    val settings = store.settings.first()
+    val vehicles = store.vehicles.first()
+    val selectedId = store.selectedVehicleId.first()
+    return SettingsBackup.export(settings, vehicles, selectedId, System.currentTimeMillis(), appVersion)
+  }
+
+  suspend fun previewBackup(bytes: ByteArray, sdkInt: Int): SettingsBackup.Outcome {
+    val settings = store.settings.first()
+    val vehicles = store.vehicles.first()
+    val selectedId = store.selectedVehicleId.first()
+    return SettingsBackup.plan(bytes, settings, vehicles, selectedId, sdkInt)
+  }
+
+  /** Validates again inside the single store edit, then refreshes shortcuts, widgets and the watch. */
+  fun commitBackup(bytes: ByteArray, sdkInt: Int, onDone: (BackupCommit) -> Unit) = viewModelScope.launch {
+    val wrote = try {
+      store.importLayout { settings, vehicles, selectedId ->
+        when (val outcome = runCatching {
+          SettingsBackup.plan(bytes, settings, vehicles, selectedId, sdkInt)
+        }.getOrNull()) {
+          is SettingsBackup.Outcome.Ready -> outcome.write
+          else -> null
+        }
+      }
+    } catch (_: Throwable) {
+      false
+    }
+    if (!wrote) {
+      onDone(BackupCommit.REJECTED)
+      return@launch
+    }
+    var sideFailed = false
+    try {
+      ShortcutSync.refresh(getApplication())
+    } catch (_: Throwable) {
+      sideFailed = true
+    }
+    try {
+      ActionsWidget().updateAll(getApplication())
+      StatusWidget().updateAll(getApplication())
+      org.tfv.ata.widget.CarFinderWidget().updateAll(getApplication())
+    } catch (_: Throwable) {
+      sideFailed = true
+    }
+    try {
+      pushWearConfig()
+    } catch (_: Throwable) {
+      sideFailed = true
+    }
+    onDone(if (sideFailed) BackupCommit.IMPORTED_PARTIAL else BackupCommit.IMPORTED)
+  }
 }
+
+enum class BackupCommit { REJECTED, IMPORTED, IMPORTED_PARTIAL }
 
 sealed interface PairUiState {
   data object Idle : PairUiState

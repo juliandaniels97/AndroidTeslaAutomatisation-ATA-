@@ -25,6 +25,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import org.tfv.ata.R
 import org.tfv.ata.ui.screens.AboutScreen
+import org.tfv.ata.ui.screens.BackupScreen
 import org.tfv.ata.ui.screens.AutomationScreen
 import org.tfv.ata.ui.screens.Car3DScreen
 import org.tfv.ata.ui.screens.BehaviorScreen
@@ -133,6 +134,7 @@ fun AtaNavHost(vm: AtaViewModel, state: AtaUiState, pendingRoute: String? = null
           onAbout = { nav.navigate("about") },
           onGuide = { nav.navigate("guide") },
           onReport = { nav.navigate("report") },
+          onBackup = { nav.navigate("backup") },
           onKeyCard = { nav.navigate("nfc_card") },
         )
       }
@@ -159,6 +161,7 @@ fun AtaNavHost(vm: AtaViewModel, state: AtaUiState, pendingRoute: String? = null
         WearPairScreen(vm, state, onBack = { nav.popBackStack() }, onReport = { nav.navigate("report") })
       }
       composable("report") { ReportScreen(onBack = { nav.popBackStack() }) }
+      composable("backup") { BackupScreen(vm, onBack = { nav.popBackStack() }) }
       composable("car3d") { Car3DScreen(vm, state, onBack = { nav.popBackStack() }) }
       composable("find_car") { CarFinderScreen(state, onBack = { nav.popBackStack() }) }
       composable("nfc_card") {

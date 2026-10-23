@@ -586,4 +586,30 @@
     <string name="status_mode_interval_desc">In festem Abstand, auch im Hintergrund (5 Min bis 3 Std).</string>
     <string name="status_every">Alle %1$s</string>
     <string name="status_never_wakes">Benötigt die BLE-Features. Automatische Abfragen wecken das Auto nie: Schläft es, wird nur der Verriegelungsstatus aktualisiert. Nach unten ziehen weckt es.</string>
+
+    <string name="settings_backup">Einstellungen sichern</string>
+    <string name="backup_title">Einstellungen sichern</string>
+    <string name="backup_export">Exportieren</string>
+    <string name="backup_import">Importieren</string>
+    <string name="backup_switch_hint_title">Wechsel von der GitHub-Version zur Play-Store-Version</string>
+    <string name="backup_switch_hint_text">Export und Import der Einstellungen für Anordnung und Darstellung sowie der FIN, gedacht für den Wechsel von der GitHub-Version zur Play-Store-Version. So geht\'s: In der GitHub-Version (ab 1.9.7) exportieren, in der Play-Store-Version importieren. Danach empfehlen wir, die alte App zu deinstallieren. Beide Apps können aber auch parallel installiert bleiben. Die Datei ist unverschlüsselt und enthält deine FIN, also sorgsam aufbewahren und nicht öffentlich teilen. Fahrzeugschlüssel sind nicht enthalten und müssen einmal neu angelernt werden.</string>
+    <string name="backup_error_not_ata">Das ist keine ATA-Datei. Nichts wurde geändert.</string>
+    <string name="backup_error_newer">Bitte ATA aktualisieren. Die Datei ist von einer neueren Version. Nichts wurde geändert.</string>
+    <string name="backup_error_corrupt">Die Datei ist beschädigt oder zu groß. Nichts wurde geändert.</string>
+    <string name="backup_export_done">Datei gespeichert.</string>
+    <string name="backup_export_failed">Export fehlgeschlagen. Nichts wurde geändert.</string>
+    <string name="backup_import_done">Einstellungen übernommen.</string>
+    <string name="backup_import_done_partial">Einstellungen übernommen. Widgets und Uhr bitte bei Bedarf manuell aktualisieren.</string>
+    <string name="backup_preview_title">Einstellungen importieren?</string>
+    <string name="backup_preview_summary">Darstellung, %1$d Kacheln, %2$d Uhr-Aktionen werden ersetzt.</string>
+    <string name="backup_preview_vehicles_new">%1$d Fahrzeuge werden neu angelegt.</string>
+    <string name="backup_preview_vehicles_updated">%1$d vorhandene Fahrzeuge werden aktualisiert (nur Name und Darstellung).</string>
+    <string name="backup_drop_invalid">Nicht übernommen: %1$s (ungültige FIN)</string>
+    <string name="backup_drop_duplicate">Nicht übernommen: %1$s (doppelte FIN)</string>
+    <string name="backup_drop_file_limit">Nicht übernommen: %1$s (höchstens 10 Fahrzeuge in der Datei)</string>
+    <string name="backup_drop_total_limit">Nicht übernommen: %1$s (Limit von 10 Fahrzeugen insgesamt)</string>
+    <string name="backup_drop_demo">Nicht übernommen: %1$s (Demo-Fahrzeug bleibt unverändert)</string>
+    <string name="backup_preview_wmi">Unbekannte Herstellerkennung, trotzdem übernommen: %1$s</string>
+    <string name="backup_preview_check">Prüfziffer weicht ab, trotzdem übernommen: %1$s</string>
+    <string name="backup_preview_critical">Einige importierte Kacheln können ohne Rückfrage laufen, weil das auf diesem Gerät schon freigegeben ist.</string>
 </resources>
