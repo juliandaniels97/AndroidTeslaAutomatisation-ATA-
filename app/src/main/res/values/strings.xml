@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">ATA</string>
-    <string name="app_label">ATA — Android Tesla Automatisation</string>
-    <string name="app_subtitle">Android Tesla Automatisation</string>
+    <string name="app_label">ATA - Car Automatisation</string>
+    <string name="app_subtitle">Car Automatisation</string>
     <string name="in_development">This feature is in development.</string>
     <string name="error_no_app">No matching app installed.</string>
     <string name="onboarding_title">Welcome to ATA</string>
@@ -384,9 +384,11 @@
     <string name="wear_keycard_use_text">Unlock: hold the watch face to the card reader on the driver\'s B-pillar. Drive: hold it on the card reader in the center console. The watch must be unlocked. If something doesn\'t work, send the bug report: it contains every request of the card reader to the watch.</string>
     <string name="wear_keycard_turn_off">Turn the watch key card off</string>
     <string name="wear_setup_no_watch_title">No watch connected</string>
-    <string name="wear_setup_no_watch_text">Pair the watch with this phone in the Galaxy Wearable app (or Wear OS app) and keep Bluetooth on.\nInstall ATA on the watch (wear APK from the release page).\nOpen ATA on the watch once, then come back here.</string>
+    <string name="wear_setup_no_watch_text">Pair the watch with this phone in the Galaxy Wearable app (or Wear OS app) and keep Bluetooth on.\nInstall ATA on the watch (Play Store on the watch or the wear APK).\nOpen ATA on the watch once, then come back here.</string>
     <string name="wear_setup_no_app_title">ATA not found on the watch</string>
     <string name="wear_setup_no_app_text">Download the wear APK (ATA-wear-…apk) from the release page.\nInstall it on the watch, e.g. with an installer app like \"Easy Fire Tools\" / \"Wear Installer\" or adb over Wi-Fi.\nUse the same version as on the phone, then open ATA on the watch once.</string>
+    <string name="wear_setup_no_app_text_play">Install ATA on the watch from Google Play: on the watch in the Play Store, or on the phone under \"Available on more devices\".\nUse the same version as on the phone, then open ATA on the watch once.</string>
+    <string name="wear_setup_open_play">Open in Google Play</string>
     <string name="wear_setup_download">Open release page</string>
     <string name="presets_title">Fixed values (e.g. temperature 21 °C)</string>
     <string name="presets_desc">Actions with a preset value, published as app shortcuts: Samsung Routines and the icon menu run them without asking. They share the space of the routine actions above.</string>
@@ -588,5 +590,7 @@
     <string name="donate_headline">Thank you for using ATA!</string>
     <string name="donate_text">ATA is free for personal use and made in my spare time. If it saves you a few taps every day and you\'d like to support further development, I\'m happy about any donation.</string>
     <string name="donate_button">Donate with PayPal</string>
-    <string name="donate_hint">Completely voluntary: ATA stays free and keeps all its features.</string>
+    <string name="donate_hint">Purely voluntary: a donation unlocks nothing. ATA stays free with all features, without ads or in-app purchases.</string>
+    <string name="donate_text_play">ATA is free, has no ads and no in-app purchases, and is made in my spare time. The best way to support it: a rating on Google Play and feedback on GitHub.</string>
+    <string name="donate_rate_button">Rate ATA on Google Play</string>
 </resources>

@@ -1,5 +1,6 @@
 package org.tfv.ata.ui.screens
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
@@ -14,6 +15,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -32,6 +34,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import org.tfv.ata.BuildConfig
 import org.tfv.ata.R
 import org.tfv.ata.ui.components.PayPalIcon
 import org.tfv.ata.ui.theme.AtaColors
@@ -39,7 +42,7 @@ import org.tfv.ata.ui.theme.AtaColors
 const val DONATE_URL = "https://www.paypal.com/donate/?hosted_button_id=YHEH2ZKAV4E9Y"
 private val PAYPAL_BLUE = Color(0xFF0070BA)
 
-/** Thanks, and a PayPal button for those who want to support ATA. */
+/** Thanks, and a PayPal button for those who want to support ATA (a Play rating button in the Google Play build). */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DonateScreen(onBack: () -> Unit) {
@@ -59,21 +62,37 @@ fun DonateScreen(onBack: () -> Unit) {
     ) {
       Icon(Icons.Filled.Favorite, contentDescription = null, tint = AtaColors.current.critical, modifier = Modifier.size(64.dp).padding(top = 8.dp))
       Text(stringResource(R.string.donate_headline), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
-      Text(stringResource(R.string.donate_text), style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center)
-      Button(
-        onClick = { runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(DONATE_URL)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) } },
-        colors = ButtonDefaults.buttonColors(containerColor = PAYPAL_BLUE, contentColor = Color.White),
-        modifier = Modifier.fillMaxWidth().height(56.dp),
-      ) {
-        Icon(PayPalIcon, contentDescription = null, modifier = Modifier.size(24.dp))
-        Text(stringResource(R.string.donate_button), fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 10.dp))
+      if (BuildConfig.DONATE_LINK) {
+        Text(stringResource(R.string.donate_text), style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center)
+        Button(
+          onClick = { open(context, DONATE_URL) },
+          colors = ButtonDefaults.buttonColors(containerColor = PAYPAL_BLUE, contentColor = Color.White),
+          modifier = Modifier.fillMaxWidth().height(56.dp),
+        ) {
+          Icon(PayPalIcon, contentDescription = null, modifier = Modifier.size(24.dp))
+          Text(stringResource(R.string.donate_button), fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 10.dp))
+        }
+        Text(
+          stringResource(R.string.donate_hint),
+          style = MaterialTheme.typography.bodySmall,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+          textAlign = TextAlign.Center,
+        )
+      } else {
+        // Google Play build: no external payment link, a rating helps just as well.
+        Text(stringResource(R.string.donate_text_play), style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center)
+        Button(
+          onClick = { open(context, "market://details?id=${context.packageName}") },
+          modifier = Modifier.fillMaxWidth().height(56.dp),
+        ) {
+          Icon(Icons.Filled.Star, contentDescription = null, modifier = Modifier.size(24.dp))
+          Text(stringResource(R.string.donate_rate_button), fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 10.dp))
+        }
       }
-      Text(
-        stringResource(R.string.donate_hint),
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        textAlign = TextAlign.Center,
-      )
     }
   }
+}
+
+private fun open(context: Context, url: String) {
+  runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
 }

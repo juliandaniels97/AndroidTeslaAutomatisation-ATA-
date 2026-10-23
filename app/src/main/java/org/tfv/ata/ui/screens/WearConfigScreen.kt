@@ -197,7 +197,8 @@ private fun WatchSetupHint() {
   }
   val (title, text) = when (reach) {
     org.tfv.ata.wear.WatchLink.Reach.NO_WATCH -> R.string.wear_setup_no_watch_title to R.string.wear_setup_no_watch_text
-    org.tfv.ata.wear.WatchLink.Reach.NO_APP -> R.string.wear_setup_no_app_title to R.string.wear_setup_no_app_text
+    org.tfv.ata.wear.WatchLink.Reach.NO_APP -> R.string.wear_setup_no_app_title to
+      if (org.tfv.ata.BuildConfig.PLAY_STORE) R.string.wear_setup_no_app_text_play else R.string.wear_setup_no_app_text
     else -> return
   }
   androidx.compose.material3.Card(
@@ -213,13 +214,14 @@ private fun WatchSetupHint() {
         onClick = {
           runCatching {
             context.startActivity(
-              android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(RELEASES_URL))
+              // The Play build installs the watch app from Google Play, never from an APK download.
+              android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(if (org.tfv.ata.BuildConfig.PLAY_STORE) "market://details?id=${context.packageName}" else RELEASES_URL))
                 .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK),
             )
           }
         },
         modifier = Modifier.padding(top = 8.dp),
-      ) { Text(stringResource(R.string.wear_setup_download)) }
+      ) { Text(stringResource(if (org.tfv.ata.BuildConfig.PLAY_STORE) R.string.wear_setup_open_play else R.string.wear_setup_download)) }
     }
   }
 }

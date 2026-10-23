@@ -64,6 +64,13 @@ jobs:
           set -o pipefail
           ./gradlew --no-daemon --stacktrace :app:assembleRelease :wear:assembleRelease 2>&1 | tee -a build.log
 
+      # Google Play: signed App Bundles (upload key = release key), all ABIs, without PayPal/APK links (-PataPlay).
+      # The watch bundle's versionCode is the phone's + 1,000,000 (wear/build.gradle.kts).
+      - name: Build Google Play bundles (phone + wear)
+        run: |
+          set -o pipefail
+          ./gradlew --no-daemon --stacktrace -PataPlay -PataAllAbis :app:bundleRelease :wear:bundleRelease 2>&1 | tee -a build.log
+
       - name: Report build errors
         if: failure()
         env:
@@ -84,13 +91,38 @@ jobs:
           cp app/build/outputs/apk/release/*.apk "dist/ATA-phone-v${VERSION}-arm64-v8a.apk"
           # One watch APK for 64-bit (arm64-v8a) and 32-bit (armeabi-v7a) watches.
           cp wear/build/outputs/apk/release/*.apk "dist/ATA-wear-v${VERSION}.apk"
+          # Google Play App Bundles (upload them in the Play Console; phone and Wear OS tracks).
+          cp app/build/outputs/bundle/release/*.aab "dist/ATA-phone-v${VERSION}.aab"
+          cp wear/build/outputs/bundle/release/*.aab "dist/ATA-wear-v${VERSION}.aab"
           ls -la dist
 
-      - name: Upload APKs
+      # Play pre-checks: permissions, exported components, versionCodes, signing and 16 KB alignment of native libs.
+      - name: Play audit (manifest, signing, 16 KB pages)
+        run: |
+          BT="${ANDROID_HOME}/build-tools/37.0.0"
+          for apk in dist/*.apk; do
+            echo "::group::${apk}"
+            "${BT}/aapt2" dump badging "${apk}" | grep -E "^package|uses-permission|sdkVersion|targetSdkVersion" || true
+            "${BT}/aapt2" dump xmltree --file AndroidManifest.xml "${apk}" | grep -E "E: (activity|service|receiver|provider)|A: android:(name|exported|permission|foregroundServiceType)" || true
+            "${BT}/apksigner" verify --print-certs "${apk}" | grep -E "SHA-256" || true
+            unzip -l "${apk}" | grep -E "lib/.*\.so" || echo "no native libraries"
+            "${BT}/zipalign" -c -P 16 -v 4 "${apk}" | grep -E "lib/|Verification" || true
+            echo "::endgroup::"
+          done
+          for aab in dist/*.aab; do
+            echo "::group::${aab}"
+            unzip -l "${aab}" | grep -E "lib/.*\.so" || echo "no native libraries"
+            keytool -printcert -jarfile "${aab}" | grep -E "SHA256" || true
+            echo "::endgroup::"
+          done
+
+      - name: Upload APKs and bundles
         uses: actions/upload-artifact@v4
         with:
           name: apks
-          path: dist/*.apk
+          path: |
+            dist/*.apk
+            dist/*.aab
 
   # Release gate: the minified release build must start on an emulator without crashing.
   smoke:
@@ -211,6 +243,8 @@ jobs:
           body_path: RELEASE_NOTES.md
           prerelease: false
           make_latest: true
-          files: dist/*.apk
+          files: |
+            dist/*.apk
+            dist/*.aab
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
