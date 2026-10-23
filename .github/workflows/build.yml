@@ -103,7 +103,7 @@ jobs:
           for apk in dist/*.apk; do
             echo "::group::${apk}"
             "${BT}/aapt2" dump badging "${apk}" | grep -E "^package|uses-permission|sdkVersion|targetSdkVersion" || true
-            "${BT}/aapt2" dump xmltree --file AndroidManifest.xml "${apk}" | grep -E "E: (activity|service|receiver|provider)|A: android:(name|exported|permission|foregroundServiceType)" || true
+            "${BT}/aapt2" dump xmltree --file AndroidManifest.xml "${apk}" | grep -E "E: (activity|service|receiver|provider)|android:(name|exported|permission|foregroundServiceType)\(" | sed -E 's#http://schemas.android.com/apk/res/##; s#\(0x[0-9a-f]+\)##' || true
             "${BT}/apksigner" verify --print-certs "${apk}" | grep -E "SHA-256" || true
             unzip -l "${apk}" | grep -E "lib/.*\.so" || echo "no native libraries"
             "${BT}/zipalign" -c -P 16 -v 4 "${apk}" | grep -E "lib/|Verification" || true
@@ -111,6 +111,7 @@ jobs:
           done
           for aab in dist/*.aab; do
             echo "::group::${aab}"
+            unzip -p "${aab}" base/manifest/AndroidManifest.xml | strings | grep -m1 -oE "(de\.juliandigitalproducts|org\.tfv)\.ata" | sed 's/^/package: /' || true
             unzip -l "${aab}" | grep -E "lib/.*\.so" || echo "no native libraries"
             keytool -printcert -jarfile "${aab}" | grep -E "SHA256" || true
             echo "::endgroup::"

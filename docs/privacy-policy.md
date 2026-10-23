@@ -36,6 +36,7 @@ This data is deleted when you uninstall ATA or clear its storage. ATA turns off 
 | **NFC** | Running actions from NFC tags you wrote with ATA, and using the phone or watch as a key card for the car (card emulation). |
 | **Notifications** | Results of commands, confirmations for critical actions, and the status notification of running services. |
 | **Display over other apps** (optional) | Lets a watch tap or an automation open the vehicle maker's app or navigation on the phone while ATA is in the background. |
+| **Biometrics** (fingerprint, face) | Optional confirmation before critical actions such as unlocking. Android checks the fingerprint, face or screen lock; ATA only gets "confirmed" or "not confirmed". |
 | **Run at startup** | Restarts *unlock when approaching* after a reboot, if you turned it on. |
 | **Wear OS Data Layer** | Syncs your actions, settings and the last status between your own phone and watch over Google Play services. |
 
@@ -105,6 +106,7 @@ die Android-Cloud-Sicherung ab (`allowBackup=false`), es landet also auch nichts
 | **NFC** | Aktionen von NFC-Tags ausführen, die du mit ATA beschrieben hast, und Handy oder Uhr als Schlüsselkarte für das Auto nutzen (Kartenemulation). |
 | **Benachrichtigungen** | Ergebnisse von Befehlen, Bestätigungen für kritische Aktionen und die Statusbenachrichtigung laufender Dienste. |
 | **Über anderen Apps einblenden** (optional) | Damit ein Tipp auf der Uhr oder eine Automatisierung die App des Fahrzeugherstellers oder die Navigation auf dem Handy öffnen kann, während ATA im Hintergrund ist. |
+| **Biometrie** (Fingerabdruck, Gesicht) | Optionale Bestätigung vor kritischen Aktionen wie dem Entriegeln. Android prüft Fingerabdruck, Gesicht oder Displaysperre; ATA erfährt nur „bestätigt“ oder „nicht bestätigt“. |
 | **Beim Start ausführen** | Startet *Entriegeln beim Herangehen* nach einem Neustart wieder, wenn du es eingeschaltet hast. |
 | **Wear OS Data Layer** | Gleicht deine Aktionen, Einstellungen und den letzten Status zwischen deinem eigenen Handy und deiner Uhr über die Google-Play-Dienste ab. |
 
