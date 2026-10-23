@@ -50,7 +50,7 @@ None. ATA has no third-party SDKs for analytics, ads or crash reporting.
   a prefilled issue on GitHub in your browser. It contains the app and Android version, phone model,
   settings, a masked VIN and the connection logs; no location and no keys. Nothing is sent unless you
   submit it yourself. GitHub's privacy policy applies to what you post there.
-- **Links:** links to GitHub (and, in the GitHub version only, a PayPal donation page) open in your browser.
+- **Links:** links to GitHub open in your browser.
   Their privacy policies apply there.
 
 ## Children
@@ -121,8 +121,7 @@ Keine. ATA enthält keine Drittanbieter-SDKs für Analyse, Werbung oder Absturzb
   Handymodell, Einstellungen, eine maskierte FIN und die Verbindungs-Logs, aber keinen Standort und keine
   Schlüssel. Gesendet wird nur, was du selbst abschickst. Für Beiträge auf GitHub gilt dessen
   Datenschutzerklärung.
-- **Links:** Links zu GitHub (und nur in der GitHub-Version zu einer PayPal-Spendenseite) öffnen sich im
-  Browser. Dort gelten deren Datenschutzerklärungen.
+- **Links:** Links zu GitHub öffnen sich im Browser. Dort gelten deren Datenschutzerklärungen.
 
 ## Kinder
 

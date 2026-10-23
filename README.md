@@ -34,7 +34,7 @@ All releases are listed under [Releases](https://github.com/juliandigitalproduct
 **Google Play:** ATA is coming to Google Play as **ATA - Car Automatisation** (package
 `de.juliandigitalproducts.ata`, phone and Wear OS). The Play version is a separate app next to the
 APK version (`org.tfv.ata`): it doesn't update an APK install, and the watch app has to come from the
-same source as the phone app. The Play version has no PayPal button. Each release also carries the
+same source as the phone app. Each release also carries the
 signed App Bundles for Play (`ATA-phone-vX.Y.Z.aab`, `ATA-wear-vX.Y.Z.aab`).
 All release builds are signed with the same release key, so new versions install as an update over
 the old one. (Very early builds were signed with a public debug key; if ATA does not update over such a build,
@@ -202,8 +202,6 @@ The Vehicle tab shows your car inside a **battery ring** (dark blue 100–80 %, 
 A **tick on the ring** marks the charge limit.
 
 **While charging:**
-- Green dots come out of the empty part of the ring and flow slowly into the charged part (a little
-  faster at higher power), e.g. at 20 % they travel from the empty 80 % into the 20 %.
 - The tip pulses, and a dashed arc shows the way to the charge limit.
 - A chip under the car shows **⚡ X kW · full in …**, a line below the values the **energy added**
   and the limit; the full‑screen view shows it too.
@@ -440,7 +438,6 @@ until the car confirms. After that, tap to lock/unlock like a card.
   animation, **vehicle status** (battery saver / smart / interval, see [Live status](#live-status)),
   **Direct BLE control**, **NFC key card** and **unlock when approaching**.
 - **Demo mode**: a made‑up connected car to try everything (see [Demo mode](#demo-mode)).
-- **Support ATA**: a thank‑you and a **Donate with PayPal** button (next to *About*).
 - **3D vehicle view** on or off (off: solid 2D side view); vehicle **type** per vehicle.
 
 ## Known limitations
@@ -466,7 +463,7 @@ cd AndroidTeslaAutomatisation-ATA-
 
 Outputs: `app/build/outputs/apk/release/` and `wear/build/outputs/apk/release/`.
 
-Google Play App Bundles (package `de.juliandigitalproducts.ata`, no PayPal or APK download links; the
+Google Play App Bundles (package `de.juliandigitalproducts.ata`, no APK download links; the
 watch bundle's versionCode is the phone's + 1,000,000):
 
 ```bash

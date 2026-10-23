@@ -97,7 +97,6 @@ for THEME in Dark Light; do
   scroll; tap "Bluetooth control (BETA)"; scroll; shot "$t-11-guide-ble"
   tap "Open pairing assistant"; shot "$t-12-pair"; scroll; shot "$t-13-pair-2"; scroll; shot "$t-14-pair-3"
   restart; tap "Settings"; tap "Wear OS watch"; tap "Start"; sleep 5; shot "$t-15-wear-pair"; scroll; shot "$t-16-wear-pair-2"
-  restart; tap "Settings"; tapany "Support ATA"; sleep 2; shot "$t-23-donate"
   restart; tap "Settings"; tapany "Send bug report"; sleep 6; shot "$t-17-report"; scroll; shot "$t-18-report-2"
   restart; tap "Settings"; tapany "Behavior, status, Bluetooth & NFC"; tapany "Set up NFC key card"; sleep 3; shot "$t-19-keycard"; scroll; shot "$t-20-keycard-2"
   adb shell am start -S -W -n org.tfv.ata/.ui.MainActivity -a android.intent.action.VIEW -d ata://car3d >/dev/null; sleep 6; shot "$t-21-car3d"

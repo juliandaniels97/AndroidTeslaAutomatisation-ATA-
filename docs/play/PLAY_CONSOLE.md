@@ -24,10 +24,8 @@ Alles, was du für ATA in der Play Console ausfüllst, Schritt für Schritt. Tex
 - Beide sind mit dem bisherigen Release-Schlüssel signiert. Er ist der **Upload-Schlüssel**.
 - Die Play-Builds (`-PataPlay`) unterscheiden sich von den APKs:
   - Paketname `de.juliandigitalproducts.ata`
-  - kein PayPal-Button, stattdessen „ATA bei Google Play bewerten“
   - Hinweise zur Uhr verweisen auf Google Play statt auf die Release-Seite
-- Den PayPal-Button wieder in die Play-Version holen: `ataPlayDonate=true` in `gradle.properties`.
-  Das rate ich ab, siehe Abschnitt 9.
+- Die App enthält keinen Spenden-Button mehr (weder APK noch Play), siehe Abschnitt 9.
 
 ## 2. App anlegen
 
@@ -276,16 +274,15 @@ foreground services.
 - [ ] Store-Eintrag Deutsch und Englisch mit Icon, Feature-Grafik und Screenshots.
 - [ ] Wear OS als Formfaktor hinzugefügt, Wear-Screenshots da, Wear-Bundle im Wear-OS-Track.
 
-## 9. Spenden-Button und Play-Richtlinie
+## 9. Spenden und Play-Richtlinie
 
 - Play verlangt für Zahlungen in Apps grundsätzlich Google Play Billing.
 - Ausgenommen sind nur **steuerbefreite Spenden** (für anerkannte gemeinnützige Organisationen).
-  Diese dürfen dann gerade nicht über Play Billing laufen.
-- Eine PayPal-Spende an einen privaten Entwickler fällt nicht unter diese Ausnahme.
-- Google hat Apps mit solchen Spendenlinks schon gesperrt oder abgemahnt, zuletzt AnkiDroid im Jahr 2026.
-  Der Hinweis „freiwillig, schaltet nichts frei“ schützt davor nicht.
-- Darum zeigt die Play-Version **keinen** PayPal-Link, sondern einen Button „Bei Google Play bewerten“.
-- Auch der Store-Eintrag nennt keine Spenden.
-- Die APK-Version auf GitHub und die README behalten den PayPal-Button mit dem Hinweis, dass die Spende freiwillig ist und nichts freischaltet.
-- Willst du Spenden in der Play-Version anbieten, ginge das regelkonform nur über Play Billing,
-  z. B. als „Trinkgeld“-In-App-Produkt ohne Gegenleistung. Dafür bräuchtest du ein Händlerkonto.
+- Eine PayPal-Spende an einen privaten Entwickler fällt nicht unter diese Ausnahme. Google hat Apps mit
+  solchen Spendenlinks schon gesperrt oder abgemahnt, zuletzt AnkiDroid im Jahr 2026.
+- Darum enthält ATA **keinen** Spenden-Button mehr, weder in der APK- noch in der Play-Version.
+  Auch der Store-Eintrag nennt keine Spenden.
+- Der PayPal-Button bleibt nur in der README auf GitHub, mit dem Hinweis, dass die Spende freiwillig ist
+  und nichts freischaltet.
+- Regelkonform wären Spenden in der App nur über Play Billing, z. B. als „Trinkgeld“-In-App-Produkt ohne
+  Gegenleistung. Dafür bräuchtest du ein Händlerkonto.

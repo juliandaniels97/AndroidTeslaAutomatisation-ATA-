@@ -13,9 +13,12 @@
 - Der App-Name auf dem Startbildschirm heißt jetzt **„ATA - Car Automatisation“**, der Untertitel auf der Startseite „Car Automatisation“.
 
 ### ATA unterstützen
-- Der Text sagt jetzt klar: Eine Spende ist **rein freiwillig und schaltet nichts frei**. ATA bleibt kostenlos mit allen Funktionen, ohne Werbung und ohne In-App-Käufe.
-- In der Play-Version gibt es keinen PayPal-Button. Dort steht stattdessen **„ATA bei Google Play bewerten“**.
-- Die APK-Version von GitHub behält den PayPal-Button.
+- Die Seite **„ATA unterstützen“** mit dem PayPal-Button ist aus der App entfernt, in der APK- und in der Play-Version.
+- Spenden sind weiter über die README auf GitHub möglich: rein freiwillig, sie schalten nichts frei. ATA bleibt kostenlos mit allen Funktionen, ohne Werbung und ohne In-App-Käufe.
+
+### Ladekreis
+- Die grünen Punkte, die beim Laden durch den Ring wandern, sind entfernt, am Handy und auf der Uhr. Sie liefen nicht sauber.
+- Ladelimit-Strich, gestrichelter Bogen bis zum Limit und die pulsierende Spitze bleiben.
 
 ### Uhr einrichten
 - Ist ATA auf der Uhr nicht installiert, verweist die Play-Version auf **Google Play** statt auf die Release-Seite.

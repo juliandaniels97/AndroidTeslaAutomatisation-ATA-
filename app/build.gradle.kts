@@ -30,10 +30,8 @@ android {
     // -PataAllAbis keeps every ABI (used by the CI emulator smoke test on x86_64).
     if (!project.hasProperty("ataAllAbis")) ndk { abiFilters += listOf("arm64-v8a") }
     vectorDrawables.useSupportLibrary = true
-    // Google Play build: no PayPal link and no APK download links, because Play's payments and
-    // device-abuse policies don't allow them. ataPlayDonate=true keeps the PayPal button.
+    // Google Play build: no APK download links (Play's device-abuse policy), the watch app comes from Play.
     buildConfigField("boolean", "PLAY_STORE", playBuild.toString())
-    buildConfigField("boolean", "DONATE_LINK", (!playBuild || project.providers.gradleProperty("ataPlayDonate").orNull == "true").toString())
   }
 
   val releaseStoreFile = System.getenv("ATA_KEYSTORE_FILE")
