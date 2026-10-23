@@ -60,11 +60,11 @@ restart; tap "Vehicle"; sleep 2; shot "body-3d-tab"
 adb shell am start -S -W -n org.tfv.ata/.ui.MainActivity -a android.intent.action.VIEW -d ata://car3d >/dev/null; sleep 6; shot "body-3d-full"
 demo() { tap "Show animations"; sleep 0.6; for n in 01 02 03 04 05 06 07 08 09 10 11 12 13 14; do shot "$1-$n"; sleep 1.9; done; }
 demo "demo-3d"
-restart; tap "Settings"; scroll; tap "3D vehicle view"; shot "body-settings-2d"
+restart; tap "Settings"; tap "Design"; tap "3D vehicle view"; shot "body-settings-2d"
 restart; tap "Vehicle"; sleep 2; shot "body-2d-tab"
 adb shell am start -S -W -n org.tfv.ata/.ui.MainActivity -a android.intent.action.VIEW -d ata://car3d >/dev/null; sleep 6; shot "body-2d-full"
 demo "demo-2d"
-restart; tap "Settings"; scroll; tap "3D vehicle view"
+restart; tap "Settings"; tap "Design"; tap "3D vehicle view"
 
 # From here on a Model Y (the Cybertruck VIN stays, the type is set by hand).
 restart; tap "Settings"; tap "Vehicles"; tap "Edit vehicle"; tap "Model Y"; tap "Save"
@@ -76,9 +76,10 @@ restart; tap "Vehicle"; sleep 3; shot "readme-vehicle"
 
 for THEME in Dark Light; do
   t=$(echo $THEME | tr A-Z a-z)
-  restart; tap "Settings"; scroll; tap "$THEME"
-  restart; shot "$t-1-home"
-  tap "Vehicle"; shot "$t-2-vehicle"; scroll; shot "$t-2b-vehicle"
+  restart; tap "Settings"; tap "Design"; tap "$THEME"
+  restart; tap "Favorites"; sleep 2; shot "$t-1-home"
+  tap "Vehicle"; sleep 2; shot "$t-2-vehicle"; scroll; shot "$t-2b-vehicle"; scroll; shot "$t-2c-vehicle"; scroll; shot "$t-2d-vehicle"
+  restart; tap "Settings"; tap "Design"; shot "$t-2e-design"
   tap "Settings"; shot "$t-3-settings"; scroll; shot "$t-4-settings-2"; scroll; shot "$t-5-settings-3"
   i=6
   for ITEM in "NFC tags" "Automation (Routines, Tasker)" "Menu & widgets" "Wear OS watch" "Vehicles"; do
@@ -98,17 +99,24 @@ done
 # Material design in dark and light (Model Y in its default paint).
 for THEME in Dark Light; do
   t=$(echo $THEME | tr A-Z a-z)
-  restart; tap "Settings"; scroll; tap "Material"; tap "$THEME"
+  restart; tap "Settings"; tap "Design"; tap "Material"; tap "$THEME"
   if [ "$t" = dark ]; then
     restart; tap "Settings"; tap "Vehicles"; tap "Edit vehicle"; shot "m-$t-4-editor"; tap "Cancel"
   else
     restart; tap "Settings"; tap "Vehicles"; tap "Edit vehicle"; shot "m-$t-4-editor"; tap "Cancel"
   fi
-  restart; shot "m-$t-1-home"
-  tap "Vehicle"; sleep 2; shot "m-$t-2-vehicle"
+  restart; tap "Favorites"; sleep 2; shot "m-$t-1-home"
+  tap "Vehicle"; sleep 2; shot "m-$t-2-vehicle"; scroll; shot "m-$t-2b-vehicle"; scroll; shot "m-$t-2c-vehicle"
   restart; tap "Settings"; shot "m-$t-5-settings"; scroll; shot "m-$t-6-settings-2"
   adb shell am start -S -W -n org.tfv.ata/.ui.MainActivity -a android.intent.action.VIEW -d ata://car3d >/dev/null; sleep 6; shot "m-$t-3-car3d"
   tap "Show animations"; sleep 0.5
   for n in 1 2 3 4 5 6 7; do sleep 3.2; shot "m-$t-demo-$n"; done
 done
+# Tablet (landscape): the car on the left, the tiles on the right.
+restart; tap "Settings"; tap "Design"; tap "Neon (standard)"; tap "Dark"
+adb shell wm size 2560x1600; adb shell wm density 320; sleep 3
+restart; tap "Vehicle"; sleep 3; shot "tablet-neon-dark"
+restart; tap "Settings"; tap "Design"; tap "Material"; tap "Light"
+restart; tap "Vehicle"; sleep 3; shot "tablet-material-light"
+adb shell wm size reset; adb shell wm density reset
 ls -la "$OUT"

@@ -1,40 +1,61 @@
-## ATA v1.9.1 — Entriegeln bei Annäherung, neuer Kompass, NFC-Schlüsselkarte fertig
+## ATA v1.9.2 — Multikacheln, Sitzheizung pro Sitz, Lautstärke, Laden mit kW, neue Struktur
 
-### Entriegeln bei Annäherung (neu)
-- **Einstellungen → Entriegeln bei Annäherung:** Das Auto entriegelt einmal, wenn du mit dem Handy darauf zugehst.
-- **So funktioniert es:**
-  - ATA misst die Stärke des Bluetooth-Signals des Autos, auch bei ausgeschaltetem Bildschirm.
-  - Hält die Tesla-App bereits die Verbindung, liest ATA die Signalstärke direkt daraus.
-- **Entfernung** einstellbar von ca. 2 bis 20 m.
-- **Nur einmal pro Annäherung:** erst nachdem du weg warst, nie direkt nach dem Start neben dem Auto, und nicht zweimal innerhalb von zwei Minuten.
-- **Sicherheit:**
-  - Bei gesperrtem Handy fragt ATA per Benachrichtigung, außer du erlaubst es ausdrücklich („Auch bei gesperrtem Handy“).
-  - Es wird ausschließlich entriegelt, nie etwas anderes geöffnet.
-- Eine stille Benachrichtigung zeigt, solange die Funktion aktiv ist. Sie startet nach einem Neustart automatisch wieder.
+### Neue Struktur
+- **Favoriten** ganz links (statt „Aktionen“), dann **Fahrzeug** und **Einstellungen**.
+- **Fahrzeug** ist beim ersten Start die Standardansicht. Danach öffnet ATA den Tab, der beim Schließen offen war.
+- Die bisherigen **Aktionen** (Navigation, Tesla-App …) stehen jetzt am **Ende des Fahrzeug-Tabs**.
+  - Sie sind auch ohne eingerichtetes Bluetooth aktiv.
+  - Wie alle Kacheln lassen sie sich verschieben.
+- **Favoriten:** Im Bearbeiten-Modus (Kachel lange drücken) mit ☆ markieren.
+- **Neu: Einstellungen → Design.** Dort ist alles zum Aussehen zusammengefasst: Neon/Material, hell/dunkel, dynamische Farben, 3D-Auto, Multikacheln und Kacheln pro Reihe.
 
-### Kompass „Auto finden“ fertig
-- **Richtige Richtung:**
-  - Berücksichtigt die Bildschirmdrehung und ob das Handy flach liegt oder aufrecht gehalten wird.
-  - Bezieht sich auf **geografisch Nord**, mit Missweisungs-Korrektur am aktuellen Standort.
-- **Kompassrose:** dreht sich mit, das Auto ist am Rand markiert, dazu ein großer Pfeil. Er dreht immer den kurzen Weg, ruhig und geglättet.
-- **Kurze Vibration**, wenn das Handy genau Richtung Auto zeigt.
-- **Hinweise:**
-  - Kalibrieren nötig (Handy in Form einer Acht schwenken).
-  - GPS-Position noch zu ungenau.
-  - Ungefähre Gehzeit zum Auto.
-- Die Richtungs-Animation beim Ausführen von Aktionen nutzt denselben, korrigierten Kompass.
+### Multikacheln (Standard: an)
+- **Mehrere Aktionen in einer Kachel.** Nur die Buttons darin sind klickbar, nicht die ganze Kachel. Der Status steht direkt in der Kachel.
+- **Größen:** Multikacheln belegen 2 Plätze (2×1) oder 4 Plätze (2×2) und lassen sich wie bisher verschieben.
+- **Die Kacheln:**
+  - **Verriegelung:** Zu-/Aufsperren mit Status.
+  - **Türen** Fahrer/Beifahrer als Doppelkachel.
+  - **Frunk & Kofferraum, Fenster, Ladeklappe.**
+  - **Sitzheizung (2×2):** alle Sitze einzeln. Pro Sitz ein An/Aus-Button und 3 Punkte für Stufe 1–3.
+  - **Sitzbelüftung** Fahrer/Beifahrer.
+  - **Klima (2×2):** An/Aus, Enteisen, Temperatur Fahrer und Beifahrer getrennt.
+  - **Laden (2×2):** Start/Stopp, Ladestand, kW, Restzeit, Ladelimit und Ampere.
+  - **Lautstärke:** leiser, lauter und ein Schieber.
+  - **Medien, Klima halten** (Aus/Halten/Hund/Camp), **Überhitzungsschutz** (Aus/Klima/nur Lüfter).
+  - **Wächter, Lenkradheizung, Bioweapon** mit An/Aus-Status.
+- **Schieber** (Lautstärke, Temperatur, Limit, Ampere): hoch und runter wischen. Der Befehl geht erst beim **Loslassen** raus, also nur einer statt vieler. Antippen oben/unten ändert um eine Stufe.
+- **Ausschalten** unter Einstellungen → Design → Multikacheln: dann gibt es wieder eine Kachel pro Aktion, mit Schieber-Dialog für Werte.
 
-### NFC-Schlüsselkarte
-- Die **NFC-Schlüsselkarte** (Handy und Uhr) ist **kein BETA mehr**. Sie funktioniert am Fahrzeug.
-- Auch sonst gibt es in der App **keine BETA-Hinweise mehr**, z. B. bei der Navigations-App „Tesla“.
+### Neue Funktionen
+- **Sitzheizung pro Sitz:** vorne links/rechts, hinten links/Mitte/rechts, jeweils Aus/Stufe 1–3.
+- **Sitzbelüftung** vorne, Aus/Stufe 1–3.
+- **Lautstärke:** auf einen Wert setzen (0–10, in Schritten), lauter und leiser.
+- **Temperatur nur für Fahrer oder Beifahrer.** Die andere Seite behält ihre Einstellung.
+- **Überhitzungsschutz nur mit Lüfter.**
+- Alle neuen Aktionen gibt es auch als Kurzbefehl, für Widgets, NFC und Automationen.
 
-### Boombox entfernt
-- **Furzgeräusch und Ortungston** sind entfernt. Tesla bietet die Boombox nur über die Cloud (Fleet API) an, nicht über Bluetooth.
-- Die bisher gesendete Nachricht war im Tesla-Protokoll der Befehl für den **Gastmodus**. Das Fahrzeug hat ihn korrekt mit „insufficient privileges“ abgelehnt.
-- Alle übrigen Bluetooth-Befehle wurden mit Teslas offiziellem Protokoll abgeglichen und stimmen.
+### Status
+- Die Kacheln zeigen den echten Zustand des Autos:
+  - Sitzstufen, Lenkradheizung, Enteisen, Klima halten
+  - Türen, Frunk/Kofferraum, Fenster, Ladeklappe
+  - Lautstärke und der laufende Titel
+- Nach einem Befehl zeigen die Kacheln den neuen Zustand sofort an.
+- **Laden:** „lädt mit X kW“, dazu Restzeit bis voll, Ladelimit und Ampere.
 
-### Symbole
-- **Frunk** und **Kofferraum** haben jetzt **verschiedene Symbole**: Box für den Frunk, Koffer für den Kofferraum. Das gilt in App, Vollbild-Ansicht, Widgets und auf der Uhr.
+### Akkuring beim Laden
+- Lichttropfen fließen den Ring entlang, **schneller bei mehr kW**.
+- Die Spitze pulsiert, und ein gestrichelter Bogen zeigt den Weg bis zum Ladelimit.
+- Am Auto erscheint eine Plakette „⚡ X kW“.
+- Funktioniert in Neon und Material, hell und dunkel.
 
-### Fehlerbericht
-- Das Bluetooth-Protokoll im Fehlerbericht zeigt jetzt bei jedem Befehl, **welche Aktion** gesendet wurde.
+### 3D-Ansicht
+- **Neue Punkte** zum Antippen:
+  - **Sitze:** Sitzheizung und Belüftung direkt einstellen.
+  - **Lenkrad:** Lenkradheizung.
+- **Klima** und **Ladeklappe** öffnen jetzt zusätzlich ihre Multikachel. Die **Türen** funktionieren wie bisher.
+- Die Sitze im Auto glühen warm, solange eine Sitzheizung läuft.
+
+### Responsiv
+- **Kacheln pro Reihe:** einstellbar 2 bis 6 oder Auto (Handy 3, Tablet mehr). Die Namen bleiben bei jeder Größe sichtbar.
+- **Tablet/Querformat:** das Auto links, die Kacheln rechts daneben.
+- Alle Kacheln haben Icons. Das Lenkrad hat ein eigenes Icon.

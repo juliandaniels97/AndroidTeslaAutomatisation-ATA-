@@ -71,8 +71,11 @@ data class CarFxState(
       AtaAction.SENTRY_ON -> on(CarEffect.SENTRY)
       AtaAction.SENTRY_OFF -> off(CarEffect.SENTRY)
       AtaAction.REMOTE_DRIVE -> pulse(CarEffect.DRIVE)
-      AtaAction.MEDIA_TOGGLE, AtaAction.MEDIA_NEXT, AtaAction.MEDIA_PREVIOUS -> pulse(CarEffect.MEDIA)
-      AtaAction.SET_TEMPERATURE, AtaAction.OVERHEAT_PROTECTION_ON -> pulse(CarEffect.AIRFLOW)
+      AtaAction.MEDIA_TOGGLE, AtaAction.MEDIA_NEXT, AtaAction.MEDIA_PREVIOUS,
+      AtaAction.SET_VOLUME, AtaAction.VOLUME_UP, AtaAction.VOLUME_DOWN -> pulse(CarEffect.MEDIA)
+      AtaAction.SET_TEMPERATURE, AtaAction.SET_TEMPERATURE_DRIVER, AtaAction.SET_TEMPERATURE_PASSENGER,
+      AtaAction.OVERHEAT_PROTECTION_ON, AtaAction.OVERHEAT_PROTECTION_FAN_ONLY,
+      AtaAction.SEAT_COOLER_FRONT_LEFT, AtaAction.SEAT_COOLER_FRONT_RIGHT -> pulse(CarEffect.AIRFLOW)
       else -> this
     }
   }

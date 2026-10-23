@@ -1,6 +1,16 @@
 package org.tfv.ata.ui.screens
 
 import android.widget.Toast
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import org.tfv.ata.ui.tiles.MultiTileView
+import org.tfv.ata.ui.tiles.TileBoard
+import org.tfv.ata.ui.tiles.TileCatalog
+import org.tfv.ata.ui.tiles.TilePickerDialog
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -42,14 +52,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.tfv.ata.R
-import org.tfv.ata.core.AtaAction
-import org.tfv.ata.core.AtaCategory
 import org.tfv.ata.core.Vin
 import org.tfv.ata.core.ble.PairedKeys
 import org.tfv.ata.ui.ActionHost
 import org.tfv.ata.ui.AtaUiState
 import org.tfv.ata.ui.AtaViewModel
-import org.tfv.ata.ui.components.EditableActionGrid
 import org.tfv.ata.ui.components.VehicleArt
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -80,19 +87,18 @@ fun VehicleScreen(
     }
   }
 
-  val allBle = remember { AtaAction.entries.filter { it.category == AtaCategory.FUNCTION_A && it.enabled } }
-  val savedBle = remember(state.settings.vehicleActionIds) {
-    val ids = state.settings.vehicleActionIds
-    if (ids.isEmpty()) allBle
-    else ids.mapNotNull { AtaAction.fromId(it) }
-      .filter { it.category == AtaCategory.FUNCTION_A && it.enabled }
-      .ifEmpty { allBle }
+  val multi = state.settings.multiTiles
+  val savedTiles = remember(state.settings.vehicleActionIds, multi) {
+    TileCatalog.resolve(state.settings.vehicleActionIds.ifEmpty { TileCatalog.vehicleDefaults }, multi)
+      .ifEmpty { TileCatalog.resolve(TileCatalog.vehicleDefaults, multi) }
   }
+  val favoriteKeys = state.settings.homeActionIds.ifEmpty { TileCatalog.favoriteDefaults }
   var editMode by remember { mutableStateOf(false) }
-  var order by remember { mutableStateOf(savedBle) }
-  val shown = if (editMode) order else savedBle
-  val hidden = allBle.filter { it !in shown }
+  var order by remember { mutableStateOf(savedTiles) }
+  val shown = if (editMode) order else savedTiles
+  val hidden = TileCatalog.all(multi).filter { t -> shown.none { it.key == t.key } }
   var addDialog by remember { mutableStateOf(false) }
+  val carReady = experimental && state.selected != null
 
   ActionHost(vm, state, onAddVehicle = onAddVehicle) { run ->
     Scaffold(
@@ -100,11 +106,12 @@ fun VehicleScreen(
         TopAppBar(
           title = { Text(if (editMode) stringResource(R.string.edit_layout_title) else state.selected?.name ?: stringResource(R.string.tab_vehicle)) },
           actions = {
-            when {
-              editMode -> TextButton(onClick = { vm.setVehicleActions(order); editMode = false }) {
+            if (editMode) {
+              TextButton(onClick = { vm.setVehicleTiles(order.map { it.key }); editMode = false }) {
                 Text(stringResource(R.string.save_layout))
               }
-              experimental -> {
+            } else {
+              if (experimental) {
                 IconButton(onClick = onFindCar) {
                   Icon(Icons.Filled.Explore, contentDescription = stringResource(R.string.finder_title))
                 }
@@ -112,84 +119,105 @@ fun VehicleScreen(
                   if (refreshing) CircularProgressIndicator(modifier = Modifier.padding(4.dp), strokeWidth = 2.dp)
                   else Icon(Icons.Filled.Refresh, contentDescription = stringResource(R.string.refresh))
                 }
-                IconButton(onClick = { order = savedBle; editMode = true }) {
-                  Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.edit_layout_title))
-                }
+              }
+              IconButton(onClick = { order = savedTiles; editMode = true }) {
+                Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.edit_layout_title))
               }
             }
           },
         )
       },
     ) { padding ->
-      EditableActionGrid(
-        actions = shown,
-        editMode = editMode,
-        showAddTile = hidden.isNotEmpty(),
-        canDelete = shown.size > 1,
-        tilesEnabled = experimental && state.selected != null,
-        haptics = state.settings.haptics,
-        favorite = { it.id in state.settings.homeActionIds },
-        onToggleFavorite = { vm.toggleHomeFavorite(it) },
-        onRun = { run(it) },
-        onEnterEdit = { if (experimental) { order = savedBle; editMode = true } },
-        onDelete = { a -> if (order.size > 1) order = order - a },
-        onMove = { from, to -> order = order.toMutableList().apply { add(to, removeAt(from)) } },
-        onAdd = { addDialog = true },
-        modifier = Modifier.fillMaxSize().padding(padding),
-        header = {
-          Column(Modifier.fillMaxWidth()) {
-            val carFx by vm.carFx.collectAsStateWithLifecycle()
-            VehicleArt(
-              snapshot,
-              fx = carFx,
-              vehicle = state.selected,
-              threeD = state.settings.car3d,
-              onOpen = if (experimental) onOpen3d else null,
-            )
-            Row(Modifier.fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.SpaceEvenly) {
-              StatBox(stringResource(R.string.stat_battery), snapshot?.let { "${it.batteryPercent}%" } ?: "--")
-              StatBox(stringResource(R.string.stat_range), snapshot?.let { "${it.rangeKm} km" } ?: "--")
-              StatBox(stringResource(R.string.stat_inside), snapshot?.let { "${it.insideTempC.toInt()}°" } ?: "--")
-              StatBox(stringResource(R.string.stat_outside), snapshot?.let { "${it.outsideTempC.toInt()}°" } ?: "--")
-            }
-            snapshot?.takeIf { it.updatedAt > 0 }?.let {
-              Text(
-                stringResource(R.string.last_updated, formatRelative(it.updatedAt)) +
-                  if (it.asleep) "  ·  " + stringResource(R.string.status_asleep) else "",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
-                textAlign = TextAlign.Center,
-              )
-            }
-            if (experimental) {
-              Text(
-                stringResource(R.string.vehicle_specific_hint),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
-                textAlign = TextAlign.Center,
-              )
-            }
-            if (!experimental) {
-              BleEnableCard(
-                onEnable = { vm.updateSettings { it.copy(experimentalBle = true) } },
-                modifier = Modifier.padding(top = 10.dp),
-              )
-            } else if (state.selected == null) {
-              AddVehicleCard(onAdd = onAddVehicle, modifier = Modifier.padding(top = 10.dp))
-            } else if (!paired) {
-              PairCard(onPair = onPair, modifier = Modifier.padding(top = 10.dp))
-            }
+      val header: @Composable () -> Unit = {
+        Column(Modifier.fillMaxWidth()) {
+          val carFx by vm.carFx.collectAsStateWithLifecycle()
+          VehicleArt(
+            snapshot,
+            fx = carFx,
+            vehicle = state.selected,
+            threeD = state.settings.car3d,
+            onOpen = if (experimental) onOpen3d else null,
+          )
+          Row(Modifier.fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.SpaceEvenly) {
+            StatBox(stringResource(R.string.stat_battery), snapshot?.let { "${it.batteryPercent}%" } ?: "--")
+            StatBox(stringResource(R.string.stat_range), snapshot?.let { "${it.rangeKm} km" } ?: "--")
+            StatBox(stringResource(R.string.stat_inside), snapshot?.let { "${it.insideTempC.toInt()}°" } ?: "--")
+            StatBox(stringResource(R.string.stat_outside), snapshot?.let { "${it.outsideTempC.toInt()}°" } ?: "--")
           }
-        },
-      )
+          snapshot?.takeIf { it.updatedAt > 0 }?.let {
+            Text(
+              stringResource(R.string.last_updated, formatRelative(it.updatedAt)) +
+                if (it.asleep) "  ·  " + stringResource(R.string.status_asleep) else "",
+              style = MaterialTheme.typography.labelSmall,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+              modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
+              textAlign = TextAlign.Center,
+            )
+          }
+          if (experimental) {
+            Text(
+              stringResource(R.string.vehicle_specific_hint),
+              style = MaterialTheme.typography.labelSmall,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+              modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+              textAlign = TextAlign.Center,
+            )
+          }
+          if (!experimental) {
+            BleEnableCard(
+              onEnable = { vm.updateSettings { it.copy(experimentalBle = true) } },
+              modifier = Modifier.padding(top = 10.dp),
+            )
+          } else if (state.selected == null) {
+            AddVehicleCard(onAdd = onAddVehicle, modifier = Modifier.padding(top = 10.dp))
+          } else if (!paired) {
+            PairCard(onPair = onPair, modifier = Modifier.padding(top = 10.dp))
+          }
+        }
+      }
+      val board: @Composable () -> Unit = {
+        TileBoard(
+          tiles = shown,
+          columnSetting = state.settings.tileColumns,
+          editMode = editMode,
+          // App actions (navigation, Tesla app …) work without Bluetooth; car functions need it.
+          enabled = { !TileCatalog.needsCar(it) || carReady },
+          onRun = { run(it) },
+          onEnterEdit = { order = savedTiles; editMode = true },
+          onMove = { from, to -> order = order.toMutableList().apply { add(to, removeAt(from)) } },
+          onDelete = { t -> if (order.size > 1) order = order.filter { it.key != t.key } },
+          onAdd = { addDialog = true },
+          canDelete = shown.size > 1,
+          showAddTile = hidden.isNotEmpty(),
+          haptics = state.settings.haptics,
+          favorite = { TileCatalog.contains(favoriteKeys, it.key) },
+          onToggleFavorite = { vm.toggleFavoriteTile(it.key) },
+          multi = { tile, enabled, interactive, compact ->
+            MultiTileView(tile, snapshot, enabled, interactive, compact, state.settings.haptics, run)
+          },
+        )
+      }
+      // Tablets / landscape: the car on the left, the tiles next to it; phones: one column.
+      BoxWithConstraints(Modifier.fillMaxSize().padding(padding)) {
+        if (maxWidth >= 720.dp || (maxWidth > maxHeight && maxWidth >= 560.dp)) {
+          Row(Modifier.fillMaxSize()) {
+            Column(Modifier.weight(.42f).fillMaxHeight().verticalScroll(rememberScrollState()).padding(12.dp)) { header() }
+            Column(Modifier.weight(.58f).fillMaxHeight().verticalScroll(rememberScrollState()).padding(12.dp)) { board() }
+          }
+        } else {
+          Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(12.dp)) {
+            header()
+            Spacer(Modifier.height(12.dp))
+            board()
+          }
+        }
+      }
     }
 
     if (addDialog) {
-      ActionPickerDialog(
+      TilePickerDialog(
         title = stringResource(R.string.add_action),
-        actions = hidden,
+        tiles = hidden,
         onPick = { order = order + it; addDialog = false },
         onDismiss = { addDialog = false },
       )

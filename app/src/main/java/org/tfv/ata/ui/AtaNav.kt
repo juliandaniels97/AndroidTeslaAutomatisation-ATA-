@@ -3,7 +3,7 @@ package org.tfv.ata.ui
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DirectionsCar
-import androidx.compose.material.icons.filled.Dashboard
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -13,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -26,6 +27,7 @@ import org.tfv.ata.ui.screens.AboutScreen
 import org.tfv.ata.ui.screens.AutomationScreen
 import org.tfv.ata.ui.screens.Car3DScreen
 import org.tfv.ata.ui.screens.CarFinderScreen
+import org.tfv.ata.ui.screens.DesignScreen
 import org.tfv.ata.ui.screens.GuideScreen
 import org.tfv.ata.ui.screens.GuideTargets
 import org.tfv.ata.ui.screens.HomeScreen
@@ -42,7 +44,7 @@ import org.tfv.ata.ui.screens.WearKeyCardScreen
 import org.tfv.ata.ui.screens.WearPairScreen
 
 private enum class Tab(val route: String, val labelRes: Int) {
-  HOME("home", R.string.tab_home),
+  HOME("home", R.string.tab_favorites),
   VEHICLE("vehicle", R.string.tab_vehicle),
   SETTINGS("settings", R.string.tab_settings),
 }
@@ -50,14 +52,23 @@ private enum class Tab(val route: String, val labelRes: Int) {
 @Composable
 fun AtaNavHost(vm: AtaViewModel, state: AtaUiState, pendingRoute: String? = null, onRouteShown: () -> Unit = {}) {
   val nav = rememberNavController()
-  LaunchedEffect(pendingRoute) {
-    if (pendingRoute != null) {
+  LaunchedEffect(pendingRoute, state.loaded) {
+    // Only once the NavHost (and its graph) exists.
+    if (pendingRoute != null && state.loaded) {
       nav.navigate(pendingRoute) { launchSingleTop = true }
       onRouteShown()
     }
   }
   val backStack by nav.currentBackStackEntryAsState()
   val currentRoute = backStack?.destination?.route
+  // Start where the app was left (vehicle the first time); remember each tab switch.
+  val startRoute = remember(state.loaded) {
+    Tab.entries.firstOrNull { it.route == state.settings.lastTab }?.route ?: Tab.VEHICLE.route
+  }
+  LaunchedEffect(currentRoute) {
+    if (state.loaded && currentRoute != null && Tab.entries.any { it.route == currentRoute }) vm.rememberTab(currentRoute)
+  }
+  if (!state.loaded) return
 
   Scaffold(
     bottomBar = {
@@ -77,7 +88,7 @@ fun AtaNavHost(vm: AtaViewModel, state: AtaUiState, pendingRoute: String? = null
               icon = {
                 Icon(
                   when (tab) {
-                    Tab.HOME -> Icons.Filled.Dashboard
+                    Tab.HOME -> Icons.Filled.Star
                     Tab.VEHICLE -> Icons.Filled.DirectionsCar
                     Tab.SETTINGS -> Icons.Filled.Settings
                   },
@@ -93,7 +104,7 @@ fun AtaNavHost(vm: AtaViewModel, state: AtaUiState, pendingRoute: String? = null
   ) { padding ->
     NavHost(
       navController = nav,
-      startDestination = Tab.HOME.route,
+      startDestination = startRoute,
       modifier = Modifier.padding(padding),
     ) {
       composable(Tab.HOME.route) { HomeScreen(vm, state, onAddVehicle = { nav.navigate("vehicles") }) }
@@ -111,6 +122,7 @@ fun AtaNavHost(vm: AtaViewModel, state: AtaUiState, pendingRoute: String? = null
           vm, state,
           onVehicles = { nav.navigate("vehicles") },
           onMenu = { nav.navigate("menu") },
+          onDesign = { nav.navigate("design") },
           onWear = { nav.navigate("wear") },
           onAutomation = { nav.navigate("automation") },
           onAbout = { nav.navigate("about") },
@@ -119,6 +131,7 @@ fun AtaNavHost(vm: AtaViewModel, state: AtaUiState, pendingRoute: String? = null
           onKeyCard = { nav.navigate("nfc_card") },
         )
       }
+      composable("design") { DesignScreen(vm, state, onBack = { nav.popBackStack() }) }
       composable("vehicles") { VehiclesScreen(vm, state, onBack = { nav.popBackStack() }) }
       composable("menu") { MenuConfigScreen(vm, state, onBack = { nav.popBackStack() }, onOpen = { nav.navigate("menu/${it.route}") }) }
       composable("menu/{section}") { entry ->

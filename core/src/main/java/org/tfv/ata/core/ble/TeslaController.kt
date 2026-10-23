@@ -83,12 +83,22 @@ object TeslaController {
         if (infotainment) ensureAwake(conn, vin, routing)
         val attempts = if (infotainment) 3 else 1
         var session = handshakeWithRetry(conn, vin, command.domain, routing, attempts)
+        // One side's temperature: the car sets both at once, so keep the other side's current setting.
+        val payload = if (action in Commands.ONE_SIDE_TEMPERATURE) {
+          val climate = runCatching {
+            execute(conn, session, Commands.vehicleData(Commands.DATA_CLIMATE).payload, routing, Domain.INFOTAINMENT)
+          }.getOrNull()?.let { StatusParser.temperatureSettings(it) }
+          BleLog.add("temperature settings: $climate")
+          (Commands.forAction(action, value, climate) ?: command).payload
+        } else {
+          command.payload
+        }
         try {
-          execute(conn, session, command.payload, routing, command.domain)
+          execute(conn, session, payload, routing, command.domain)
         } catch (e: BleException) {
           if (!e.resync) throw e
           session = handshakeWithRetry(conn, vin, command.domain, routing, 1)
-          execute(conn, session, command.payload, routing, command.domain)
+          execute(conn, session, payload, routing, command.domain)
         }
         PairedKeys.set(context, vin, true)
         CommandResult.Success

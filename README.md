@@ -36,19 +36,23 @@ uninstall it once and pair the phone with the car again.)
 
 **Neon — dark mode**
 
-<img width="1832" alt="ATA neon design in dark mode: home, vehicle in 3D, full-screen car, settings, watch settings" src="docs/screenshots/ata-dark.png" />
+<img width="1832" alt="ATA neon design in dark mode: favourites, vehicle with multi-tiles, seat heating and charging tiles, full-screen car, design settings" src="docs/screenshots/ata-dark.png" />
 
 **Neon — light mode**
 
-<img width="1832" alt="ATA neon design in light mode: home, vehicle, full-screen car, settings, watch settings" src="docs/screenshots/ata-light.png" />
+<img width="1832" alt="ATA neon design in light mode: favourites, vehicle with multi-tiles, seat heating and charging tiles, full-screen car, design settings" src="docs/screenshots/ata-light.png" />
 
 **Material — dark mode**
 
-<img width="1832" alt="ATA Material design in dark mode: home, painted car, full-screen car with animation, vehicle colours, settings" src="docs/screenshots/ata-material-dark.png" />
+<img width="1832" alt="ATA Material design in dark mode: favourites, painted car, multi-tiles, full-screen car with animation, vehicle colours" src="docs/screenshots/ata-material-dark.png" />
 
 **Material — light mode**
 
-<img width="1832" alt="ATA Material design in light mode: home, painted car, full-screen car with animation, vehicle colours, settings" src="docs/screenshots/ata-material-light.png" />
+<img width="1832" alt="ATA Material design in light mode: favourites, painted car, multi-tiles, full-screen car with animation, vehicle colours" src="docs/screenshots/ata-material-light.png" />
+
+**Tablet — car on the left, tiles on the right**
+
+<img width="1832" alt="ATA on a tablet in landscape: the car on the left, the multi-tiles on the right, dark and light" src="docs/screenshots/ata-tablet.png" />
 
 **Wear OS**
 
@@ -95,15 +99,27 @@ and don't work on every model. Then:
    this device's key — compare the fingerprint shown in ATA, tap your key card on the console and
    confirm in the car. ATA's key is an EC‑P‑256 key kept in the Android Keystore and never leaves
    the phone.
-3. The BLE buttons then send commands over BLE: lock/unlock, open driver or passenger door, climate
-   (on/off, temperature, keeper/dog/camp, defrost, steering‑wheel heater, bioweapon defence, cabin
-   overheat protection), charging (start/stop, limit, amps, charge port), trunk/frunk, windows,
-   sentry, honk, flash, wake, remote drive and media (play/pause, next, previous).
+3. The BLE buttons then send commands over BLE:
+   - lock/unlock, open driver or passenger door, trunk/frunk, windows
+   - climate: on/off, temperature for both sides or for driver / passenger only, keeper/dog/camp,
+     defrost, steering‑wheel heater, bioweapon defence, cabin overheat protection (on, fan only, off)
+   - **seat heaters per seat** (front left/right, rear left/centre/right; off or level 1–3) and
+     **ventilated front seats** (off or level 1–3)
+   - charging: start/stop, limit, amps, charge port
+   - media: play/pause, next, previous, **volume** (set 0–10 in steps, up, down)
+   - sentry, honk, flash, wake, remote drive
 
 #### Live status
 
-With the BLE features enabled, ATA can read the car's **battery, range, inside/outside temperature,
-charging and lock state** over BLE. Pull the latest reading any time with the **refresh** button on
+With the BLE features enabled, ATA reads over BLE:
+
+- **battery, range, inside/outside temperature, lock state**
+- **charging:** whether the car is charging and **with how many kW**, plus time to full, charge limit and amps
+- **seat heater levels**, steering‑wheel heater, defrost and climate‑keeper mode
+- **doors, frunk/trunk, windows, charge port**
+- **volume** and the current title
+
+The tiles show this state, and after a command they show the new state right away. Pull the latest reading any time with the **refresh** button on
 the Vehicle tab, or let ATA poll automatically on the interval you choose under **Settings → Status
 interval** (15 min minimum; `Off` disables it). **Background polls never wake the car:** ATA first
 asks the security controller (which stays awake) and, if the car sleeps, only refreshes the lock state
@@ -115,7 +131,8 @@ its complications, with a relative "updated X ago" timestamp.
 
 ## Design
 
-Choose under **Settings → Appearance → Design**, each in light and dark:
+Everything about the look is on **Settings → Design**: design, theme, dynamic colour, 3D car,
+multi‑tiles and tiles per row. Both designs come in light and dark:
 
 - **Neon (standard):** glowing lines on a dark showroom, a neon car with a floor reflection.
 - **Material:** calm Material 3 surfaces, flat tonal tiles, and a **painted car close to the real one**:
@@ -123,10 +140,39 @@ Choose under **Settings → Appearance → Design**, each in light and dark:
   clear‑coat sheen when it turns. Doors and lids open as painted panels; the effects use Material
   colours without glow.
 
+## Tabs & tiles
+
+- **Favorites** (left), **Vehicle** (opens on first start) and **Settings**. ATA reopens the tab you
+  had open when you closed it.
+- The **Vehicle** tab holds all functions: car functions first, then the app actions (navigation,
+  Tesla app …). The app actions work without Bluetooth. Every tile can be moved.
+- **Edit mode:** long‑press a tile. Drag to move, ✕ to remove, ☆ to add to the favourites.
+- **Multi‑tiles** (on by default, **Settings → Design → Multi‑tiles**): related actions share one tile.
+  - Only the buttons inside are tappable, and each tile shows the car's state.
+  - Multi‑tiles take 2 (2×1) or 4 (2×2) places:
+    - lock/unlock, doors (driver/passenger), frunk & trunk, windows, charge port, media
+    - **seat heating (2×2):** every seat on its own, with an on/off button and three dots for level 1–3
+    - seat ventilation
+    - **climate (2×2):** on/off, defrost, driver and passenger temperature
+    - **charging (2×2):** start/stop, battery, kW, time to full, limit, amps
+    - volume, climate keeper, overheat protection
+    - sentry, steering‑wheel heater, bioweapon defence
+  - **Sliders** (volume, temperature, limit, amps): slide up or down. The command is sent only when
+    you let go, so the car gets one command instead of dozens. A tap on the upper or lower half
+    changes the value by one step.
+  - Off: one tile per action, with a slider dialog for values.
+- **Tiles per row:** 2–6 or Auto (3 on phones, more on tablets). Names stay visible at every size.
+- **Tablets / landscape:** the car on the left, the tiles on the right.
+
 ## Vehicle view
 
 The Vehicle tab shows your car inside a **battery ring** (dark blue 100–80 %, blue 80–20 %, yellow
 20–10 %, red below 10 %, with a subtle animated glow).
+
+**While charging:**
+- Drops of light flow along the ring, faster at higher power.
+- The tip pulses, and a dashed arc shows the way to the charge limit.
+- A chip shows **⚡ X kW**.
 
 - **Six body styles:** Model 3, Model Y, Model S, Model X, Cybertruck and Roadster. ATA picks the
   style from the VIN; you can override it under **Settings → Vehicles → Edit** (with a live preview).
@@ -136,9 +182,14 @@ The Vehicle tab shows your car inside a **battery ring** (dark blue 100–80 %, 
 - **3D (default):** a minimalist neon car that turns slowly, with rims, mirrors, door handles, seats,
   the battery pack in the floor (cells light up with the charge level) and a reflection on the floor.
   Tap it for the **full‑screen view**: turn it with one finger (it follows the finger), **pinch to zoom**, and tap the glowing
-  spots on the car (doors, frunk, trunk, charge port, windows, lights, climate) to run actions right
-  there.
-- **2D:** switch off **Settings → Appearance → 3D vehicle view** for a calm, solid side view of your
+  spots on the car to run actions right there:
+  - doors, frunk, trunk, windows, lights
+  - **seats** (seat heating and ventilation)
+  - **steering wheel** (heater)
+  - climate and charge port, which also show their multi‑tile
+
+  The seats glow warm while a seat heater is on.
+- **2D:** switch off **Settings → Design → 3D vehicle view** for a calm, solid side view of your
   car instead.
 - **Animations after each action:** doors swing open, lids lift, the charge port opens and the cable
   plugs in with flowing energy, windows go down, lights flash, wake lights up the light bars, unlock
@@ -325,8 +376,8 @@ until the car confirms. After that, tap to lock/unlock like a card.
 
 ## Settings
 
-- **Design** (Neon or Material) and **theme** (System/Light/Dark) + Material You dynamic color; **language** follows the system
-  (English & German).
+- **Design** page: Neon or Material, theme (System/Light/Dark), Material You dynamic color, 3D vehicle view,
+  multi‑tiles, tiles per row. The **language** follows the system (English & German).
 - **Navigation app**: Google Maps, Waze or system.
 - **Confirm critical actions**, **biometric lock** (apply in the app and when confirming an
   automation).

@@ -1,6 +1,9 @@
 package org.tfv.ata.ui.components
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AirlineSeatReclineNormal
+import androidx.compose.material.icons.filled.Speaker
+import androidx.compose.material.icons.filled.VolumeDown
 import androidx.compose.material.icons.filled.AcUnit
 import androidx.compose.material.icons.filled.Air
 import androidx.compose.material.icons.filled.Bolt
@@ -29,7 +32,6 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Thermostat
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.VolumeUp
-import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material.icons.filled.Window
 import androidx.compose.ui.graphics.vector.ImageVector
 import org.tfv.ata.core.AtaAction
@@ -50,8 +52,7 @@ fun iconFor(action: AtaAction): ImageVector = when (action) {
   AtaAction.CLIMATE_ON -> Icons.Filled.Air
   AtaAction.CLIMATE_OFF -> Icons.Filled.PowerSettingsNew
   AtaAction.SET_TEMPERATURE -> Icons.Filled.Thermostat
-  AtaAction.SEAT_HEATER -> Icons.Filled.WbSunny
-  AtaAction.STEERING_WHEEL_HEATER -> Icons.Filled.WbSunny
+  AtaAction.STEERING_WHEEL_HEATER -> SteeringWheelIcon
   AtaAction.DEFROST -> Icons.Filled.AcUnit
   AtaAction.CHARGE_START -> Icons.Filled.Bolt
   AtaAction.CHARGE_STOP -> Icons.Filled.Bolt
@@ -72,7 +73,7 @@ fun iconFor(action: AtaAction): ImageVector = when (action) {
   AtaAction.CAMP_MODE -> Icons.Filled.Nightlight
   AtaAction.CLIMATE_KEEP_OFF -> Icons.Filled.PowerSettingsNew
   AtaAction.DEFROST_OFF -> Icons.Filled.AcUnit
-  AtaAction.STEERING_WHEEL_HEATER_OFF -> Icons.Filled.WbSunny
+  AtaAction.STEERING_WHEEL_HEATER_OFF -> SteeringWheelIcon
   AtaAction.BIOWEAPON_ON -> Icons.Filled.Masks
   AtaAction.BIOWEAPON_OFF -> Icons.Filled.Masks
   AtaAction.OVERHEAT_PROTECTION_ON -> Icons.Filled.DeviceThermostat
@@ -84,4 +85,12 @@ fun iconFor(action: AtaAction): ImageVector = when (action) {
   AtaAction.MEDIA_TOGGLE -> Icons.Filled.PlayArrow
   AtaAction.MEDIA_NEXT -> Icons.Filled.SkipNext
   AtaAction.MEDIA_PREVIOUS -> Icons.Filled.SkipPrevious
+  AtaAction.SEAT_HEATER_FRONT_LEFT, AtaAction.SEAT_HEATER_FRONT_RIGHT, AtaAction.SEAT_HEATER_REAR_LEFT,
+  AtaAction.SEAT_HEATER_REAR_CENTER, AtaAction.SEAT_HEATER_REAR_RIGHT -> Icons.Filled.AirlineSeatReclineNormal
+  AtaAction.SEAT_COOLER_FRONT_LEFT, AtaAction.SEAT_COOLER_FRONT_RIGHT -> Icons.Filled.AcUnit
+  AtaAction.SET_VOLUME -> Icons.Filled.Speaker
+  AtaAction.VOLUME_UP -> Icons.Filled.VolumeUp
+  AtaAction.VOLUME_DOWN -> Icons.Filled.VolumeDown
+  AtaAction.SET_TEMPERATURE_DRIVER, AtaAction.SET_TEMPERATURE_PASSENGER -> Icons.Filled.Thermostat
+  AtaAction.OVERHEAT_PROTECTION_FAN_ONLY -> Icons.Filled.Air
 }

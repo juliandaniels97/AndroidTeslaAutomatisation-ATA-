@@ -7,6 +7,7 @@ import android.os.Handler
 import android.os.Looper
 import android.widget.Toast
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import org.tfv.ata.R
 import org.tfv.ata.automation.ActionRequest
@@ -14,6 +15,7 @@ import org.tfv.ata.automation.BackgroundLaunch
 import org.tfv.ata.automation.Notifier
 import org.tfv.ata.core.ActionPolicy
 import org.tfv.ata.core.AtaAction
+import org.tfv.ata.core.after
 import org.tfv.ata.core.AtaCategory
 import org.tfv.ata.core.AtaSettings
 import org.tfv.ata.core.CommandResult
@@ -82,6 +84,11 @@ object CommandDispatcher {
     }
 
     val result = withContext(Dispatchers.IO) { TeslaController.sendCommand(context, vin, action, number) }
+    if (result is CommandResult.Success && vehicle != null) {
+      // Show the new state (seat level, lock, volume …) right away; the next status read confirms it.
+      val store = org.tfv.ata.data.AtaStore.get(context)
+      store.snapshot(vehicle.id).first()?.let { store.saveSnapshot(vehicle.id, it.after(action, number)) }
+    }
     feedback(context, action, result, source, inForeground)
     return result
   }

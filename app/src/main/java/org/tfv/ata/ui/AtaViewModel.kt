@@ -34,6 +34,8 @@ data class AtaUiState(
   val vehicles: List<Vehicle> = emptyList(),
   val selected: Vehicle? = null,
   val snapshot: VehicleSnapshot? = null,
+  /** False until the stored settings have been read (the start tab depends on them). */
+  val loaded: Boolean = false,
 )
 
 data class ActivationFx(val id: Long, val success: Boolean, val bearing: Float?)
@@ -55,7 +57,7 @@ class AtaViewModel(app: Application) : AndroidViewModel(app) {
     selectedVehicle,
     selectedVehicle.flatMapLatest { v -> if (v == null) flowOf(null) else store.snapshot(v.id) },
   ) { settings, vehicles, selected, snapshot ->
-    AtaUiState(settings, vehicles, selected, snapshot)
+    AtaUiState(settings, vehicles, selected, snapshot, loaded = true)
   }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AtaUiState())
 
   private val _refreshing = MutableStateFlow(false)
@@ -94,6 +96,20 @@ class AtaViewModel(app: Application) : AndroidViewModel(app) {
 
   init {
     viewModelScope.launch {
+      // 1.9.2: the actions tab became "Favourites"; its tiles move to the end of the vehicle tab.
+      store.updateSettings { st ->
+        if (st.vehicleTilesMerged) st
+        else if (st.vehicleActionIds.isEmpty()) st.copy(vehicleTilesMerged = true)
+        else st.copy(
+          // New in 1.9.2 (seats, ventilation, volume) first, then the former actions tab at the end.
+          vehicleActionIds = (
+            st.vehicleActionIds +
+              org.tfv.ata.ui.tiles.TileCatalog.newIn192 +
+              org.tfv.ata.ui.tiles.TileCatalog.basicDefaults.map { it.id }
+            ).distinct(),
+          vehicleTilesMerged = true,
+        )
+      }
       val s = store.settings.first()
       StatusPoller.sync(getApplication(), s)
       org.tfv.ata.proximity.ProximityService.sync(getApplication(), s, currentVehicle())
@@ -220,12 +236,6 @@ class AtaViewModel(app: Application) : AndroidViewModel(app) {
     pushWearConfig()
   }
 
-  fun setHomeActions(actions: List<org.tfv.ata.core.AtaAction>) =
-    updateSettings { it.copy(homeActionIds = actions.map { a -> a.id }) }
-
-  fun setVehicleActions(actions: List<org.tfv.ata.core.AtaAction>) =
-    updateSettings { it.copy(vehicleActionIds = actions.map { a -> a.id }) }
-
   /** Sends menu and selected car to the watch again (e.g. from the watch-pairing assistant). */
   fun resyncWear() {
     pushWearConfig()
@@ -238,17 +248,18 @@ class AtaViewModel(app: Application) : AndroidViewModel(app) {
     })
   }
 
-  fun toggleHomeFavorite(action: org.tfv.ata.core.AtaAction) = updateSettings { s ->
-    val current = if (s.homeActionIds.isEmpty()) {
-      org.tfv.ata.core.AtaAction.entries
-        .filter { it.category == org.tfv.ata.core.AtaCategory.FUNCTION_B && it.enabled && !it.beta }
-        .map { it.id }
-    } else {
-      s.homeActionIds
-    }
-    val updated = if (action.id in current) current - action.id else current + action.id
-    s.copy(homeActionIds = updated)
+  /** Stores the favourites' tile order (action and multi-tile ids). */
+  fun setFavoriteTiles(keys: List<String>) = updateSettings { it.copy(homeActionIds = keys) }
+
+  /** Stores the vehicle tab's tile order (action and multi-tile ids). */
+  fun setVehicleTiles(keys: List<String>) = updateSettings { it.copy(vehicleActionIds = keys) }
+
+  fun toggleFavoriteTile(key: String) = updateSettings { s ->
+    val current = s.homeActionIds.ifEmpty { org.tfv.ata.ui.tiles.TileCatalog.favoriteDefaults }
+    s.copy(homeActionIds = org.tfv.ata.ui.tiles.TileCatalog.toggle(current, key))
   }
+
+  fun rememberTab(route: String) = updateSettings { if (it.lastTab == route) it else it.copy(lastTab = route) }
 }
 
 sealed interface PairUiState {
