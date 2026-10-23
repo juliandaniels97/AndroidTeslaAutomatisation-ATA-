@@ -110,7 +110,11 @@ object ActionPolicy {
   fun valueRange(action: AtaAction): IntRange? = when (action) {
     AtaAction.CHARGE_LIMIT -> 50..100
     AtaAction.CHARGING_AMPS -> 1..48
-    AtaAction.SET_TEMPERATURE -> 15..28
+    AtaAction.SET_TEMPERATURE, AtaAction.SET_TEMPERATURE_DRIVER, AtaAction.SET_TEMPERATURE_PASSENGER -> 15..28
+    AtaAction.SEAT_HEATER_FRONT_LEFT, AtaAction.SEAT_HEATER_FRONT_RIGHT, AtaAction.SEAT_HEATER_REAR_LEFT,
+    AtaAction.SEAT_HEATER_REAR_CENTER, AtaAction.SEAT_HEATER_REAR_RIGHT,
+    AtaAction.SEAT_COOLER_FRONT_LEFT, AtaAction.SEAT_COOLER_FRONT_RIGHT -> 0..3
+    AtaAction.SET_VOLUME -> 0..100
     else -> null
   }
 

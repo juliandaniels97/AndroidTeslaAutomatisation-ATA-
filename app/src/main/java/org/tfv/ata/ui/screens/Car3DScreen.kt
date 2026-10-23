@@ -1,5 +1,10 @@
 package org.tfv.ata.ui.screens
 
+import androidx.compose.foundation.layout.height
+import org.tfv.ata.ui.components.SteeringWheelIcon
+import org.tfv.ata.ui.tiles.MultiTile
+import org.tfv.ata.ui.tiles.MultiTileView
+import androidx.compose.material.icons.filled.AirlineSeatReclineNormal
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -138,6 +143,9 @@ private fun actionsFor(spot: CarHotspot?, sideView: Boolean): List<AtaAction> = 
     AtaAction.CAMP_MODE, AtaAction.CLIMATE_KEEP_OFF, AtaAction.BIOWEAPON_ON, AtaAction.BIOWEAPON_OFF,
     AtaAction.OVERHEAT_PROTECTION_ON, AtaAction.OVERHEAT_PROTECTION_OFF,
   )
+  // Seats and steering wheel are controlled by their tiles in the sheet.
+  CarHotspot.SEATS -> emptyList()
+  CarHotspot.STEERING_WHEEL -> emptyList()
   null -> listOf(
     AtaAction.LOCK, AtaAction.UNLOCK, AtaAction.WAKE, AtaAction.SENTRY_ON, AtaAction.SENTRY_OFF,
     AtaAction.MEDIA_TOGGLE, AtaAction.MEDIA_PREVIOUS, AtaAction.MEDIA_NEXT, AtaAction.REMOTE_DRIVE,
@@ -152,6 +160,17 @@ private fun spotIcon(spot: CarHotspot): ImageVector = when (spot) {
   CarHotspot.WINDOWS -> Icons.Filled.Window
   CarHotspot.LIGHTS -> Icons.Filled.FlashOn
   CarHotspot.CLIMATE -> Icons.Filled.Thermostat
+  CarHotspot.SEATS -> Icons.Filled.AirlineSeatReclineNormal
+  CarHotspot.STEERING_WHEEL -> SteeringWheelIcon
+}
+
+/** Tiles shown at the top of a spot's sheet (seat levels, steering wheel heater, climate, charging). */
+private fun tilesFor(spot: CarHotspot?): List<MultiTile> = when (spot) {
+  CarHotspot.SEATS -> listOf(MultiTile.SEATS, MultiTile.SEAT_COOLING)
+  CarHotspot.STEERING_WHEEL -> listOf(MultiTile.STEERING)
+  CarHotspot.CLIMATE -> listOf(MultiTile.CLIMATE)
+  CarHotspot.CHARGE_PORT -> listOf(MultiTile.CHARGING)
+  else -> emptyList()
 }
 
 private fun titleFor(spot: CarHotspot?): Int = when (spot) {
@@ -163,6 +182,8 @@ private fun titleFor(spot: CarHotspot?): Int = when (spot) {
   CarHotspot.WINDOWS -> R.string.hs_windows
   CarHotspot.LIGHTS -> R.string.hs_lights
   CarHotspot.CLIMATE -> R.string.hs_climate
+  CarHotspot.SEATS -> R.string.seat_sheet_title
+  CarHotspot.STEERING_WHEEL -> R.string.steering_sheet_title
   null -> R.string.hs_general
 }
 
@@ -198,7 +219,7 @@ fun Car3DScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit) {
   var sheet by remember { mutableStateOf<Pair<Boolean, CarHotspot?>?>(null) }
   val snapshot = state.snapshot
   val known = snapshot != null && snapshot.updatedAt > 0
-  val status = CarStatus(snapshot?.charging == true, snapshot?.climateOn == true, snapshot?.sentry == true, if (known) snapshot?.batteryPercent else null)
+  val status = CarStatus(snapshot?.charging == true, snapshot?.climateOn == true, snapshot?.sentry == true, if (known) snapshot?.batteryPercent else null, seatHeat = listOfNotNull(snapshot?.seatHeatFrontLeft, snapshot?.seatHeatFrontRight, snapshot?.seatHeatRearLeft, snapshot?.seatHeatRearCenter, snapshot?.seatHeatRearRight).any { it > 0 })
   val palette = AtaColors.current
   val material = palette.material
   // Neon: dark or light showroom; Material: the app's surface. Both follow the light / dark theme.
@@ -248,7 +269,7 @@ fun Car3DScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit) {
         if (threeD) drawNeonCar(shape, camera, yaw, fx, status, now, look.style)
         else drawFlatCar(shape, camera, fx, status, now, look.flat)
         if (known) {
-          drawBatteryRing(Offset(size.width / 2f, size.height * .86f), size.minDimension * .07f, snapshot?.batteryPercent, status.charging, now, !material && dark, accent, width = 8f, material = material)
+          drawBatteryRing(Offset(size.width / 2f, size.height * .86f), size.minDimension * .07f, snapshot?.batteryPercent, status.charging, now, !material && dark, accent, width = 8f, material = material, chargeKw = snapshot?.chargingPowerKw ?: 0, chargeLimit = snapshot?.chargeLimit)
         }
       }
 
@@ -351,6 +372,21 @@ fun Car3DScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit) {
           modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
         )
         LazyColumn(Modifier.padding(bottom = 24.dp)) {
+          items(tilesFor(spot)) { tile ->
+            Box(
+              Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp)
+                .height(if (tile.h > 1) 230.dp else if (tile.w > 1) 112.dp else 120.dp),
+            ) {
+              MultiTileView(
+                tile, snapshot,
+                enabled = state.settings.experimentalBle && state.selected != null,
+                interactive = true,
+                compact = false,
+                haptics = state.settings.haptics,
+                run = run,
+              )
+            }
+          }
           items(actionsFor(spot, !threeD)) { action ->
             val critical = ActionPolicy.isCritical(action)
             ListItem(

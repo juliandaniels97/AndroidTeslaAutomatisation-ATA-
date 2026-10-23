@@ -76,7 +76,7 @@ fun VehicleArt(
   val climate = snapshot?.climateOn == true
   val palette = AtaColors.current
   val now by rememberFrameClock()
-  val status = CarStatus(charging = charging, climate = climate, sentry = snapshot?.sentry == true, battery = if (known) snapshot?.batteryPercent else null)
+  val status = CarStatus(charging = charging, climate = climate, sentry = snapshot?.sentry == true, battery = if (known) snapshot?.batteryPercent else null, seatHeat = listOfNotNull(snapshot?.seatHeatFrontLeft, snapshot?.seatHeatFrontRight, snapshot?.seatHeatRearLeft, snapshot?.seatHeatRearCenter, snapshot?.seatHeatRearRight).any { it > 0 })
   val badgePulse by rememberInfiniteTransition(label = "badge").animateFloat(
     initialValue = 1f,
     targetValue = 1.12f,
@@ -92,7 +92,10 @@ fun VehicleArt(
     Canvas(modifier = Modifier.fillMaxWidth().height(260.dp)) {
       val center = Offset(size.width / 2f, size.height / 2f)
       val radius = min(size.width, size.height) / 2f - 10f
-      drawBatteryRing(center, radius, if (known) snapshot?.batteryPercent else null, charging, now, palette.isDark && !palette.material, palette.muted, material = palette.material)
+      drawBatteryRing(
+        center, radius, if (known) snapshot?.batteryPercent else null, charging, now, palette.isDark && !palette.material, palette.muted,
+        material = palette.material, chargeKw = snapshot?.chargingPowerKw ?: 0, chargeLimit = snapshot?.chargeLimit,
+      )
       // Gentle idle turn so the car reads as 3D; the full-screen view turns with the finger.
       val yaw = if (threeD) -35f + 14f * sin(now / 4000f) else CarCamera.SIDE_YAW
       val inner = radius * 2f * .92f
@@ -116,7 +119,10 @@ fun VehicleArt(
         snapshot?.locked?.let { locked ->
           StateChip(if (locked) Icons.Filled.Lock else Icons.Filled.LockOpen, if (locked) palette.success else palette.warning)
         }
-        if (charging) StateChip(Icons.Filled.Bolt, palette.success)
+        if (charging) {
+          val kw = snapshot?.chargingPowerKw ?: 0
+          StateChip(Icons.Filled.Bolt, palette.success, if (kw > 0) "$kw kW" else null, pulse = true)
+        }
         if (climate) StateChip(Icons.Filled.AcUnit, palette.accent)
         if (snapshot?.sentry == true) StateChip(Icons.Filled.Shield, palette.critical)
       }
@@ -125,11 +131,25 @@ fun VehicleArt(
 }
 
 @Composable
-private fun StateChip(icon: ImageVector, tint: Color) {
-  Box(
+private fun StateChip(icon: ImageVector, tint: Color, text: String? = null, pulse: Boolean = false) {
+  val glow = if (pulse) {
+    rememberInfiniteTransition(label = "chip").animateFloat(.6f, 1f, infiniteRepeatable(tween(800), RepeatMode.Reverse), label = "chipGlow").value
+  } else {
+    1f
+  }
+  Row(
     Modifier.clip(RoundedCornerShape(50)).background(tint.copy(alpha = 0.16f)).padding(horizontal = 10.dp, vertical = 4.dp),
-    contentAlignment = Alignment.Center,
+    verticalAlignment = Alignment.CenterVertically,
   ) {
-    Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(18.dp))
+    Icon(icon, contentDescription = null, tint = tint.copy(alpha = glow), modifier = Modifier.size(18.dp))
+    if (text != null) {
+      androidx.compose.material3.Text(
+        text,
+        color = tint,
+        style = androidx.compose.material3.MaterialTheme.typography.labelMedium,
+        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+        modifier = Modifier.padding(start = 4.dp),
+      )
+    }
   }
 }

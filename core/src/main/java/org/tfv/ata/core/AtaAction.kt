@@ -25,7 +25,6 @@ enum class AtaAction(
   CLIMATE_ON("climate_on", AtaCategory.FUNCTION_A, true, beta = true),
   CLIMATE_OFF("climate_off", AtaCategory.FUNCTION_A, true, beta = true),
   SET_TEMPERATURE("set_temperature", AtaCategory.FUNCTION_A, true, needsValue = true, beta = true),
-  SEAT_HEATER("seat_heater", AtaCategory.FUNCTION_A, false, needsValue = true),
   STEERING_WHEEL_HEATER("steering_wheel_heater", AtaCategory.FUNCTION_A, true, beta = true),
   DEFROST("defrost", AtaCategory.FUNCTION_A, true, beta = true),
   CHARGE_START("charge_start", AtaCategory.FUNCTION_A, true, beta = true),
@@ -58,7 +57,24 @@ enum class AtaAction(
   REMOTE_DRIVE("remote_drive", AtaCategory.FUNCTION_A, true, beta = true),
   MEDIA_TOGGLE("media_toggle", AtaCategory.FUNCTION_A, true, beta = true),
   MEDIA_NEXT("media_next", AtaCategory.FUNCTION_A, true, beta = true),
-  MEDIA_PREVIOUS("media_previous", AtaCategory.FUNCTION_A, true, beta = true);
+  MEDIA_PREVIOUS("media_previous", AtaCategory.FUNCTION_A, true, beta = true),
+  // Seat heaters, each seat on its own: value 0 = off, 1 … 3 = level.
+  SEAT_HEATER_FRONT_LEFT("seat_heater_fl", AtaCategory.FUNCTION_A, true, needsValue = true),
+  SEAT_HEATER_FRONT_RIGHT("seat_heater_fr", AtaCategory.FUNCTION_A, true, needsValue = true),
+  SEAT_HEATER_REAR_LEFT("seat_heater_rl", AtaCategory.FUNCTION_A, true, needsValue = true),
+  SEAT_HEATER_REAR_CENTER("seat_heater_rc", AtaCategory.FUNCTION_A, true, needsValue = true),
+  SEAT_HEATER_REAR_RIGHT("seat_heater_rr", AtaCategory.FUNCTION_A, true, needsValue = true),
+  // Ventilated front seats: value 0 = off, 1 … 3 = level.
+  SEAT_COOLER_FRONT_LEFT("seat_cooler_fl", AtaCategory.FUNCTION_A, true, needsValue = true),
+  SEAT_COOLER_FRONT_RIGHT("seat_cooler_fr", AtaCategory.FUNCTION_A, true, needsValue = true),
+  // Volume: value in tenths (0 … 100 = 0 … 10, the car's scale).
+  SET_VOLUME("set_volume", AtaCategory.FUNCTION_A, true, needsValue = true),
+  VOLUME_UP("volume_up", AtaCategory.FUNCTION_A, true),
+  VOLUME_DOWN("volume_down", AtaCategory.FUNCTION_A, true),
+  // Temperature for one side only (°C); the other side keeps its setting.
+  SET_TEMPERATURE_DRIVER("set_temperature_driver", AtaCategory.FUNCTION_A, true, needsValue = true),
+  SET_TEMPERATURE_PASSENGER("set_temperature_passenger", AtaCategory.FUNCTION_A, true, needsValue = true),
+  OVERHEAT_PROTECTION_FAN_ONLY("overheat_protection_fan_only", AtaCategory.FUNCTION_A, true);
 
   companion object {
     fun fromId(id: String?): AtaAction? = entries.firstOrNull { it.id == id }

@@ -13,6 +13,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.MenuBook
@@ -69,6 +70,7 @@ fun SettingsScreen(
   state: AtaUiState,
   onVehicles: () -> Unit,
   onMenu: () -> Unit,
+  onDesign: () -> Unit,
   onWear: () -> Unit,
   onAutomation: () -> Unit,
   onAbout: () -> Unit,
@@ -112,44 +114,7 @@ fun SettingsScreen(
 
       HorizontalDivider()
       SectionTitle(stringResource(R.string.section_appearance))
-      Text(stringResource(R.string.settings_design), style = MaterialTheme.typography.titleSmall)
-      Text(stringResource(R.string.settings_design_desc), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-      Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 4.dp, bottom = 8.dp)) {
-        UiDesign.entries.forEach { design ->
-          FilterChip(
-            selected = s.design == design,
-            onClick = { vm.updateSettings { it.copy(design = design) } },
-            label = { Text(stringResource(if (design == UiDesign.NEON) R.string.design_neon else R.string.design_material)) },
-          )
-        }
-      }
-      Text(stringResource(R.string.settings_theme), style = MaterialTheme.typography.titleSmall)
-      Column {
-        ThemeMode.entries.forEach { mode ->
-          Row(
-            Modifier.fillMaxWidth().selectable(s.theme == mode) {
-              vm.updateSettings { it.copy(theme = mode) }
-            }.padding(vertical = 6.dp),
-            verticalAlignment = Alignment.CenterVertically,
-          ) {
-            RadioButton(selected = s.theme == mode, onClick = null)
-            Text(
-              when (mode) {
-                ThemeMode.SYSTEM -> stringResource(R.string.theme_system)
-                ThemeMode.LIGHT -> stringResource(R.string.theme_light)
-                ThemeMode.DARK -> stringResource(R.string.theme_dark)
-              },
-              Modifier.padding(start = 10.dp),
-            )
-          }
-        }
-      }
-      SwitchRow(stringResource(R.string.settings_dynamic_color), null, s.dynamicColor) {
-        vm.updateSettings { it.copy(dynamicColor = it.dynamicColor.not()) }
-      }
-      SwitchRow(stringResource(R.string.settings_car3d), stringResource(R.string.settings_car3d_desc), s.car3d) {
-        vm.updateSettings { it.copy(car3d = it.car3d.not()) }
-      }
+      LinkRow(stringResource(R.string.settings_design_page), Icons.Filled.Palette, onDesign)
 
       HorizontalDivider()
       SectionTitle(stringResource(R.string.section_navigation))
@@ -270,12 +235,12 @@ fun SettingsScreen(
 }
 
 @Composable
-private fun SectionTitle(text: String) {
+internal fun SectionTitle(text: String) {
   Text(text, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
 }
 
 @Composable
-private fun LinkRow(title: String, icon: ImageVector, onClick: () -> Unit) {
+internal fun LinkRow(title: String, icon: ImageVector, onClick: () -> Unit) {
   Row(
     Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 12.dp),
     verticalAlignment = Alignment.CenterVertically,
@@ -308,7 +273,7 @@ private fun AddressField(label: String, value: String, onCommit: (String) -> Uni
 }
 
 @Composable
-private fun SwitchRow(title: String, desc: String?, checked: Boolean, onToggle: () -> Unit) {
+internal fun SwitchRow(title: String, desc: String?, checked: Boolean, onToggle: () -> Unit) {
   Row(
     Modifier.fillMaxWidth().toggleable(checked, role = Role.Switch) { onToggle() }.padding(vertical = 6.dp),
     verticalAlignment = Alignment.CenterVertically,

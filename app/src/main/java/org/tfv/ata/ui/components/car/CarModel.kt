@@ -535,6 +535,9 @@ class CarShape(private val s: BodySpec) {
     CarHotspot.WINDOWS -> V3(-w - .03f, (s.beltRear + s.roofHeight) / 2f, (s.doorRear + s.roofRear) / 2f)
     CarHotspot.LIGHTS -> V3(0f, s.sill + .12f, l + .07f)
     CarHotspot.CLIMATE -> V3(0f, s.roofHeight + .03f, (s.roofFront + s.roofRear) / 2f)
+    // Inside, seen through the glass: the passenger seat and the steering wheel's hub.
+    CarHotspot.SEATS -> V3(.4f * w, s.beltMid + .14f, (s.windscreenBase + s.doorRear) / 2f - .4f)
+    CarHotspot.STEERING_WHEEL -> V3(-.37f * w, s.beltMid + .02f, s.windscreenBase - .58f)
   }
 }
 
@@ -548,4 +551,6 @@ enum class CarHotspot(val normal: V3) {
   WINDOWS(V3(-1f, .3f, 0f)),
   LIGHTS(V3(0f, 0f, 1f)),
   CLIMATE(V3(0f, 1f, 0f)),
+  SEATS(V3(.45f, .85f, 0f)),
+  STEERING_WHEEL(V3(-.45f, .75f, .45f)),
 }

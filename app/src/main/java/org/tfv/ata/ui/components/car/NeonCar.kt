@@ -24,6 +24,8 @@ data class CarStatus(
   val sentry: Boolean = false,
   /** Battery level 0 … 100, null = unknown. */
   val battery: Int? = null,
+  /** A seat heater is on: the seats glow warm. */
+  val seatHeat: Boolean = false,
 )
 
 /** Colours of the neon drawing; [glow] adds light (for dark backgrounds); [solid] draws a painted body instead. */
@@ -224,7 +226,12 @@ fun DrawScope.drawNeonCar(
 
   // Cabin: seats and dashboard seen through the glass.
   if (solid == null) {
-    shape.seats.forEach { polyline(it, style.line, width = style.lineWidth * .7f, alpha = .3f) }
+    if (status.seatHeat) {
+      val warmth = .55f + .25f * sin(now / 600f)
+      shape.seats.forEach { polyline(it, style.warm, width = style.lineWidth * .9f, alpha = warmth) }
+    } else {
+      shape.seats.forEach { polyline(it, style.line, width = style.lineWidth * .7f, alpha = .3f) }
+    }
     polyline(shape.dashboard, style.line, width = style.lineWidth * .8f, alpha = .45f)
   }
 

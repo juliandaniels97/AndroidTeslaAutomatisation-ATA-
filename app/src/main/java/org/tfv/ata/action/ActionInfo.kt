@@ -20,7 +20,6 @@ object ActionInfo {
     AtaAction.CLIMATE_ON -> R.string.a_climate_on
     AtaAction.CLIMATE_OFF -> R.string.a_climate_off
     AtaAction.SET_TEMPERATURE -> R.string.a_set_temperature
-    AtaAction.SEAT_HEATER -> R.string.a_seat_heater
     AtaAction.STEERING_WHEEL_HEATER -> R.string.a_steering_wheel_heater
     AtaAction.DEFROST -> R.string.a_defrost
     AtaAction.CHARGE_START -> R.string.a_charge_start
@@ -54,5 +53,18 @@ object ActionInfo {
     AtaAction.MEDIA_TOGGLE -> R.string.a_media_toggle
     AtaAction.MEDIA_NEXT -> R.string.a_media_next
     AtaAction.MEDIA_PREVIOUS -> R.string.a_media_previous
+    AtaAction.SEAT_HEATER_FRONT_LEFT -> R.string.a_seat_heater_fl
+    AtaAction.SEAT_HEATER_FRONT_RIGHT -> R.string.a_seat_heater_fr
+    AtaAction.SEAT_HEATER_REAR_LEFT -> R.string.a_seat_heater_rl
+    AtaAction.SEAT_HEATER_REAR_CENTER -> R.string.a_seat_heater_rc
+    AtaAction.SEAT_HEATER_REAR_RIGHT -> R.string.a_seat_heater_rr
+    AtaAction.SEAT_COOLER_FRONT_LEFT -> R.string.a_seat_cooler_fl
+    AtaAction.SEAT_COOLER_FRONT_RIGHT -> R.string.a_seat_cooler_fr
+    AtaAction.SET_VOLUME -> R.string.a_set_volume
+    AtaAction.VOLUME_UP -> R.string.a_volume_up
+    AtaAction.VOLUME_DOWN -> R.string.a_volume_down
+    AtaAction.SET_TEMPERATURE_DRIVER -> R.string.a_set_temperature_driver
+    AtaAction.SET_TEMPERATURE_PASSENGER -> R.string.a_set_temperature_passenger
+    AtaAction.OVERHEAT_PROTECTION_FAN_ONLY -> R.string.a_overheat_protection_fan_only
   }
 }

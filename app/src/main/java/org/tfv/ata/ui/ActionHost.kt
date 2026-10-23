@@ -28,16 +28,21 @@ import org.tfv.ata.geo.Geo
 import org.tfv.ata.geo.rememberDeviceHeading
 import org.tfv.ata.ui.screens.ValueInputDialog
 
+/** Starts actions from the UI: `run(action)` (asks for a value if needed) or [withValue] (sliders, levels). */
+class ActionRun(private val run: (AtaAction) -> Unit, val withValue: (AtaAction, Int) -> Unit) {
+  operator fun invoke(action: AtaAction) = run(action)
+}
+
 /**
  * Hosts the full action-run flow (permissions, confirm, biometric, connection + activation FX)
- * for both Basic and BLE actions, and hands a `run(action)` lambda to [content].
+ * for both Basic and BLE actions, and hands an [ActionRun] to [content].
  */
 @Composable
 fun ActionHost(
   vm: AtaViewModel,
   state: AtaUiState,
   onAddVehicle: () -> Unit = {},
-  content: @Composable (run: (AtaAction) -> Unit) -> Unit,
+  content: @Composable (run: ActionRun) -> Unit,
 ) {
   val context = LocalContext.current
   val scope = rememberCoroutineScope()
@@ -106,17 +111,26 @@ fun ActionHost(
     }
   }
 
-  fun trigger(action: AtaAction) {
+  fun ready(action: AtaAction): Boolean {
     if (action.category == AtaCategory.FUNCTION_A) {
       if (!state.settings.experimentalBle) {
         enableBle = true
-        return
+        return false
       }
       if (state.selected == null) {
         noVehicle = true
-        return
+        return false
       }
     }
+    return true
+  }
+
+  fun triggerValue(action: AtaAction, value: Int) {
+    if (ready(action)) secure(action, value.toString())
+  }
+
+  fun trigger(action: AtaAction) {
+    if (!ready(action)) return
     when {
       action.needsValue -> valueAction = action
       action in CommandDispatcher.criticalActions && state.settings.confirmCritical -> confirmAction = action
@@ -124,7 +138,7 @@ fun ActionHost(
     }
   }
 
-  content(::trigger)
+  content(ActionRun({ trigger(it) }, { a, v -> triggerValue(a, v) }))
 
   valueAction?.let { action ->
     ValueInputDialog(

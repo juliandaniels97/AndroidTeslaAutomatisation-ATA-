@@ -81,6 +81,46 @@ data class VehicleSnapshot(
   val insideTempC: Float = 0f,
   val outsideTempC: Float = 0f,
   val sentry: Boolean = false,
+  /** Charging power in kW while [charging] (0 otherwise). */
+  val chargingPowerKw: Int = 0,
+  val chargerVoltage: Int = 0,
+  val chargerCurrent: Int = 0,
+  val minutesToFull: Int = 0,
+  val chargeLimit: Int? = null,
+  val chargeAmpsRequest: Int? = null,
+  val pluggedIn: Boolean = false,
+  val chargePortOpen: Boolean? = null,
+  val chargeEnergyAddedKwh: Float = 0f,
+  /** Temperature settings (°C) of the driver and passenger side. */
+  val driverTempC: Float? = null,
+  val passengerTempC: Float? = null,
+  /** Seat heater levels 0 … 3, null = seat has no heater (or unknown). */
+  val seatHeatFrontLeft: Int? = null,
+  val seatHeatFrontRight: Int? = null,
+  val seatHeatRearLeft: Int? = null,
+  val seatHeatRearCenter: Int? = null,
+  val seatHeatRearRight: Int? = null,
+  /** Ventilated seat levels 0 … 3, null = no ventilation. */
+  val seatCoolFrontLeft: Int? = null,
+  val seatCoolFrontRight: Int? = null,
+  val steeringHeater: Boolean? = null,
+  val defrost: Boolean = false,
+  val bioweapon: Boolean? = null,
+  /** Cabin overheat protection: 0 off, 1 on, 2 fan only; null = unknown. */
+  val overheatProtection: Int? = null,
+  /** Climate keeper: 0 off, 1 keep, 2 dog, 3 camp. */
+  val climateKeeper: Int = 0,
+  val doorDriverOpen: Boolean = false,
+  val doorPassengerOpen: Boolean = false,
+  val doorRearLeftOpen: Boolean = false,
+  val doorRearRightOpen: Boolean = false,
+  val frunkOpen: Boolean = false,
+  val trunkOpen: Boolean = false,
+  val windowsOpen: Boolean = false,
+  /** Media volume on the car's scale (0 … [volumeMax]), null = unknown. */
+  val volume: Float? = null,
+  val volumeMax: Float = 10f,
+  val nowPlaying: String? = null,
   /** True when only VCSEC answered (car asleep): battery/range/temperatures are from an earlier reading. */
   val asleep: Boolean = false,
   val updatedAt: Long = 0,
@@ -130,8 +170,18 @@ data class AtaSettings(
   val proximityMeters: Int = 5,
   /** Also unlock while the phone is locked (otherwise ATA asks with a notification). */
   val proximityWhenLocked: Boolean = false,
+  /** Favourite tiles (action ids and multi-tile ids, see the app's TileCatalog). */
   val homeActionIds: List<String> = emptyList(),
+  /** Tiles of the vehicle tab in order (action ids and multi-tile ids). */
   val vehicleActionIds: List<String> = emptyList(),
+  /** Several actions of one kind in one tile (lock/unlock, seats, volume …); off = one tile per action. */
+  val multiTiles: Boolean = true,
+  /** Tiles per row, 2 … 6; 0 = automatic (3 on phones, more on tablets). */
+  val tileColumns: Int = 0,
+  /** Tab shown at the start: the one open when the app was closed. */
+  val lastTab: String = "vehicle",
+  /** The vehicle tab got the former actions tab's tiles appended (1.9.2). */
+  val vehicleTilesMerged: Boolean = false,
   val wearActionIds: List<String> = emptyList(),
   /** Tiles on the watch's first screen: 4 (round 1/2/1, square 2×2) or 7 (round 2/3/2, square 3×3 = 9). */
   val wearGrid: Int = 4,

@@ -25,6 +25,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
 import org.tfv.ata.core.ActionPolicy
 import org.tfv.ata.core.AtaAction
+import kotlin.math.roundToInt
 
 @Composable
 fun ActionPickerDialog(
@@ -60,15 +61,39 @@ fun ValueInputDialog(
   onConfirm: (String) -> Unit,
   onDismiss: () -> Unit,
 ) {
-  var value by remember { mutableStateOf("") }
   val range = ActionPolicy.valueRange(action)
-  val valid = if (range != null) ActionPolicy.parseValue(action, value) != null else value.isNotBlank()
-  val label = when (action) {
-    AtaAction.CHARGE_LIMIT -> stringResource(R.string.value_percent, range?.first ?: 0, range?.last ?: 0)
-    AtaAction.CHARGING_AMPS -> stringResource(R.string.value_amps, range?.first ?: 0, range?.last ?: 0)
-    AtaAction.SET_TEMPERATURE -> stringResource(R.string.value_celsius, range?.first ?: 0, range?.last ?: 0)
-    else -> stringResource(R.string.address_or_place)
+  if (range != null) {
+    // Numbers: a slider in the action's range (seat level, volume, temperature, limit, amps).
+    var pick by remember { mutableStateOf(((range.first + range.last) / 2).toFloat()) }
+    val n = pick.toInt()
+    val shown = when (action) {
+      AtaAction.CHARGE_LIMIT -> "$n %"
+      AtaAction.CHARGING_AMPS -> "$n A"
+      AtaAction.SET_TEMPERATURE, AtaAction.SET_TEMPERATURE_DRIVER, AtaAction.SET_TEMPERATURE_PASSENGER -> "$n °C"
+      AtaAction.SET_VOLUME -> String.format(java.util.Locale.ROOT, "%.1f", n / 10f)
+      else -> if (n == 0) stringResource(R.string.st_off) else n.toString()
+    }
+    AlertDialog(
+      onDismissRequest = onDismiss,
+      title = { Text(stringResource(ActionInfo.labelRes(action))) },
+      text = {
+        Column(horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally) {
+          Text(shown, style = androidx.compose.material3.MaterialTheme.typography.headlineMedium)
+          androidx.compose.material3.Slider(
+            value = pick,
+            onValueChange = { pick = it.roundToInt().toFloat() },
+            valueRange = range.first.toFloat()..range.last.toFloat(),
+            steps = (range.last - range.first - 1).coerceIn(0, 200),
+            modifier = Modifier.fillMaxWidth(),
+          )
+        }
+      },
+      confirmButton = { TextButton(onClick = { onConfirm(n.toString()) }) { Text(stringResource(R.string.ok)) } },
+      dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } },
+    )
+    return
   }
+  var value by remember { mutableStateOf("") }
   AlertDialog(
     onDismissRequest = onDismiss,
     title = { Text(stringResource(ActionInfo.labelRes(action))) },
@@ -76,15 +101,13 @@ fun ValueInputDialog(
       OutlinedTextField(
         value = value,
         onValueChange = { value = it },
-        label = { Text(label) },
-        isError = value.isNotEmpty() && !valid,
-        keyboardOptions = if (range != null) KeyboardOptions(keyboardType = KeyboardType.Decimal) else KeyboardOptions.Default,
+        label = { Text(stringResource(R.string.address_or_place)) },
         modifier = Modifier.fillMaxWidth(),
         singleLine = true,
       )
     },
     confirmButton = {
-      TextButton(enabled = valid, onClick = { onConfirm(value.trim()) }) {
+      TextButton(enabled = value.isNotBlank(), onClick = { onConfirm(value.trim()) }) {
         Text(stringResource(R.string.ok))
       }
     },

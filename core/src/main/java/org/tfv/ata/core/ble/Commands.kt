@@ -6,7 +6,11 @@ internal data class Command(val domain: Int, val payload: ByteArray)
 
 internal object Commands {
 
-  fun forAction(action: AtaAction, value: Int?): Command? = when (action) {
+  /**
+   * The command for [action]. [climate] is the car's current temperature setting (driver to passenger), needed
+   * to change one side without touching the other.
+   */
+  fun forAction(action: AtaAction, value: Int?, climate: Pair<Float, Float>? = null): Command? = when (action) {
     AtaAction.WAKE -> vcsecRke(30)
     AtaAction.LOCK -> vcsecRke(1)
     AtaAction.UNLOCK -> vcsecRke(0)
@@ -52,8 +56,40 @@ internal object Commands {
     AtaAction.MEDIA_TOGGLE -> infotainment(15, ByteArray(0))
     AtaAction.MEDIA_NEXT -> infotainment(19, ByteArray(0))
     AtaAction.MEDIA_PREVIOUS -> infotainment(20, ByteArray(0))
+    // HvacSeatHeaterActions: one HvacSeatHeaterAction with a level (2 off, 3 low, 4 medium, 5 high) and a seat.
+    AtaAction.SEAT_HEATER_FRONT_LEFT -> value?.let { seatHeater(7, it) }
+    AtaAction.SEAT_HEATER_FRONT_RIGHT -> value?.let { seatHeater(8, it) }
+    AtaAction.SEAT_HEATER_REAR_LEFT -> value?.let { seatHeater(9, it) }
+    AtaAction.SEAT_HEATER_REAR_CENTER -> value?.let { seatHeater(11, it) }
+    AtaAction.SEAT_HEATER_REAR_RIGHT -> value?.let { seatHeater(12, it) }
+    // HvacSeatCoolerActions: level 1 off … 4 high, position 1 front left / 2 front right.
+    AtaAction.SEAT_COOLER_FRONT_LEFT -> value?.let { seatCooler(1, it) }
+    AtaAction.SEAT_COOLER_FRONT_RIGHT -> value?.let { seatCooler(2, it) }
+    // MediaUpdateVolume: absolute volume 0 … 10 (field 3), or a step up / down (field 1, sint32).
+    AtaAction.SET_VOLUME -> value?.takeIf { it in 0..100 }?.let { infotainment(16, buildProto { float(3, it / 10f) }) }
+    AtaAction.VOLUME_UP -> infotainment(16, buildProto { varint(1, zigzag(1)) })
+    AtaAction.VOLUME_DOWN -> infotainment(16, buildProto { varint(1, zigzag(-1)) })
+    AtaAction.SET_TEMPERATURE_DRIVER -> value?.let { temperatures(it.toFloat(), climate?.second ?: it.toFloat()) }
+    AtaAction.SET_TEMPERATURE_PASSENGER -> value?.let { temperatures(climate?.first ?: it.toFloat(), it.toFloat()) }
+    AtaAction.OVERHEAT_PROTECTION_FAN_ONLY -> infotainment(50, buildProto { bool(1, true); bool(2, true) })
     else -> null
   }
+
+  private fun seatHeater(seatField: Int, level: Int): Command? {
+    if (level !in 0..3) return null
+    val action = buildProto { message(2 + level, ByteArray(0)); message(seatField, ByteArray(0)) }
+    return infotainment(36, buildProto { message(1, action) })
+  }
+
+  private fun seatCooler(position: Int, level: Int): Command? {
+    if (level !in 0..3) return null
+    return infotainment(49, buildProto { message(1, buildProto { enum(1, level + 1); enum(2, position) }) })
+  }
+
+  private fun temperatures(driver: Float, passenger: Float) =
+    infotainment(14, buildProto { float(6, driver); float(7, passenger) })
+
+  private fun zigzag(n: Int): Long = ((n shl 1) xor (n shr 31)).toLong() and 0xFFFFFFFFL
 
   private fun vcsecRke(action: Int) =
     Command(Domain.VEHICLE_SECURITY, buildProto { enum(2, action) })
@@ -77,7 +113,9 @@ internal object Commands {
   const val DATA_CHARGE = 2
   const val DATA_CLIMATE = 3
   const val DATA_CLOSURES = 8
-  val STATUS_CATEGORIES = listOf(DATA_CHARGE, DATA_CLIMATE, DATA_CLOSURES)
+  const val DATA_MEDIA = 15
+  val ONE_SIDE_TEMPERATURE = setOf(AtaAction.SET_TEMPERATURE_DRIVER, AtaAction.SET_TEMPERATURE_PASSENGER)
+  val STATUS_CATEGORIES = listOf(DATA_CHARGE, DATA_CLIMATE, DATA_CLOSURES, DATA_MEDIA)
 
   /**
    * Vehicle data for one category. Over BLE the whole answer must fit in one message: asking for several
