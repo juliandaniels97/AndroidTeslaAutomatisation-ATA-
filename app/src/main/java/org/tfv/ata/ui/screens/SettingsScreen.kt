@@ -14,6 +14,7 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -76,6 +77,7 @@ fun SettingsScreen(
   onWear: () -> Unit,
   onAutomation: () -> Unit,
   onAbout: () -> Unit,
+  onDonate: () -> Unit,
   onGuide: () -> Unit,
   onReport: () -> Unit,
   onKeyCard: () -> Unit,
@@ -151,6 +153,7 @@ fun SettingsScreen(
 
       HorizontalDivider()
       LinkRow(stringResource(R.string.report_title), Icons.Filled.BugReport, onReport)
+      LinkRow(stringResource(R.string.donate_title), Icons.Filled.Favorite, onDonate)
       LinkRow(stringResource(R.string.settings_about), Icons.Filled.Info, onAbout)
     }
   }

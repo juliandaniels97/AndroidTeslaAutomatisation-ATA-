@@ -224,7 +224,7 @@ private fun WatchSetupHint() {
   }
 }
 
-private const val RELEASES_URL = "https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-/releases/latest"
+private const val RELEASES_URL = "https://github.com/juliandigitalproducts/AndroidTeslaAutomatisation-ATA-/releases/latest"
 
 @Composable
 private fun WatchFeatureCard(title: String, text: String, onOpen: () -> Unit) {

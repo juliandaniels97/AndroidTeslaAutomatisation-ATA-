@@ -30,6 +30,7 @@ import org.tfv.ata.ui.screens.Car3DScreen
 import org.tfv.ata.ui.screens.BehaviorScreen
 import org.tfv.ata.ui.screens.CarFinderScreen
 import org.tfv.ata.ui.screens.DesignScreen
+import org.tfv.ata.ui.screens.DonateScreen
 import org.tfv.ata.ui.screens.GuideScreen
 import org.tfv.ata.ui.screens.GuideTargets
 import org.tfv.ata.ui.screens.HomeScreen
@@ -131,6 +132,7 @@ fun AtaNavHost(vm: AtaViewModel, state: AtaUiState, pendingRoute: String? = null
           onWear = { nav.navigate("wear") },
           onAutomation = { nav.navigate("automation") },
           onAbout = { nav.navigate("about") },
+          onDonate = { nav.navigate("donate") },
           onGuide = { nav.navigate("guide") },
           onReport = { nav.navigate("report") },
           onKeyCard = { nav.navigate("nfc_card") },
@@ -165,6 +167,7 @@ fun AtaNavHost(vm: AtaViewModel, state: AtaUiState, pendingRoute: String? = null
         KeyCardScreen(vm, state, onBack = { nav.popBackStack() }, onReport = { nav.navigate("report") })
       }
       composable("automation") { AutomationScreen(vm, state, onBack = { nav.popBackStack() }) }
+      composable("donate") { DonateScreen(onBack = { nav.popBackStack() }) }
       composable("about") { AboutScreen(onBack = { nav.popBackStack() }) }
       composable("pair") {
         PairScreen(

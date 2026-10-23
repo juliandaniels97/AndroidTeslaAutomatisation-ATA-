@@ -1,4 +1,12 @@
-## ATA v1.9.4 — Laden live hochgerechnet, neuer Ladekreis, Demo-Modus, Statusmodi, Uhr im Kachel-Look
+## ATA v1.9.5 — Laden live hochgerechnet, neuer Ladekreis, Demo-Modus, Statusmodi, Uhr im Kachel-Look, Spenden
+
+Enthält alles aus 1.9.4 (wurde nicht separat veröffentlicht) und zusätzlich:
+
+### ATA unterstützen
+- **Einstellungen → ATA unterstützen** (bei „Über“): ein Dankeschön und ein **„Mit PayPal spenden“**-Button mit PayPal-Logo. Ganz freiwillig, ATA bleibt kostenlos.
+
+### Neuer GitHub-Name
+- Links in der App (Fehlerbericht, Uhr-Download) und in der README zeigen auf **github.com/juliandigitalproducts**.
 
 ### Laden
 - **Live hochgerechnet:** ATA merkt sich den letzten Ladestatus und rechnet ihn weiter. Aus „voll in 6 h“ von vor 3 Stunden wird „voll in 3 h“.

@@ -22,13 +22,13 @@ ATA is free for personal use. If it saves you a few taps every day, you can supp
 
 ## Downloads
 
-Latest release **v1.9.4** — phone APK for **64‑bit ARM (arm64‑v8a)**, watch APK for **64‑ and 32‑bit ARM (arm64‑v8a + armeabi‑v7a)**:
+Latest release **v1.9.5** — phone APK for **64‑bit ARM (arm64‑v8a)**, watch APK for **64‑ and 32‑bit ARM (arm64‑v8a + armeabi‑v7a)**:
 
-- 📱 Phone APK: **[ATA-phone-v1.9.4-arm64-v8a.apk](https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-/releases/download/v1.9.4/ATA-phone-v1.9.4-arm64-v8a.apk)**
-- ⌚ Wear OS APK: **[ATA-wear-v1.9.4.apk](https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-/releases/download/v1.9.4/ATA-wear-v1.9.4.apk)**
+- 📱 Phone APK: **[ATA-phone-v1.9.5-arm64-v8a.apk](https://github.com/juliandigitalproducts/AndroidTeslaAutomatisation-ATA-/releases/download/v1.9.5/ATA-phone-v1.9.5-arm64-v8a.apk)**
+- ⌚ Wear OS APK: **[ATA-wear-v1.9.5.apk](https://github.com/juliandigitalproducts/AndroidTeslaAutomatisation-ATA-/releases/download/v1.9.5/ATA-wear-v1.9.5.apk)**
 
-The newest version is always at [Releases → latest](https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-/releases/latest).
-All releases are listed under [Releases](https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-/releases).
+The newest version is always at [Releases → latest](https://github.com/juliandigitalproducts/AndroidTeslaAutomatisation-ATA-/releases/latest).
+All releases are listed under [Releases](https://github.com/juliandigitalproducts/AndroidTeslaAutomatisation-ATA-/releases).
 All release builds are signed with the same release key, so new versions install as an update over
 the old one. (Very early builds were signed with a public debug key; if ATA does not update over such a build,
 uninstall it once and pair the phone with the car again.)
@@ -432,6 +432,7 @@ until the car confirms. After that, tap to lock/unlock like a card.
   animation, **vehicle status** (battery saver / smart / interval, see [Live status](#live-status)),
   **Direct BLE control**, **NFC key card** and **unlock when approaching**.
 - **Demo mode**: a made‑up connected car to try everything (see [Demo mode](#demo-mode)).
+- **Support ATA**: a thank‑you and a **Donate with PayPal** button (next to *About*).
 - **3D vehicle view** on or off (off: solid 2D side view); vehicle **type** per vehicle.
 
 ## Known limitations
@@ -451,7 +452,7 @@ until the car confirms. After that, tap to lock/unlock like a card.
 Requires JDK 17 and the Android SDK.
 
 ```bash
-git clone https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-.git
+git clone https://github.com/juliandigitalproducts/AndroidTeslaAutomatisation-ATA-.git
 cd AndroidTeslaAutomatisation-ATA-
 ./gradlew :app:assembleRelease :wear:assembleRelease
 ```
@@ -495,7 +496,7 @@ signed updates that install over an existing install.
 - Licensed under the **ATA License (Source‑Available, Non‑Commercial)** — see [LICENSE](LICENSE).
   You may use, modify and share ATA for **personal, educational and other non‑commercial purposes**.
 - **Commercial use requires prior written permission** from the author
-  ([github.com/juliandaniels97](https://github.com/juliandaniels97)). This includes selling it,
+  ([github.com/juliandigitalproducts](https://github.com/juliandigitalproducts)). This includes selling it,
   bundling it into a paid or ad‑supported product or service, or otherwise using it to generate
   revenue.
 - See [NOTICE](NOTICE) for third‑party attributions (Tesla vehicle‑command protocol, Apache‑2.0).

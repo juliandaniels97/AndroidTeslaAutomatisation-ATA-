@@ -584,4 +584,9 @@
     <string name="status_mode_interval_desc">In festem Abstand, auch im Hintergrund (5 Min bis 3 Std).</string>
     <string name="status_every">Alle %1$s</string>
     <string name="status_never_wakes">Benötigt die BLE-Features. Automatische Abfragen wecken das Auto nie: Schläft es, wird nur der Verriegelungsstatus aktualisiert. Nach unten ziehen weckt es.</string>
+    <string name="donate_title">ATA unterstützen</string>
+    <string name="donate_headline">Danke, dass du ATA nutzt!</string>
+    <string name="donate_text">ATA ist für die private Nutzung kostenlos und entsteht in meiner Freizeit. Wenn dir die App jeden Tag ein paar Handgriffe spart und du die Weiterentwicklung unterstützen möchtest, freue ich mich über jede Spende.</string>
+    <string name="donate_button">Mit PayPal spenden</string>
+    <string name="donate_hint">Ganz freiwillig: ATA bleibt kostenlos und behält alle Funktionen.</string>
 </resources>

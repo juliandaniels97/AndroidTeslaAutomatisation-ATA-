@@ -584,4 +584,9 @@
     <string name="status_mode_interval_desc">At a fixed interval, also in the background (5 min to 3 h).</string>
     <string name="status_every">Every %1$s</string>
     <string name="status_never_wakes">Requires the BLE features. Automatic reads never wake the car: while it sleeps only the lock state is refreshed. Pulling down wakes it.</string>
+    <string name="donate_title">Support ATA</string>
+    <string name="donate_headline">Thank you for using ATA!</string>
+    <string name="donate_text">ATA is free for personal use and made in my spare time. If it saves you a few taps every day and you\'d like to support further development, I\'m happy about any donation.</string>
+    <string name="donate_button">Donate with PayPal</string>
+    <string name="donate_hint">Completely voluntary: ATA stays free and keeps all its features.</string>
 </resources>

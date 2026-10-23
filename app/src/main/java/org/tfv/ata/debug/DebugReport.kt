@@ -26,7 +26,7 @@ import java.net.URLEncoder
  * The VIN is shortened; no keys or tokens are included.
  */
 object DebugReport {
-  private const val ISSUES_URL = "https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-/issues/new"
+  private const val ISSUES_URL = "https://github.com/juliandigitalproducts/AndroidTeslaAutomatisation-ATA-/issues/new"
   /** Browsers and GitHub reject much longer URLs. */
   private const val MAX_URL = 7_500
 
