@@ -1,50 +1,37 @@
-## ATA v1.9.5 — Laden live hochgerechnet, neuer Ladekreis, Demo-Modus, Statusmodi, Uhr im Kachel-Look, Spenden
+## ATA v1.9.6 — bereit für Google Play
 
-Enthält alles aus 1.9.4 (wurde nicht separat veröffentlicht) und zusätzlich:
+### Google Play
+- ATA kommt als **ATA - Car Automatisation** in den Play Store, für Handy und Wear OS.
+- Die Play-Version hat einen eigenen Paketnamen: **`de.juliandigitalproducts.ata`**.
+  - Sie ist eine eigene App neben der APK-Version (`org.tfv.ata`) und aktualisiert diese nicht.
+  - Handy und Uhr müssen aus derselben Quelle kommen: beide aus Play oder beide als APK.
+  - Die APK-Version von GitHub bleibt `org.tfv.ata`, wird wie gewohnt aktualisiert und behält ihre Kopplung mit dem Auto.
+- Jedes Release enthält jetzt zusätzlich die signierten **App Bundles** für Play: `ATA-phone-v1.9.6.aab` und `ATA-wear-v1.9.6.aab`.
+- Die Uhr-Version hat eine eigene Versionsnummer (Handy + 1.000.000), weil Play für jedes Bundle eine eigene braucht. Für APK-Nutzer ändert sich nichts, Updates installieren wie gewohnt.
+
+### App-Name
+- Der App-Name auf dem Startbildschirm heißt jetzt **„ATA - Car Automatisation“**, der Untertitel auf der Startseite „Car Automatisation“.
 
 ### ATA unterstützen
-- **Einstellungen → ATA unterstützen** (bei „Über“): ein Dankeschön und ein **„Mit PayPal spenden“**-Button mit PayPal-Logo. Ganz freiwillig, ATA bleibt kostenlos.
+- Die Seite **„ATA unterstützen“** mit dem PayPal-Button ist aus der App entfernt, in der APK- und in der Play-Version.
+- Spenden sind weiter über die README auf GitHub möglich: rein freiwillig, sie schalten nichts frei. ATA bleibt kostenlos mit allen Funktionen, ohne Werbung und ohne In-App-Käufe.
 
-### Neuer GitHub-Name
-- Links in der App (Fehlerbericht, Uhr-Download) und in der README zeigen auf **github.com/juliandigitalproducts**.
+### Ladekreis
+- Die grünen Punkte, die beim Laden durch den Ring wandern, sind entfernt, am Handy und auf der Uhr. Sie liefen nicht sauber.
+- Ladelimit-Strich, gestrichelter Bogen bis zum Limit und die pulsierende Spitze bleiben.
 
-### Laden
-- **Live hochgerechnet:** ATA merkt sich den letzten Ladestatus und rechnet ihn weiter. Aus „voll in 6 h“ von vor 3 Stunden wird „voll in 3 h“.
-  - Akkustand, Reichweite und die nachgeladene Energie steigen dazu ungefähr mit, berechnet aus Ladeleistung und Restladedauer.
-  - Das gilt in der App, im Widget und auf der Uhr.
-- **Nachgeladene Energie** mit einer Nachkommastelle, z. B. „+20,4 kWh“:
-  - in der Lade-Kachel
-  - unter den Werten am Fahrzeug, zusammen mit dem Ladelimit
-  - im Widget und auf der Uhr
-- **Neuer Ladekreis:**
-  - Grüne Punkte kommen aus dem leeren Teil des Rings und wandern langsam in den geladenen Bereich. Bei 20 % laufen sie also aus den fehlenden 80 % in die 20 %.
-  - Ein **Strich auf dem Ring** zeigt das Ladelimit, immer und nicht nur beim Laden.
+### Uhr einrichten
+- Ist ATA auf der Uhr nicht installiert, verweist die Play-Version auf **Google Play** statt auf die Release-Seite.
+- Der Hinweis ohne verbundene Uhr nennt beide Wege: Play Store auf der Uhr oder Wear-APK.
 
-### Fahrzeugstatus: drei Modi
-Zu finden unter Einstellungen → Verhalten, Status, Bluetooth & NFC.
-1. **Akkuschutz (Standard):** nur manuell. Im Fahrzeug-Tab **nach unten ziehen** oder ↻ tippen. Keine Hintergrundabfragen.
-2. **Intelligent:** beim App-Start, danach regelmäßig, solange das Auto am Strom hängt und das Handy benutzt wird. Der Abstand ist per Schieber einstellbar, Standard 30 Min.
-3. **Intervall:** fester Abstand, **auch im Hintergrund**. Der Schieber reicht von 5 Min bis 3 Std in 120 Stufen, Standard 30 Min.
-- Automatische Abfragen wecken das Auto nie. Wer vorher ein Intervall eingestellt hatte, behält es.
+### Demo-Modus
+- Ein Tipp auf der Uhr im Demo-Modus aktualisiert den Demo-Status auf der Uhr jetzt sofort (bisher erst nach dem nächsten Abruf).
 
-### Demo-Modus (Einstellungen → Demo-Modus, Standard: aus)
-- Ein erfundenes, verbundenes Model Y zum Ausprobieren ohne Auto. Alle Kacheln reagieren wie beim echten Auto, es wird nichts gesendet.
-- Startet immer mit demselben Stand: **50 %, lädt mit 22 kW bis 80 %, noch 1 h, 20 kWh nachgeladen**. Auch nach Aus- und wieder Einschalten.
+### Datenschutz
+- Neue **Datenschutzerklärung** (Deutsch und Englisch) unter `docs/privacy-policy.md`: keine Datenerhebung, kein Server, alles bleibt auf dem Gerät. Sie erklärt Bluetooth, Standort, NFC, Benachrichtigungen und die übrigen Berechtigungen.
 
-### Bedienung und Struktur
-- **Nach unten ziehen** im Fahrzeug-Tab fragt den Status ab.
-- **Weniger Leerraum oben:** Die Kopfzeilen (ATA, Fahrzeug, Einstellungen …) sitzen jetzt direkt unter der Statusleiste.
-- **Einstellungen → „Verhalten, Status, Bluetooth & NFC“** (neue Unterseite) fasst zusammen: Verhalten, Fahrzeugstatus, Bluetooth & NFC und Entriegeln bei Annäherung.
-- **Eigene Icons** für Fenster lüften/schließen, Fahrer-/Beifahrertür und Ladeklappe öffnen/schließen.
-
-### Uhr (Wear OS)
-- Die Uhr bekommt den **kompletten Status** vom Handy: Ladeleistung, Restzeit, nachgeladene Energie und Ladelimit.
-- **Kacheln im Karten-Look** der App. Eine Kachel leuchtet, wenn das Auto in ihrem Zustand ist, z. B. „Verriegeln“ bei verriegeltem Auto.
-- **Neue Statuskarte** (nach links wischen):
-  - Akkuring mit grünen Ladepunkten und Limit-Strich
-  - Akkustand und Reichweite
-  - beim Laden kW, Restzeit und kWh
-- Der Rand zeigt beim Laden Leistung und Restzeit.
-
-### Lenkradheizung
-- Teslas Bluetooth-Protokoll kann die Lenkradheizung nur **ein- und ausschalten**. Stufen oder Auto lassen sich nicht setzen. Ein steuert das Auto die Heizung selbst, zeigt die Kachel „Auto“.
+### Für Entwickler
+- CI baut zusätzlich die Play-Bundles und prüft Manifest, Berechtigungen, Signatur und 16-KB-Ausrichtung nativer Bibliotheken.
+- Store-Texte (Deutsch und Englisch) und Grafiken liegen in `fastlane/metadata/android/`, die Anleitung für die Play Console in `docs/play/PLAY_CONSOLE.md`, die Versionshinweise im Play-Format (`<de-DE>…</de-DE><en-US>…</en-US>`) in `docs/play/release-notes.txt`.
+- `tools/play-graphics.py` baut Icon, Feature-Grafik und die Screenshots für Handy, 7"- und 10"-Tablet und Wear OS aus den CI-Screenshots.
+- README: veralteten Hinweis zur Sitzheizung entfernt (die Sitzheizung je Sitz gibt es seit 1.9.2).

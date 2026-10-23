@@ -269,7 +269,7 @@ fun Car3DScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit) {
         if (threeD) drawNeonCar(shape, camera, yaw, fx, status, now, look.style)
         else drawFlatCar(shape, camera, fx, status, now, look.flat)
         if (known) {
-          drawBatteryRing(Offset(size.width / 2f, size.height * .86f), size.minDimension * .07f, snapshot?.batteryPercent, status.charging, now, !material && dark, accent, width = 8f, material = material, chargeKw = snapshot?.chargingPowerKw ?: 0, chargeLimit = snapshot?.chargeLimit)
+          drawBatteryRing(Offset(size.width / 2f, size.height * .86f), size.minDimension * .07f, snapshot?.batteryPercent, status.charging, now, !material && dark, accent, width = 8f, material = material, chargeLimit = snapshot?.chargeLimit)
         }
       }
 

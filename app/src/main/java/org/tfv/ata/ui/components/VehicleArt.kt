@@ -94,7 +94,7 @@ fun VehicleArt(
       val radius = min(size.width, size.height) / 2f - 10f
       drawBatteryRing(
         center, radius, if (known) snapshot?.batteryPercent else null, charging, now, palette.isDark && !palette.material, palette.muted,
-        material = palette.material, chargeKw = snapshot?.chargingPowerKw ?: 0, chargeLimit = snapshot?.chargeLimit,
+        material = palette.material, chargeLimit = snapshot?.chargeLimit,
       )
       // Gentle idle turn so the car reads as 3D; the full-screen view turns with the finger.
       val yaw = if (threeD) -35f + 14f * sin(now / 4000f) else CarCamera.SIDE_YAW

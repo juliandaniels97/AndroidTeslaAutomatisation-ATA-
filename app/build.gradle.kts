@@ -8,6 +8,11 @@ plugins {
   alias(libs.plugins.kotlin.serialization)
 }
 
+// Google Play build (-PataPlay, the App Bundles from CI) uses its own package name; the GitHub APKs keep
+// org.tfv.ata so existing installs keep updating (and keep their paired vehicle key).
+val playBuild = project.hasProperty("ataPlay")
+val ataApplicationId = if (playBuild) "de.juliandigitalproducts.ata" else "org.tfv.ata"
+
 val versionProps = Properties().apply {
   load(rootProject.file("version.properties").inputStream())
 }
@@ -17,7 +22,7 @@ android {
   compileSdk = 37
 
   defaultConfig {
-    applicationId = "org.tfv.ata"
+    applicationId = ataApplicationId
     minSdk = 31
     targetSdk = 37
     versionCode = (System.getenv("ATA_VERSION_CODE")?.toIntOrNull()) ?: versionProps.getProperty("versionCode").toInt()
@@ -25,6 +30,8 @@ android {
     // -PataAllAbis keeps every ABI (used by the CI emulator smoke test on x86_64).
     if (!project.hasProperty("ataAllAbis")) ndk { abiFilters += listOf("arm64-v8a") }
     vectorDrawables.useSupportLibrary = true
+    // Google Play build: no APK download links (Play's device-abuse policy), the watch app comes from Play.
+    buildConfigField("boolean", "PLAY_STORE", playBuild.toString())
   }
 
   val releaseStoreFile = System.getenv("ATA_KEYSTORE_FILE")

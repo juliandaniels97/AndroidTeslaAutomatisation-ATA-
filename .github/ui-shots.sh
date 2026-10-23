@@ -97,7 +97,6 @@ for THEME in Dark Light; do
   scroll; tap "Bluetooth control (BETA)"; scroll; shot "$t-11-guide-ble"
   tap "Open pairing assistant"; shot "$t-12-pair"; scroll; shot "$t-13-pair-2"; scroll; shot "$t-14-pair-3"
   restart; tap "Settings"; tap "Wear OS watch"; tap "Start"; sleep 5; shot "$t-15-wear-pair"; scroll; shot "$t-16-wear-pair-2"
-  restart; tap "Settings"; tapany "Support ATA"; sleep 2; shot "$t-23-donate"
   restart; tap "Settings"; tapany "Send bug report"; sleep 6; shot "$t-17-report"; scroll; shot "$t-18-report-2"
   restart; tap "Settings"; tapany "Behavior, status, Bluetooth & NFC"; tapany "Set up NFC key card"; sleep 3; shot "$t-19-keycard"; scroll; shot "$t-20-keycard-2"
   adb shell am start -S -W -n org.tfv.ata/.ui.MainActivity -a android.intent.action.VIEW -d ata://car3d >/dev/null; sleep 6; shot "$t-21-car3d"
@@ -127,5 +126,35 @@ adb shell wm size 2560x1600; adb shell wm density 320; sleep 3
 restart; tap "Vehicle"; sleep 3; shot "tablet-neon-dark"
 restart; tap "Settings"; tapany "Design"; tapany "Material"; tapany "Light"
 restart; tap "Vehicle"; sleep 3; shot "tablet-material-light"
+# Google Play tablet screenshots (16:9): 10" (2560x1440) and 7" (1920x1080), neon dark and material light.
+for T in "10:2560x1440:320" "7:1920x1080:280"; do
+  IFS=: read -r INCH SIZE DPI <<< "$T"
+  # Switch the design at phone size (the settings list needs scrolling, which only works there).
+  adb shell wm size reset; adb shell wm density reset; sleep 3
+  restart; tap "Settings"; tapany "Design"; tapany "Neon (standard)"; tapany "Dark"
+  adb shell wm size "$SIZE"; adb shell wm density "$DPI"; sleep 3
+  restart; tap "Vehicle"; sleep 3; shot "play-tablet$INCH-1-vehicle"
+  tap "Favorites"; sleep 2; shot "play-tablet$INCH-2-favorites"
+  adb shell am start -S -W -n org.tfv.ata/.ui.MainActivity -a android.intent.action.VIEW -d ata://car3d >/dev/null; sleep 6; shot "play-tablet$INCH-3-car3d"
+  adb shell wm size reset; adb shell wm density reset; sleep 3
+  restart; tap "Settings"; tapany "Design"; tapany "Material"; tapany "Light"
+  adb shell wm size "$SIZE"; adb shell wm density "$DPI"; sleep 3
+  restart; tap "Vehicle"; sleep 3; shot "play-tablet$INCH-4-material"
+done
 adb shell wm size reset; adb shell wm density reset
+
+# Google Play phone screenshots in German (app language de-DE, demo mode, neon).
+adb shell cmd locale set-app-locales org.tfv.ata --user current --locales de-DE; sleep 2
+for THEME in Dunkel Hell; do
+  t=$([ "$THEME" = Dunkel ] && echo dark || echo light)
+  restart; tap "Einstellungen"; tapany "Design"; tapany "Neon (Standard)"; tapany "$THEME"
+  restart; tap "Favoriten"; sleep 2; shot "de-$t-1-home"
+  tap "Fahrzeug"; sleep 2; shot "de-$t-2-vehicle"; scroll; shot "de-$t-2b-vehicle"; scroll; shot "de-$t-2c-vehicle"; scroll; shot "de-$t-2d-vehicle"
+  adb shell am start -S -W -n org.tfv.ata/.ui.MainActivity -a android.intent.action.VIEW -d ata://car3d >/dev/null; sleep 6; shot "de-$t-21-car3d"
+  tap "Animationen zeigen"; sleep 0.5; for n in 1 2 3; do sleep 3.2; shot "de-$t-demo-$n"; done
+  restart; tap "Einstellungen"; tap "Automation (Routinen, Tasker)"; shot "de-$t-7-automationroutinestasker"
+done
+restart; tap "Einstellungen"; tapany "Design"; tapany "Material"; tapany "Dunkel"
+restart; tap "Fahrzeug"; sleep 2; shot "de-m-dark-2-vehicle"
+adb shell cmd locale set-app-locales org.tfv.ata --user current --locales en-US
 ls -la "$OUT"

@@ -1,0 +1,50 @@
+ATA turns your phone and Wear OS watch into a fast remote and automation hub for your Tesla vehicle: one tap, a widget, a routine or an NFC tag, and the car does what you want.
+
+ATA is an independent app for Tesla vehicles. It is not affiliated with, endorsed or sponsored by Tesla, Inc. "Tesla" is a trademark of Tesla, Inc.
+
+<b>No cloud, no account, no tracking</b>
+• ATA talks directly to the car over Bluetooth Low Energy, using Tesla's publicly documented vehicle-command protocol.
+• No Tesla login, no Fleet API, no servers. Nothing keeps polling the car over the internet.
+• ATA collects no data. Everything stays on your device.
+
+<b>Direct control over Bluetooth</b>
+• Lock and unlock, driver and passenger door, frunk and trunk, vent or close the windows
+• Climate on/off, temperature per side, defrost, climate keeper (keep, dog, camp), overheat protection
+• Seat heating per seat, ventilated front seats, steering wheel heater
+• Charging: start/stop, charge limit, amps, charge port
+• Media and volume, sentry mode, honk, flash lights, wake up
+• Unlock when walking up to the car (optional)
+
+<b>Live status</b>
+• Battery, range, inside and outside temperature, lock state, doors and windows
+• Charging power in kW, time to full, energy added, charge limit
+• Battery saver mode by default: ATA only reads the status when you ask. Automatic reads never wake the car.
+
+<b>Made for automation</b>
+• Home-screen widgets for status, actions and finding the car
+• App shortcuts and Samsung Routines, Tasker and broadcast intents
+• NFC tags: tap to run an action
+• Phone as a key card (NFC card emulation, where supported)
+• Navigate home, to work or to any address with Google Maps or Waze, open the Tesla app
+
+<b>Wear OS</b>
+• Tile grid with your favourite actions, a status page, tiles and complications
+• Relays through the phone, or controls the car directly over Bluetooth once the watch is paired
+
+<b>Design</b>
+• Neon or Material design, each in light and dark
+• A 3D car you can turn and zoom, with glowing spots for doors, seats, climate and charging, and animations after every action
+• Model 3, Model Y, Model S, Model X, Cybertruck and Roadster body styles, your paint colour
+• Tablet layout with the car on the left and the tiles on the right
+
+<b>Try it without a car</b>
+Settings → Demo mode shows a made-up, connected Model Y. Every button works, nothing is sent.
+
+<b>Security</b>
+ATA's vehicle key is created in the Android Keystore and never leaves the device. Every request from widgets, routines, NFC tags or other apps is checked by one policy before it runs. Critical actions can require confirmation.
+
+<b>Good to know</b>
+• Pairing needs your key card and a confirmation in the car.
+• Some functions depend on the vehicle and don't work on every model.
+• ATA is free, without ads and without in-app purchases.
+• Source code: github.com/juliandigitalproducts/AndroidTeslaAutomatisation-ATA-

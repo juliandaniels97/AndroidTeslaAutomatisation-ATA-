@@ -8,6 +8,12 @@ plugins {
   alias(libs.plugins.kotlin.serialization)
 }
 
+val WEAR_VERSION_CODE_OFFSET = 1_000_000
+
+// Same package name as the phone app (the Data Layer only connects apps with the same package and key):
+// de.juliandigitalproducts.ata in the Google Play build (-PataPlay), org.tfv.ata for the GitHub APKs.
+val ataApplicationId = if (project.hasProperty("ataPlay")) "de.juliandigitalproducts.ata" else "org.tfv.ata"
+
 val versionProps = Properties().apply {
   load(rootProject.file("version.properties").inputStream())
 }
@@ -17,10 +23,13 @@ android {
   compileSdk = 37
 
   defaultConfig {
-    applicationId = "org.tfv.ata"
+    applicationId = ataApplicationId
     minSdk = 30
     targetSdk = 37
-    versionCode = (System.getenv("ATA_VERSION_CODE")?.toIntOrNull()) ?: versionProps.getProperty("versionCode").toInt()
+    // The watch build sits 1,000,000 above the phone build: Google Play needs a unique versionCode
+    // for every uploaded bundle, and phone and watch are released together.
+    versionCode = WEAR_VERSION_CODE_OFFSET +
+      ((System.getenv("ATA_VERSION_CODE")?.toIntOrNull()) ?: versionProps.getProperty("versionCode").toInt())
     versionName = versionProps.getProperty("versionName")
     // -PataAllAbis keeps every ABI (used by the CI emulator smoke test on x86_64).
     // 64-bit and 32-bit ARM: e.g. Galaxy Watch 4–6 run a 32-bit (armeabi-v7a) system.

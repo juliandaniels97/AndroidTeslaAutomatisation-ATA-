@@ -14,7 +14,8 @@ tap — or an automation — triggers exactly the action you want.
 
 ## Support the project
 
-ATA is free for personal use. If it saves you a few taps every day, you can support the development:
+ATA is free for personal use. If it saves you a few taps every day, you can support the development.
+A donation is purely voluntary and unlocks nothing: ATA stays free with all features, without ads or in‑app purchases.
 
 <a href="https://www.paypal.com/donate/?hosted_button_id=YHEH2ZKAV4E9Y"><img alt="Donate with PayPal" src="https://img.shields.io/badge/Donate-PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white" /></a>
 
@@ -22,13 +23,19 @@ ATA is free for personal use. If it saves you a few taps every day, you can supp
 
 ## Downloads
 
-Latest release **v1.9.5** — phone APK for **64‑bit ARM (arm64‑v8a)**, watch APK for **64‑ and 32‑bit ARM (arm64‑v8a + armeabi‑v7a)**:
+Latest release **v1.9.6** — phone APK for **64‑bit ARM (arm64‑v8a)**, watch APK for **64‑ and 32‑bit ARM (arm64‑v8a + armeabi‑v7a)**:
 
-- 📱 Phone APK: **[ATA-phone-v1.9.5-arm64-v8a.apk](https://github.com/juliandigitalproducts/AndroidTeslaAutomatisation-ATA-/releases/download/v1.9.5/ATA-phone-v1.9.5-arm64-v8a.apk)**
-- ⌚ Wear OS APK: **[ATA-wear-v1.9.5.apk](https://github.com/juliandigitalproducts/AndroidTeslaAutomatisation-ATA-/releases/download/v1.9.5/ATA-wear-v1.9.5.apk)**
+- 📱 Phone APK: **[ATA-phone-v1.9.6-arm64-v8a.apk](https://github.com/juliandigitalproducts/AndroidTeslaAutomatisation-ATA-/releases/download/v1.9.6/ATA-phone-v1.9.6-arm64-v8a.apk)**
+- ⌚ Wear OS APK: **[ATA-wear-v1.9.6.apk](https://github.com/juliandigitalproducts/AndroidTeslaAutomatisation-ATA-/releases/download/v1.9.6/ATA-wear-v1.9.6.apk)**
 
 The newest version is always at [Releases → latest](https://github.com/juliandigitalproducts/AndroidTeslaAutomatisation-ATA-/releases/latest).
 All releases are listed under [Releases](https://github.com/juliandigitalproducts/AndroidTeslaAutomatisation-ATA-/releases).
+
+**Google Play:** ATA is coming to Google Play as **ATA - Car Automatisation** (package
+`de.juliandigitalproducts.ata`, phone and Wear OS). The Play version is a separate app next to the
+APK version (`org.tfv.ata`): it doesn't update an APK install, and the watch app has to come from the
+same source as the phone app. Each release also carries the
+signed App Bundles for Play (`ATA-phone-vX.Y.Z.aab`, `ATA-wear-vX.Y.Z.aab`).
 All release builds are signed with the same release key, so new versions install as an update over
 the old one. (Very early builds were signed with a public debug key; if ATA does not update over such a build,
 uninstall it once and pair the phone with the car again.)
@@ -195,8 +202,6 @@ The Vehicle tab shows your car inside a **battery ring** (dark blue 100–80 %, 
 A **tick on the ring** marks the charge limit.
 
 **While charging:**
-- Green dots come out of the empty part of the ring and flow slowly into the charged part (a little
-  faster at higher power), e.g. at 20 % they travel from the empty 80 % into the 20 %.
 - The tip pulses, and a dashed arc shows the way to the charge limit.
 - A chip under the car shows **⚡ X kW · full in …**, a line below the values the **energy added**
   and the limit; the full‑screen view shows it too.
@@ -294,6 +299,7 @@ Any action can be pinned to the launcher; long‑pressing the ATA icon shows up 
 actions**. All of them carry the token and behave like Samsung Routines above.
 
 ### Tasker & broadcasts
+Target package: `org.tfv.ata` (APK from GitHub) or `de.juliandigitalproducts.ata` (Google Play).
 ```
 Action:  org.tfv.ata.action.RUN
 Extras:  action_id   = e.g. "climate_on" | "navigate_home" | "charge_limit"
@@ -432,7 +438,6 @@ until the car confirms. After that, tap to lock/unlock like a card.
   animation, **vehicle status** (battery saver / smart / interval, see [Live status](#live-status)),
   **Direct BLE control**, **NFC key card** and **unlock when approaching**.
 - **Demo mode**: a made‑up connected car to try everything (see [Demo mode](#demo-mode)).
-- **Support ATA**: a thank‑you and a **Donate with PayPal** button (next to *About*).
 - **3D vehicle view** on or off (off: solid 2D side view); vehicle **type** per vehicle.
 
 ## Known limitations
@@ -441,7 +446,6 @@ until the car confirms. After that, tap to lock/unlock like a card.
   have them.
 - The **boombox** (fart and locate sound) is not part of Tesla's Bluetooth protocol (only the cloud API
   offers it), so ATA can't trigger it.
-- **Seat heater** has no BLE command mapped yet; the tile reports it as unavailable.
 - **Samsung Routines** only lists ATA's published app shortcuts (icon menu + routine actions, see
   above); whether the extra routine actions appear depends on the One UI version.
 - Delays (`delay_ms`) are approximate: Android may postpone background work by a few minutes.
@@ -458,6 +462,16 @@ cd AndroidTeslaAutomatisation-ATA-
 ```
 
 Outputs: `app/build/outputs/apk/release/` and `wear/build/outputs/apk/release/`.
+
+Google Play App Bundles (package `de.juliandigitalproducts.ata`, no APK download links; the
+watch bundle's versionCode is the phone's + 1,000,000):
+
+```bash
+./gradlew -PataPlay -PataAllAbis :app:bundleRelease :wear:bundleRelease
+```
+
+Store listing texts and graphics are in `fastlane/metadata/android/` (`tools/play-graphics.py` builds the
+graphics from the CI screenshots); the Play Console guide is in [docs/play/](docs/play/PLAY_CONSOLE.md).
 
 | Module | Purpose |
 |---|---|
@@ -503,4 +517,4 @@ signed updates that install over an existing install.
 - ATA is **not affiliated with, endorsed by, or sponsored by Tesla, Inc.** "Tesla" and related
   marks are trademarks of Tesla, Inc., used only to describe interoperability.
 - ATA stores your data **only on your device** and needs no account or internet of its own for its
-  core features. You are responsible for complying with local laws when automating your vehicle.
+  core features. See the [privacy policy](docs/privacy-policy.md). You are responsible for complying with local laws when automating your vehicle.

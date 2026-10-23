@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">ATA</string>
-    <string name="app_label">ATA — Android Tesla Automatisation</string>
-    <string name="app_subtitle">Android Tesla Automatisation</string>
+    <string name="app_label">ATA - Car Automatisation</string>
+    <string name="app_subtitle">Car Automatisation</string>
     <string name="in_development">Diese Funktion ist in Entwicklung.</string>
     <string name="error_no_app">Keine passende App installiert.</string>
     <string name="onboarding_title">Willkommen bei ATA</string>
@@ -384,9 +384,11 @@
     <string name="wear_keycard_use_text">Entriegeln: das Uhrdisplay an den Kartenleser an der B-Säule der Fahrerseite halten. Losfahren: auf den Kartenleser in der Mittelkonsole halten. Die Uhr muss entsperrt sein. Klappt etwas nicht, den Fehlerbericht senden: Er enthält jede Anfrage des Kartenlesers an die Uhr.</string>
     <string name="wear_keycard_turn_off">Schlüsselkarte auf der Uhr ausschalten</string>
     <string name="wear_setup_no_watch_title">Keine Uhr verbunden</string>
-    <string name="wear_setup_no_watch_text">Die Uhr in der Galaxy-Wearable-App (oder Wear-OS-App) mit diesem Handy koppeln und Bluetooth eingeschaltet lassen.\nATA auf der Uhr installieren (Wear-APK von der Release-Seite).\nATA auf der Uhr einmal öffnen, dann hierher zurückkehren.</string>
+    <string name="wear_setup_no_watch_text">Die Uhr in der Galaxy-Wearable-App (oder Wear-OS-App) mit diesem Handy koppeln und Bluetooth eingeschaltet lassen.\nATA auf der Uhr installieren (Play Store auf der Uhr oder Wear-APK).\nATA auf der Uhr einmal öffnen, dann hierher zurückkehren.</string>
     <string name="wear_setup_no_app_title">ATA auf der Uhr nicht gefunden</string>
     <string name="wear_setup_no_app_text">Die Wear-APK (ATA-wear-…apk) von der Release-Seite herunterladen.\nAuf der Uhr installieren, z. B. mit einer Installer-App wie „Easy Fire Tools“ / „Wear Installer“ oder adb über WLAN.\nDieselbe Version wie auf dem Handy verwenden, dann ATA auf der Uhr einmal öffnen.</string>
+    <string name="wear_setup_no_app_text_play">ATA auf der Uhr aus Google Play installieren: auf der Uhr im Play Store oder am Handy unter „Auf weiteren Geräten verfügbar“.\nDieselbe Version wie auf dem Handy verwenden, dann ATA auf der Uhr einmal öffnen.</string>
+    <string name="wear_setup_open_play">In Google Play öffnen</string>
     <string name="wear_setup_download">Release-Seite öffnen</string>
     <string name="presets_title">Feste Werte (z. B. Temperatur 21 °C)</string>
     <string name="presets_desc">Aktionen mit festem Wert, veröffentlicht als App-Verknüpfungen: Samsung Routinen und das Icon-Menü führen sie ohne Nachfrage aus. Sie teilen sich den Platz mit den Routine-Aktionen oben.</string>
@@ -584,9 +586,4 @@
     <string name="status_mode_interval_desc">In festem Abstand, auch im Hintergrund (5 Min bis 3 Std).</string>
     <string name="status_every">Alle %1$s</string>
     <string name="status_never_wakes">Benötigt die BLE-Features. Automatische Abfragen wecken das Auto nie: Schläft es, wird nur der Verriegelungsstatus aktualisiert. Nach unten ziehen weckt es.</string>
-    <string name="donate_title">ATA unterstützen</string>
-    <string name="donate_headline">Danke, dass du ATA nutzt!</string>
-    <string name="donate_text">ATA ist für die private Nutzung kostenlos und entsteht in meiner Freizeit. Wenn dir die App jeden Tag ein paar Handgriffe spart und du die Weiterentwicklung unterstützen möchtest, freue ich mich über jede Spende.</string>
-    <string name="donate_button">Mit PayPal spenden</string>
-    <string name="donate_hint">Ganz freiwillig: ATA bleibt kostenlos und behält alle Funktionen.</string>
 </resources>

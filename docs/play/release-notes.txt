@@ -1,0 +1,18 @@
+<de-DE>
+Erste Version im Play Store:
+• Steuerung per Bluetooth ohne Cloud und ohne Konto
+• Live-Status mit Ladeleistung, Zeit bis voll und nachgeladener Energie
+• Widgets, Samsung Routinen, Tasker und NFC-Tags
+• Wear OS mit Kacheln, Statusseite und Komplikationen
+• Neon- und Material-Design, hell und dunkel, 3D-Auto
+• Demo-Modus zum Ausprobieren ohne Auto
+</de-DE>
+<en-US>
+First version on Google Play:
+• Bluetooth control without cloud or account
+• Live status with charging power, time to full and energy added
+• Widgets, Samsung Routines, Tasker and NFC tags
+• Wear OS with tiles, a status page and complications
+• Neon and Material design, light and dark, 3D car
+• Demo mode to try it without a car
+</en-US>

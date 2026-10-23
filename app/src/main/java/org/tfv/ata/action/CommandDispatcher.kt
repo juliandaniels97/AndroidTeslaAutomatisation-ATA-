@@ -121,6 +121,8 @@ object CommandDispatcher {
     }
     store.saveSnapshot(org.tfv.ata.core.DemoCar.VEHICLE_ID, next)
     runCatching { org.tfv.ata.widget.StatusWidget().updateAll(context) }
+    // The watch shows the demo car too, also right after a tap on the watch.
+    runCatching { org.tfv.ata.wear.WearPush.pushStatus(context, next, org.tfv.ata.core.DemoCar.vehicle.name) }
     val result = CommandResult.Success
     feedback(context, action, result, source, inForeground)
     return result

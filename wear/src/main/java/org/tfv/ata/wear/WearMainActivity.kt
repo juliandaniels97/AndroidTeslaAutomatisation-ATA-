@@ -1,11 +1,6 @@
 package org.tfv.ata.wear
 
 import android.os.Bundle
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.runtime.produceState
 import androidx.compose.ui.geometry.Offset
@@ -503,14 +498,11 @@ private fun formatMinutes(m: Int): String = when {
 }
 
 /**
- * Second page: the car as a card, like the phone's vehicle view. Battery ring (green dots flow into the charged
- * part while charging, a tick marks the charge limit), battery and range in the middle, then charging details
- * or temperatures and lock state.
+ * Second page: the car as a card, like the phone's vehicle view. Battery ring (a tick marks the charge limit),
+ * battery and range in the middle, then charging details or temperatures and lock state.
  */
 @Composable
 private fun StatusCard(s: VehicleSnapshot?, name: String, round: Boolean) {
-  val transition = rememberInfiniteTransition(label = "ring")
-  val t by transition.animateFloat(0f, 1000f, infiniteRepeatable(tween(1_000_000, easing = LinearEasing)), label = "t")
   Box(Modifier.fillMaxSize().padding(if (round) 14.dp else 8.dp), contentAlignment = Alignment.Center) {
     Canvas(Modifier.fillMaxSize()) {
       val stroke = size.minDimension * .045f
@@ -526,21 +518,6 @@ private fun StatusCard(s: VehicleSnapshot?, name: String, round: Boolean) {
       val sweep = 360f * s.batteryPercent.coerceIn(0, 100) / 100f
       drawCircle(color.copy(alpha = .14f), radius, c, style = Stroke(stroke))
       drawArc(color, -90f, sweep, false, topLeft, box, style = Stroke(stroke, cap = StrokeCap.Round))
-      if (s.charging) {
-        val empty = 360f - sweep
-        val spacing = 24f
-        val count = (empty / spacing).toInt() + 1
-        val speed = (12f + s.chargingPowerKw * .1f).coerceAtMost(30f)
-        for (k in 0 until count) {
-          val d = (k * spacing + t * speed) % (count * spacing)
-          if (d > empty) continue
-          val f = d / empty
-          val fade = minOf(1f, f * 5f, (1f - f) * 4f).coerceIn(0f, 1f)
-          val rad = Math.toRadians((-90f + sweep + empty - d).toDouble())
-          val p = Offset(c.x + radius * cos(rad).toFloat(), c.y + radius * sin(rad).toFloat())
-          drawCircle(CHARGE.copy(alpha = .95f * fade), stroke * (.25f + .1f * fade), p)
-        }
-      }
       s.chargeLimit?.takeIf { it in 1..99 }?.let { limit ->
         val rad = Math.toRadians((-90f + 360f * limit / 100f).toDouble())
         val dir = Offset(cos(rad).toFloat(), sin(rad).toFloat())

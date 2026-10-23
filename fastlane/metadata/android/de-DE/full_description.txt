@@ -1,0 +1,50 @@
+ATA macht dein Handy und deine Wear-OS-Uhr zur schnellen Fernbedienung und Automatisierungs-Zentrale für dein Tesla-Fahrzeug: ein Tipp, ein Widget, eine Routine oder ein NFC-Tag, und das Auto tut, was du willst.
+
+ATA ist eine unabhängige App für Tesla-Fahrzeuge. Sie steht in keiner Verbindung zu Tesla, Inc. und wird von Tesla weder unterstützt noch gesponsert. „Tesla“ ist eine Marke von Tesla, Inc.
+
+<b>Ohne Cloud, ohne Konto, ohne Tracking</b>
+• ATA spricht direkt per Bluetooth Low Energy mit dem Auto, über Teslas öffentlich dokumentiertes Fahrzeugbefehl-Protokoll.
+• Kein Tesla-Login, keine Fleet API, keine Server. Nichts fragt das Auto ständig über das Internet ab.
+• ATA erhebt keine Daten. Alles bleibt auf deinem Gerät.
+
+<b>Direkte Steuerung per Bluetooth</b>
+• Ver- und Entriegeln, Fahrer- und Beifahrertür, Frunk und Kofferraum, Fenster lüften oder schließen
+• Klima an/aus, Temperatur je Seite, Entfrosten, Klima-Modus (Halten, Hund, Camping), Überhitzungsschutz
+• Sitzheizung je Sitz, Sitzbelüftung vorne, Lenkradheizung
+• Laden: Start/Stopp, Ladelimit, Ampere, Ladeklappe
+• Medien und Lautstärke, Wächtermodus, Hupen, Lichthupe, Aufwecken
+• Entriegeln beim Herangehen (optional)
+
+<b>Live-Status</b>
+• Akku, Reichweite, Innen- und Außentemperatur, Verriegelung, Türen und Fenster
+• Ladeleistung in kW, Zeit bis voll, nachgeladene Energie, Ladelimit
+• Standardmäßig Akkuschutz: ATA liest den Status nur, wenn du es willst. Automatische Abfragen wecken das Auto nie.
+
+<b>Gemacht für Automatisierung</b>
+• Startbildschirm-Widgets für Status, Aktionen und Auto finden
+• App-Verknüpfungen und Samsung Routinen, Tasker und Broadcast-Intents
+• NFC-Tags: antippen und eine Aktion ausführen
+• Handy als Schlüsselkarte (NFC-Kartenemulation, wo unterstützt)
+• Nach Hause, zur Arbeit oder zu jeder Adresse navigieren mit Google Maps oder Waze, Tesla-App öffnen
+
+<b>Wear OS</b>
+• Kachel-Raster mit deinen Lieblingsaktionen, Statusseite, Kacheln und Komplikationen
+• Über das Handy oder, nach dem Koppeln der Uhr, direkt per Bluetooth
+
+<b>Design</b>
+• Neon- oder Material-Design, jeweils hell und dunkel
+• Ein 3D-Auto zum Drehen und Zoomen, mit leuchtenden Punkten für Türen, Sitze, Klima und Laden, und Animationen nach jeder Aktion
+• Karosserien für Model 3, Model Y, Model S, Model X, Cybertruck und Roadster, in deiner Lackfarbe
+• Tablet-Layout mit dem Auto links und den Kacheln rechts
+
+<b>Ausprobieren ohne Auto</b>
+Einstellungen → Demo-Modus zeigt ein ausgedachtes, verbundenes Model Y. Alle Tasten funktionieren, gesendet wird nichts.
+
+<b>Sicherheit</b>
+ATAs Fahrzeugschlüssel entsteht im Android Keystore und verlässt das Gerät nie. Jede Anfrage von Widgets, Routinen, NFC-Tags oder anderen Apps wird vor dem Ausführen von einer zentralen Regel geprüft. Kritische Aktionen können eine Bestätigung verlangen.
+
+<b>Gut zu wissen</b>
+• Zum Koppeln brauchst du deine Schlüsselkarte und eine Bestätigung im Auto.
+• Manche Funktionen hängen vom Fahrzeug ab und funktionieren nicht bei jedem Modell.
+• ATA ist kostenlos, ohne Werbung und ohne In-App-Käufe.
+• Quellcode: github.com/juliandigitalproducts/AndroidTeslaAutomatisation-ATA-
