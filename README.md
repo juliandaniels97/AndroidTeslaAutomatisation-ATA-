@@ -23,10 +23,10 @@ A donation is purely voluntary and unlocks nothing: ATA stays free with all feat
 
 ## Downloads
 
-Latest release **v1.9.6** — phone APK for **64‑bit ARM (arm64‑v8a)**, watch APK for **64‑ and 32‑bit ARM (arm64‑v8a + armeabi‑v7a)**:
+Latest release **v1.9.7** — phone APK for **64‑bit ARM (arm64‑v8a)**, watch APK for **64‑ and 32‑bit ARM (arm64‑v8a + armeabi‑v7a)**:
 
-- 📱 Phone APK: **[ATA-phone-v1.9.6-arm64-v8a.apk](https://github.com/juliandigitalproducts/AndroidTeslaAutomatisation-ATA-/releases/download/v1.9.6/ATA-phone-v1.9.6-arm64-v8a.apk)**
-- ⌚ Wear OS APK: **[ATA-wear-v1.9.6.apk](https://github.com/juliandigitalproducts/AndroidTeslaAutomatisation-ATA-/releases/download/v1.9.6/ATA-wear-v1.9.6.apk)**
+- 📱 Phone APK: **[ATA-phone-v1.9.7-arm64-v8a.apk](https://github.com/juliandigitalproducts/AndroidTeslaAutomatisation-ATA-/releases/download/v1.9.7/ATA-phone-v1.9.7-arm64-v8a.apk)**
+- ⌚ Wear OS APK: **[ATA-wear-v1.9.7.apk](https://github.com/juliandigitalproducts/AndroidTeslaAutomatisation-ATA-/releases/download/v1.9.7/ATA-wear-v1.9.7.apk)**
 
 The newest version is always at [Releases → latest](https://github.com/juliandigitalproducts/AndroidTeslaAutomatisation-ATA-/releases/latest).
 All releases are listed under [Releases](https://github.com/juliandigitalproducts/AndroidTeslaAutomatisation-ATA-/releases).
