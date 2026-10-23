@@ -21,11 +21,14 @@
 - Ist ATA auf der Uhr nicht installiert, verweist die Play-Version auf **Google Play** statt auf die Release-Seite.
 - Der Hinweis ohne verbundene Uhr nennt beide Wege: Play Store auf der Uhr oder Wear-APK.
 
+### Demo-Modus
+- Ein Tipp auf der Uhr im Demo-Modus aktualisiert den Demo-Status auf der Uhr jetzt sofort (bisher erst nach dem nächsten Abruf).
+
 ### Datenschutz
 - Neue **Datenschutzerklärung** (Deutsch und Englisch) unter `docs/privacy-policy.md`: keine Datenerhebung, kein Server, alles bleibt auf dem Gerät. Sie erklärt Bluetooth, Standort, NFC, Benachrichtigungen und die übrigen Berechtigungen.
 
 ### Für Entwickler
 - CI baut zusätzlich die Play-Bundles und prüft Manifest, Berechtigungen, Signatur und 16-KB-Ausrichtung nativer Bibliotheken.
-- Store-Texte (Deutsch und Englisch) und Grafiken liegen in `fastlane/metadata/android/`, die Anleitung für die Play Console in `docs/play/PLAY_CONSOLE.md`.
+- Store-Texte (Deutsch und Englisch) und Grafiken liegen in `fastlane/metadata/android/`, die Anleitung für die Play Console in `docs/play/PLAY_CONSOLE.md`, die Versionshinweise im Play-Format (`<de-DE>…</de-DE><en-US>…</en-US>`) in `docs/play/release-notes.txt`.
 - `tools/play-graphics.py` baut Icon, Feature-Grafik und die Screenshots für Handy, 7"- und 10"-Tablet und Wear OS aus den CI-Screenshots.
 - README: veralteten Hinweis zur Sitzheizung entfernt (die Sitzheizung je Sitz gibt es seit 1.9.2).
