@@ -101,7 +101,12 @@ class AtaViewModel(app: Application) : AndroidViewModel(app) {
         if (st.vehicleTilesMerged) st
         else if (st.vehicleActionIds.isEmpty()) st.copy(vehicleTilesMerged = true)
         else st.copy(
-          vehicleActionIds = st.vehicleActionIds + org.tfv.ata.ui.tiles.TileCatalog.basicDefaults.map { it.id }.filter { it !in st.vehicleActionIds },
+          // New in 1.9.2 (seats, ventilation, volume) first, then the former actions tab at the end.
+          vehicleActionIds = (
+            st.vehicleActionIds +
+              org.tfv.ata.ui.tiles.TileCatalog.newIn192 +
+              org.tfv.ata.ui.tiles.TileCatalog.basicDefaults.map { it.id }
+            ).distinct(),
           vehicleTilesMerged = true,
         )
       }

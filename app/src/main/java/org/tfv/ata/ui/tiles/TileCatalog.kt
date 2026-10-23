@@ -131,6 +131,9 @@ object TileCatalog {
       ble.filter { MultiTile.covering(it) == null }.map { it.id } +
       basicDefaults.map { it.id }
 
+  /** Tiles added for existing layouts on the update to 1.9.2. */
+  val newIn192: List<String> = listOf(MultiTile.SEATS.id, MultiTile.SEAT_COOLING.id, MultiTile.VOLUME.id)
+
   val favoriteDefaults: List<String> =
     listOf(MultiTile.LOCK.id, MultiTile.CLIMATE.id, MultiTile.LIDS.id) + basicDefaults.map { it.id }
 
