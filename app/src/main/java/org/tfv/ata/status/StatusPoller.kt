@@ -4,11 +4,14 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import kotlinx.coroutines.flow.first
 import org.tfv.ata.core.AtaSettings
+import org.tfv.ata.core.DemoCar
+import org.tfv.ata.core.StatusMode
+import org.tfv.ata.core.projected
 import org.tfv.ata.core.VehicleSnapshot
 import org.tfv.ata.core.ble.TeslaController
 import org.tfv.ata.data.AtaStore
@@ -16,8 +19,8 @@ import java.util.concurrent.TimeUnit
 import androidx.glance.appwidget.updateAll
 
 object StatusPoller {
-  private const val WORK_NAME = "ata-status-poll"
-  const val MIN_INTERVAL_MINUTES = 15L
+  private const val OLD_WORK_NAME = "ata-status-poll"
+  private const val WORK_NAME = "ata-status-next"
 
   fun hasBlePermission(context: Context): Boolean =
     arrayOf(Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT).all {
@@ -31,6 +34,7 @@ object StatusPoller {
   suspend fun pollNow(context: Context, wake: Boolean = false): VehicleSnapshot? {
     val store = AtaStore.get(context)
     val settings = store.settings.first()
+    if (settings.demoMode) return pollDemo(context)
     if (!settings.experimentalBle || !settings.active) return null
     if (!hasBlePermission(context)) return null
     val vehicles = store.vehicles.first()
@@ -39,6 +43,7 @@ object StatusPoller {
     val fresh = runCatching { TeslaController.readStatus(context, vehicle.vin, wake) }.getOrNull() ?: return null
     val snapshot = if (fresh.asleep) {
       store.snapshot(vehicle.id).first()
+        ?.projected(fresh.updatedAt)
         ?.copy(locked = fresh.locked, asleep = true, updatedAt = fresh.updatedAt)
         ?: fresh
     } else {
@@ -49,6 +54,16 @@ object StatusPoller {
     rememberCarLocation(context)
     if (settings.statusBroadcast) broadcastStatus(context, vehicle.id, snapshot)
     org.tfv.ata.wear.WearPush.pushStatus(context, snapshot, vehicle.name)
+    return snapshot
+  }
+
+  /** Demo mode: the made-up car "answers" with its charging state carried forward to now. */
+  private suspend fun pollDemo(context: Context): VehicleSnapshot {
+    val store = AtaStore.get(context)
+    val now = System.currentTimeMillis()
+    val snapshot = (store.snapshot(DemoCar.VEHICLE_ID).first() ?: DemoCar.start(now)).projected(now).copy(updatedAt = now, asleep = false)
+    store.saveSnapshot(DemoCar.VEHICLE_ID, snapshot)
+    org.tfv.ata.wear.WearPush.pushStatus(context, snapshot, DemoCar.vehicle.name)
     return snapshot
   }
 
@@ -77,15 +92,51 @@ object StatusPoller {
     runCatching { context.sendBroadcast(intent) }
   }
 
+  /**
+   * Plans the next background read for [AtaSettings.statusMode] (none for battery saver or the demo). Each read
+   * plans the following one, so intervals below WorkManager's 15-minute minimum work too.
+   */
   fun sync(context: Context, settings: AtaSettings) {
     val wm = WorkManager.getInstance(context)
-    val enabled = settings.experimentalBle && settings.active && settings.pollIntervalMinutes > 0
-    if (!enabled) {
+    wm.cancelUniqueWork(OLD_WORK_NAME)
+    val minutes = minutesFor(settings)
+    if (minutes == null) {
       wm.cancelUniqueWork(WORK_NAME)
       return
     }
-    val minutes = maxOf(settings.pollIntervalMinutes.toLong(), MIN_INTERVAL_MINUTES)
-    val request = PeriodicWorkRequestBuilder<StatusPollWorker>(minutes, TimeUnit.MINUTES).build()
-    wm.enqueueUniquePeriodicWork(WORK_NAME, ExistingPeriodicWorkPolicy.UPDATE, request)
+    schedule(context, minutes, ExistingWorkPolicy.REPLACE)
+  }
+
+  /** Minutes until the next read, or null when nothing reads in the background. */
+  fun minutesFor(settings: AtaSettings): Int? {
+    if (settings.demoMode || !settings.experimentalBle || !settings.active) return null
+    return when (settings.statusMode) {
+      StatusMode.BATTERY_SAVER -> null
+      StatusMode.SMART -> settings.smartMinutes.coerceIn(5, 180)
+      StatusMode.INTERVAL -> settings.intervalMinutes.coerceIn(5, 180)
+    }
+  }
+
+  fun schedule(context: Context, minutes: Int, policy: ExistingWorkPolicy) {
+    val request = OneTimeWorkRequestBuilder<StatusPollWorker>().setInitialDelay(minutes.toLong(), TimeUnit.MINUTES).build()
+    WorkManager.getInstance(context).enqueueUniqueWork(WORK_NAME, policy, request)
+  }
+
+  /**
+   * Whether a planned read should run now: interval always; smart only while the phone is in use and the car was
+   * plugged in at the last reading.
+   */
+  suspend fun shouldReadNow(context: Context, settings: AtaSettings): Boolean = when (settings.statusMode) {
+    StatusMode.INTERVAL -> true
+    StatusMode.SMART -> {
+      val power = context.getSystemService(Context.POWER_SERVICE) as android.os.PowerManager
+      val store = AtaStore.get(context)
+      val vehicles = store.vehicles.first()
+      val id = store.selectedVehicleId.first()
+      val vehicle = vehicles.firstOrNull { it.id == id } ?: vehicles.firstOrNull()
+      val last = vehicle?.let { store.snapshot(it.id).first() }
+      power.isInteractive && (last?.pluggedIn == true || last?.charging == true)
+    }
+    StatusMode.BATTERY_SAVER -> false
   }
 }

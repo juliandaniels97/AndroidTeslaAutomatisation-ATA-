@@ -45,8 +45,22 @@ data class WatchStatus(
   val outside: Float = 0f,
   val climate: Boolean = false,
   val updatedAt: Long = 0,
+  /** Everything the phone read (charging power, time to full, energy added …); null from older phone apps. */
+  val snapshot: org.tfv.ata.core.VehicleSnapshot? = null,
 ) {
   val known: Boolean get() = updatedAt > 0
+
+  /** The basic values as a snapshot (phone apps before 1.9.4 send no full snapshot). */
+  fun asSnapshot() = org.tfv.ata.core.VehicleSnapshot(
+    batteryPercent = battery,
+    rangeKm = range,
+    charging = charging,
+    locked = locked,
+    climateOn = climate,
+    insideTempC = inside,
+    outsideTempC = outside,
+    updatedAt = updatedAt,
+  )
 }
 
 /**
@@ -145,6 +159,9 @@ object WearStore {
       outside = map.getFloat(WearContract.KEY_OUTSIDE, 0f),
       climate = map.getBoolean(WearContract.KEY_CLIMATE, false),
       updatedAt = map.getLong(WearContract.KEY_UPDATED, 0),
+      snapshot = map.getString(WearContract.KEY_SNAPSHOT)?.let {
+        runCatching { json.decodeFromString(org.tfv.ata.core.VehicleSnapshot.serializer(), it) }.getOrNull()
+      },
     )
   }
 }

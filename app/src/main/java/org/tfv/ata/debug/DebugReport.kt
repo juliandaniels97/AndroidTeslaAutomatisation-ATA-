@@ -26,7 +26,7 @@ import java.net.URLEncoder
  * The VIN is shortened; no keys or tokens are included.
  */
 object DebugReport {
-  private const val ISSUES_URL = "https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-/issues/new"
+  private const val ISSUES_URL = "https://github.com/juliandigitalproducts/AndroidTeslaAutomatisation-ATA-/issues/new"
   /** Browsers and GitHub reject much longer URLs. */
   private const val MAX_URL = 7_500
 
@@ -51,7 +51,7 @@ object DebugReport {
       appendLine("Tesla app installed: ${KeyCardRegistration.teslaAppInstalled(context)}")
       appendLine(
         "Settings: active=${settings.active} ble=${settings.experimentalBle} nfcKeyCard=${settings.nfcKeyCard} " +
-          "theme=${settings.theme} poll=${settings.pollIntervalMinutes}min",
+          "theme=${settings.theme} status=${settings.statusMode} smart=${settings.smartMinutes}min interval=${settings.intervalMinutes}min demo=${settings.demoMode}",
       )
       appendLine("Vehicles: ${vehicles.size}")
       selected?.let { v ->

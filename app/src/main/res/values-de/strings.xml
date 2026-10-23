@@ -6,7 +6,7 @@
     <string name="in_development">Diese Funktion ist in Entwicklung.</string>
     <string name="error_no_app">Keine passende App installiert.</string>
     <string name="onboarding_title">Willkommen bei ATA</string>
-    <string name="onboarding_body">ATA steuert und automatisiert deinen Tesla — ohne Konto, ohne Fleet API, ohne Cloud.\n\n▸ BASISFUNKTIONEN\nTesla-App öffnen; zu Laden/Klima/Steuerung/Standort springen (öffnet ggf. nur die App). Nach Hause/Arbeit oder zu jeder Adresse navigieren (an die Tesla-App gesendet, oder Google Maps/Waze). Ziel teilen.\n\n▸ BLE-FUNKTIONEN\nUnter Einstellungen → Bluetooth &amp; NFC aktivieren, Fahrzeug (VIN) hinzufügen und Telefonschlüssel koppeln. Dann ver-/entriegeln, Klima, Laden, Kofferraum/Frunk, Fenster, Wächtermodus u. v. m. über Bluetooth — plus Live-Status (Akku, Reichweite, Temperaturen).\n\n▸ ANPASSEN\nAuf dem Aktionen-Tab eine Kachel lange drücken: per Drag anordnen, löschen, mit + wieder hinzufügen, dann Darstellung speichern. Fahrzeugaktionen über den Stern im Fahrzeug-Tab oder die +-Liste hinzufügen. Jede Aktion als Shortcut, App-Icon-Menü oder Widget anheften (bis zu 8 Kacheln).\n\n▸ AUTOMATISIERUNG\nAktionen aus Samsung Routines oder Tasker auslösen und auf den Fahrzeugstatus (Akku, Laden, verriegelt …) über ATA-Broadcasts reagieren.\n\nTipp: Heimat-/Arbeitsadresse unter Einstellungen → Adressen festlegen — Navigation funktioniert auch ohne gespeichertes Fahrzeug.</string>
+    <string name="onboarding_body">ATA steuert und automatisiert deinen Tesla — ohne Konto, ohne Fleet API, ohne Cloud.\n\n▸ BASISFUNKTIONEN\nTesla-App öffnen; zu Laden/Klima/Steuerung/Standort springen (öffnet ggf. nur die App). Nach Hause/Arbeit oder zu jeder Adresse navigieren (an die Tesla-App gesendet, oder Google Maps/Waze). Ziel teilen.\n\n▸ BLE-FUNKTIONEN\nUnter Einstellungen → Verhalten, Status, Bluetooth &amp; NFC aktivieren, Fahrzeug (VIN) hinzufügen und Telefonschlüssel koppeln. Dann ver-/entriegeln, Klima, Laden, Kofferraum/Frunk, Fenster, Wächtermodus u. v. m. über Bluetooth — plus Live-Status (Akku, Reichweite, Temperaturen).\n\n▸ ANPASSEN\nIm Fahrzeug- oder Favoriten-Tab eine Kachel lange drücken: per Drag anordnen, löschen, mit + wieder hinzufügen, mit dem Stern zu den Favoriten, dann Darstellung speichern. Einstellungen → Design legt Multikacheln und Kacheln pro Reihe fest. Jede Aktion als Shortcut, App-Icon-Menü oder Widget anheften (bis zu 8 Kacheln).\n\n▸ AUTOMATISIERUNG\nAktionen aus Samsung Routines oder Tasker auslösen und auf den Fahrzeugstatus (Akku, Laden, verriegelt …) über ATA-Broadcasts reagieren.\n\nTipp: Heimat-/Arbeitsadresse unter Einstellungen → Adressen festlegen — Navigation funktioniert auch ohne gespeichertes Fahrzeug.</string>
     <string name="onboarding_cta">Los geht\'s</string>
 
     <string name="tab_home">Aktionen</string>
@@ -73,8 +73,6 @@
     <string name="nfc_write_failed">Tag konnte nicht geschrieben werden. Erneut versuchen.</string>
     <string name="settings_direction_fx">Animation Richtung Fahrzeug</string>
     <string name="settings_direction_fx_desc">Nutzt deinen Standort, um die Aktivierungs-Animation zum zuletzt bekannten Standort des Fahrzeugs auszurichten. Benötigt Standortberechtigung.</string>
-    <string name="settings_poll">Status-Intervall: %1$d Min</string>
-    <string name="settings_poll_desc">Benötigt die BLE-Features. 0 deaktiviert Hintergrund-Abfragen (Minimum 15 Min). Hintergrund-Abfragen wecken das Auto nie: Schläft es, wird nur der Verriegelungsstatus aktualisiert.</string>
 
 
     <string name="settings_about">Über</string>
@@ -147,7 +145,7 @@
     <string name="settings_experimental_ble">Direkte BLE-Steuerung</string>
     <string name="settings_experimental_ble_desc">Steuert das Auto direkt per Bluetooth (nach einmaligem Koppeln des Handys). Manche Funktionen sind fahrzeugspezifisch, z. B. Türen öffnen oder die elektrische Heckklappe, und funktionieren nicht bei jedem Modell.</string>
     <string name="ble_enable_title">BLE-Features aktivieren</string>
-    <string name="ble_enable_desc">Direkte Bluetooth-Steuerung deines Tesla. Wieder ausschalten unter Einstellungen → Bluetooth &amp; NFC.</string>
+    <string name="ble_enable_desc">Direkte Bluetooth-Steuerung deines Tesla. Wieder ausschalten unter Einstellungen → Verhalten, Status, Bluetooth &amp; NFC.</string>
     <string name="activate">Aktivieren</string>
     <string name="section_places">Adressen</string>
     <string name="settings_places_desc">Getrennt von Fahrzeugen gespeichert, damit Navigations-Shortcuts (z. B. Nach Hause) auch ohne hinzugefügtes Fahrzeug funktionieren.</string>
@@ -164,7 +162,7 @@
     <string name="result_failed">%1$s fehlgeschlagen</string>
     <string name="result_blocked">%1$s blockiert</string>
     <string name="deny_inactive">ATA ist passiv. Schalte ATA aktiv, damit Automationen laufen.</string>
-    <string name="deny_ble_disabled">Die Bluetooth-Funktionen sind ausgeschaltet (Einstellungen → Bluetooth &amp; NFC).</string>
+    <string name="deny_ble_disabled">Die Bluetooth-Funktionen sind ausgeschaltet (Einstellungen → Verhalten, Status, Bluetooth &amp; NFC).</string>
     <string name="deny_locked">Entsperre dein Telefon oder erlaube es unter Einstellungen → Automation.</string>
     <string name="deny_external">Für andere Apps nicht erlaubt. Nutze einen ATA-Shortcut oder erlaube es unter Einstellungen → Automation.</string>
     <string name="confirm_title">%1$s ausführen?</string>
@@ -572,4 +570,23 @@
     <string name="widget_design_app">Wie die App</string>
     <string name="settings_widget_translucent">Durchscheinender Hintergrund</string>
     <string name="settings_widget_translucent_desc">Das Hintergrundbild scheint leicht durch.</string>
+    <string name="st_kwh_added">%1$s nachgeladen</string>
+    <string name="section_behavior_connections">Verhalten &amp; Verbindungen</string>
+    <string name="settings_behavior_page">Verhalten, Status, Bluetooth &amp; NFC</string>
+    <string name="settings_demo">Demo-Modus</string>
+    <string name="settings_demo_desc">Zeigt ein erfundenes, verbundenes Auto (50 %, lädt), damit du alles ohne Tesla ausprobieren kannst. Es wird nichts gesendet. Startet bei jedem Einschalten mit demselben Stand.</string>
+    <string name="section_status">Fahrzeugstatus</string>
+    <string name="status_mode_saver">Akkuschutz</string>
+    <string name="status_mode_saver_desc">Nur auf Anfrage: im Fahrzeug-Tab nach unten ziehen oder ↻ tippen. Keine Abfragen im Hintergrund.</string>
+    <string name="status_mode_smart">Intelligent</string>
+    <string name="status_mode_smart_desc">Beim App-Start, danach regelmäßig, solange das Auto am Strom hängt und das Handy benutzt wird.</string>
+    <string name="status_mode_interval">Intervall</string>
+    <string name="status_mode_interval_desc">In festem Abstand, auch im Hintergrund (5 Min bis 3 Std).</string>
+    <string name="status_every">Alle %1$s</string>
+    <string name="status_never_wakes">Benötigt die BLE-Features. Automatische Abfragen wecken das Auto nie: Schläft es, wird nur der Verriegelungsstatus aktualisiert. Nach unten ziehen weckt es.</string>
+    <string name="donate_title">ATA unterstützen</string>
+    <string name="donate_headline">Danke, dass du ATA nutzt!</string>
+    <string name="donate_text">ATA ist für die private Nutzung kostenlos und entsteht in meiner Freizeit. Wenn dir die App jeden Tag ein paar Handgriffe spart und du die Weiterentwicklung unterstützen möchtest, freue ich mich über jede Spende.</string>
+    <string name="donate_button">Mit PayPal spenden</string>
+    <string name="donate_hint">Ganz freiwillig: ATA bleibt kostenlos und behält alle Funktionen.</string>
 </resources>

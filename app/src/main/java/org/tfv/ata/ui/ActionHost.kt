@@ -83,7 +83,8 @@ fun ActionHost(
   }
 
   fun runWithPermissions(action: AtaAction, value: String?) {
-    if (action.category == AtaCategory.FUNCTION_A) {
+    // The demo needs no Bluetooth.
+    if (action.category == AtaCategory.FUNCTION_A && !state.settings.demoMode) {
       val perms = org.tfv.ata.core.ble.TeslaController.BLE_PERMISSIONS
       val missing = perms.any { ContextCompat.checkSelfPermission(context, it) != PackageManager.PERMISSION_GRANTED }
       if (missing) {

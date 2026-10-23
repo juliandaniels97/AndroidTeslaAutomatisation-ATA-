@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.tfv.ata.core.AtaSettings
@@ -34,6 +35,8 @@ data class AtaUiState(
   val vehicles: List<Vehicle> = emptyList(),
   val selected: Vehicle? = null,
   val snapshot: VehicleSnapshot? = null,
+  /** Demo mode: the settings as stored ([settings] then shows Bluetooth as on). */
+  val stored: AtaSettings? = null,
   /** False until the stored settings have been read (the start tab depends on them). */
   val loaded: Boolean = false,
 )
@@ -58,6 +61,20 @@ class AtaViewModel(app: Application) : AndroidViewModel(app) {
     selectedVehicle.flatMapLatest { v -> if (v == null) flowOf(null) else store.snapshot(v.id) },
   ) { settings, vehicles, selected, snapshot ->
     AtaUiState(settings, vehicles, selected, snapshot, loaded = true)
+  }.flatMapLatest { ui ->
+    // Demo mode: a made-up car that is "connected" (no Bluetooth needed) with its own status.
+    if (!ui.settings.demoMode) {
+      flowOf(ui)
+    } else {
+      store.snapshot(org.tfv.ata.core.DemoCar.VEHICLE_ID).map { demo ->
+        ui.copy(
+          settings = ui.settings.copy(experimentalBle = true),
+          stored = ui.settings,
+          selected = org.tfv.ata.core.DemoCar.vehicle,
+          snapshot = demo ?: org.tfv.ata.core.DemoCar.start(System.currentTimeMillis()),
+        )
+      }
+    }
   }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AtaUiState())
 
   private val _refreshing = MutableStateFlow(false)
@@ -96,6 +113,16 @@ class AtaViewModel(app: Application) : AndroidViewModel(app) {
 
   init {
     viewModelScope.launch {
+      // 1.9.4: the status interval became three modes; an interval set before stays an interval.
+      store.updateSettings { st ->
+        if (st.statusModeMigrated) st
+        else if (st.pollIntervalMinutes > 0) st.copy(
+          statusMode = org.tfv.ata.core.StatusMode.INTERVAL,
+          intervalMinutes = st.pollIntervalMinutes.coerceIn(5, 180),
+          statusModeMigrated = true,
+        )
+        else st.copy(statusModeMigrated = true)
+      }
       // 1.9.2: the actions tab became "Favourites"; its tiles move to the end of the vehicle tab.
       store.updateSettings { st ->
         if (st.vehicleTilesMerged) st
@@ -258,6 +285,13 @@ class AtaViewModel(app: Application) : AndroidViewModel(app) {
   fun toggleFavoriteTile(key: String) = updateSettings { s ->
     val current = s.homeActionIds.ifEmpty { org.tfv.ata.ui.tiles.TileCatalog.favoriteDefaults }
     s.copy(homeActionIds = org.tfv.ata.ui.tiles.TileCatalog.toggle(current, key))
+  }
+
+  /** Turns the demo mode on (always from the same start: 50 %, charging) or off. */
+  fun setDemoMode(on: Boolean) = viewModelScope.launch {
+    if (on) store.saveSnapshot(org.tfv.ata.core.DemoCar.VEHICLE_ID, org.tfv.ata.core.DemoCar.start(System.currentTimeMillis()))
+    store.updateSettings { it.copy(demoMode = on) }
+    runCatching { StatusWidget().updateAll(getApplication()) }
   }
 
   fun rememberTab(route: String) = updateSettings { if (it.lastTab == route) it else it.copy(lastTab = route) }

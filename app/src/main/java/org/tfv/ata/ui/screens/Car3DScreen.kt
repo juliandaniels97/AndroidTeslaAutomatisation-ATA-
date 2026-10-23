@@ -217,7 +217,7 @@ fun Car3DScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit) {
   }
   val shape = CarModel.shape(state.selected?.body ?: BodyStyle.MODEL_3)
   var sheet by remember { mutableStateOf<Pair<Boolean, CarHotspot?>?>(null) }
-  val snapshot = state.snapshot
+  val snapshot = org.tfv.ata.ui.tiles.rememberLiveSnapshot(state.snapshot)
   val known = snapshot != null && snapshot.updatedAt > 0
   val status = CarStatus(snapshot?.charging == true, snapshot?.climateOn == true, snapshot?.sentry == true, if (known) snapshot?.batteryPercent else null, seatHeat = listOfNotNull(snapshot?.seatHeatFrontLeft, snapshot?.seatHeatFrontRight, snapshot?.seatHeatRearLeft, snapshot?.seatHeatRearCenter, snapshot?.seatHeatRearRight).any { it > 0 })
   val palette = AtaColors.current

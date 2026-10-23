@@ -43,6 +43,7 @@ object WearPush {
       snapshot.locked?.let { dataMap.putBoolean(WearContract.KEY_LOCKED, it) } ?: dataMap.remove(WearContract.KEY_LOCKED)
       dataMap.putString(WearContract.KEY_VEHICLE, vehicleName)
       dataMap.putLong(WearContract.KEY_UPDATED, snapshot.updatedAt)
+      dataMap.putString(WearContract.KEY_SNAPSHOT, kotlinx.serialization.json.Json.encodeToString(VehicleSnapshot.serializer(), snapshot))
     }.asPutDataRequest().setUrgent()
     runCatching { Wearable.getDataClient(context).putDataItem(request) }
   }

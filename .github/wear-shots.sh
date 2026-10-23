@@ -11,7 +11,12 @@ import json, sys, html
 acts = [("lock","Lock"),("unlock","Unlock"),("climate_on","Climate on"),("flash_lights","Flash lights"),("frunk","Frunk"),
         ("trunk","Trunk"),("honk","Honk"),("vent_windows","Vent windows"),("sentry_on","Sentry on"),("defrost","Defrost"),("wake","Wake up")]
 config = {"actions":[{"id":i,"label":l} for i,l in acts],"grid":int(sys.argv[1]),"complications":[]}
-status = {"vehicle":"Neon","battery":76,"range":382,"charging":False,"locked":True,"inside":21.4,"outside":9.6,"climate":False,"updatedAt":1700000000000}
+import time
+now = int(time.time() * 1000)
+# Like the phone's demo mode: plugged in, 1 h to go, 20 kWh added, limit 80 %.
+snap = {"batteryPercent":50,"rangeKm":265,"charging":True,"locked":True,"insideTempC":19.5,"outsideTempC":12.0,"chargingPowerKw":22,
+        "minutesToFull":60,"chargeLimit":80,"pluggedIn":True,"chargePortOpen":True,"chargeEnergyAddedKwh":20.0,"updatedAt":now}
+status = {"vehicle":"Demo Model Y","battery":50,"range":265,"charging":True,"locked":True,"inside":19.5,"outside":12.0,"climate":False,"updatedAt":now,"snapshot":snap}
 print("<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n<map>")
 print('<string name="config">%s</string>' % html.escape(json.dumps(config)))
 print('<string name="status">%s</string>' % html.escape(json.dumps(status)))
@@ -33,6 +38,7 @@ W=$(adb shell wm size | grep -o '[0-9]*x[0-9]*' | tail -1); WX=${W%x*}; WY=${W#*
 # First start compiles the app and shows "Starting…" for a while.
 adb shell am start -W -n org.tfv.ata/org.tfv.ata.wear.WearMainActivity >/dev/null; sleep 40; deny; deny
 prefs 4; start; deny; shot "wear-grid-4"
+adb shell input swipe $((WX * 8 / 10)) $((WY / 2)) $((WX / 10)) $((WY / 2)) 300; sleep 3; shot "wear-status"
 adb shell input swipe $((WX * 8 / 10)) $((WY / 2)) $((WX / 10)) $((WY / 2)) 300; sleep 2; shot "wear-list"
 prefs 7; start; deny; shot "wear-grid-7"
 adb shell input tap $((WX / 2)) $((WY / 2)); sleep 1; shot "wear-grid-7-tap"

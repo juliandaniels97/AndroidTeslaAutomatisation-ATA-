@@ -44,6 +44,8 @@ object WearContract {
   const val KEY_INSIDE = "inside"
   const val KEY_OUTSIDE = "outside"
   const val KEY_CLIMATE = "climate"
+  /** The whole VehicleSnapshot as JSON (charging power, time to full, energy added, seats …). */
+  const val KEY_SNAPSHOT = "snapshot"
 
   /** Tiles on the watch's first screen (4 or 7). */
   const val KEY_GRID = "grid"
