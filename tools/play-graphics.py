@@ -110,7 +110,7 @@ PHONE = [
     ('dark-1-home', 'de-dark-1-home', 'One tap, done', 'Favorites for lock, climate, frunk and navigation',
      'Ein Tipp, fertig', 'Favoriten für Schloss, Klima, Frunk und Navigation'),
     ('dark-2d-vehicle', 'de-dark-2d-vehicle', 'Charging, doors, windows', 'Charge limit, amps, charge port, frunk and trunk',
-     'Laden, Türen, Fenster', 'Ladelimit, Ampere, Ladeklappe, Frunk und Kofferraum'),
+     'Laden und Sitzheizung', 'Ladelimit und Ampere, Sitzheizung für jeden Sitz'),
     ('dark-2c-vehicle', 'de-dark-2c-vehicle', 'Climate and seats', 'Seat heating per seat, steering wheel heater, defrost',
      'Klima und Sitze', 'Sitzheizung je Sitz, Lenkradheizung, Entfrosten'),
     ('dark-21-car3d', 'de-dark-21-car3d', 'Tap the car itself', 'A 3D car you can turn, with glowing spots for every action',

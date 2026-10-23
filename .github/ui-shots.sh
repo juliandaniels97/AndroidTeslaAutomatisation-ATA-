@@ -130,12 +130,16 @@ restart; tap "Vehicle"; sleep 3; shot "tablet-material-light"
 # Google Play tablet screenshots (16:9): 10" (2560x1440) and 7" (1920x1080), neon dark and material light.
 for T in "10:2560x1440:320" "7:1920x1080:280"; do
   IFS=: read -r INCH SIZE DPI <<< "$T"
-  adb shell wm size "$SIZE"; adb shell wm density "$DPI"; sleep 3
+  # Switch the design at phone size (the settings list needs scrolling, which only works there).
+  adb shell wm size reset; adb shell wm density reset; sleep 3
   restart; tap "Settings"; tapany "Design"; tapany "Neon (standard)"; tapany "Dark"
+  adb shell wm size "$SIZE"; adb shell wm density "$DPI"; sleep 3
   restart; tap "Vehicle"; sleep 3; shot "play-tablet$INCH-1-vehicle"
   tap "Favorites"; sleep 2; shot "play-tablet$INCH-2-favorites"
   adb shell am start -S -W -n org.tfv.ata/.ui.MainActivity -a android.intent.action.VIEW -d ata://car3d >/dev/null; sleep 6; shot "play-tablet$INCH-3-car3d"
+  adb shell wm size reset; adb shell wm density reset; sleep 3
   restart; tap "Settings"; tapany "Design"; tapany "Material"; tapany "Light"
+  adb shell wm size "$SIZE"; adb shell wm density "$DPI"; sleep 3
   restart; tap "Vehicle"; sleep 3; shot "play-tablet$INCH-4-material"
 done
 adb shell wm size reset; adb shell wm density reset
