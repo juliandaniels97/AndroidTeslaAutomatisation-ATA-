@@ -36,19 +36,23 @@ uninstall it once and pair the phone with the car again.)
 
 **Neon — dark mode**
 
-<img width="1832" alt="ATA neon design in dark mode: home, vehicle in 3D, full-screen car, settings, watch settings" src="docs/screenshots/ata-dark.png" />
+<img width="1832" alt="ATA neon design in dark mode: favourites, vehicle with multi-tiles, seat heating and charging tiles, full-screen car, design settings" src="docs/screenshots/ata-dark.png" />
 
 **Neon — light mode**
 
-<img width="1832" alt="ATA neon design in light mode: home, vehicle, full-screen car, settings, watch settings" src="docs/screenshots/ata-light.png" />
+<img width="1832" alt="ATA neon design in light mode: favourites, vehicle with multi-tiles, seat heating and charging tiles, full-screen car, design settings" src="docs/screenshots/ata-light.png" />
 
 **Material — dark mode**
 
-<img width="1832" alt="ATA Material design in dark mode: home, painted car, full-screen car with animation, vehicle colours, settings" src="docs/screenshots/ata-material-dark.png" />
+<img width="1832" alt="ATA Material design in dark mode: favourites, painted car, multi-tiles, full-screen car with animation, vehicle colours" src="docs/screenshots/ata-material-dark.png" />
 
 **Material — light mode**
 
-<img width="1832" alt="ATA Material design in light mode: home, painted car, full-screen car with animation, vehicle colours, settings" src="docs/screenshots/ata-material-light.png" />
+<img width="1832" alt="ATA Material design in light mode: favourites, painted car, multi-tiles, full-screen car with animation, vehicle colours" src="docs/screenshots/ata-material-light.png" />
+
+**Tablet — car on the left, tiles on the right**
+
+<img width="1832" alt="ATA on a tablet in landscape: the car on the left, the multi-tiles on the right, dark and light" src="docs/screenshots/ata-tablet.png" />
 
 **Wear OS**
 
