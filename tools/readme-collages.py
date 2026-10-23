@@ -97,7 +97,8 @@ def tablet_collage(names, path):
     canvas = background(True)
     margin, gap = 50, 40
     tw = (W - 2 * margin - gap * (len(names) - 1)) // len(names)
-    th = int(tw * 1600 / 2560)
+    w0, h0 = Image.open(os.path.join(phone, names[0] + '.png')).size
+    th = int(tw * h0 / w0)
     y = (H - th) // 2
     x = margin
     for name in names:
@@ -109,5 +110,8 @@ def tablet_collage(names, path):
     canvas.crop((0, y - 40, W, y + th + 40)).convert('RGB').save(path, optimize=True)
     print('wrote', path)
 
-if os.path.exists(os.path.join(phone, 'tablet-neon-dark.png')):
+# The 16:9 Play tablet shots switch the design at phone size and are reliable; the older 16:10 pair is the fallback.
+if os.path.exists(os.path.join(phone, 'play-tablet10-1-vehicle.png')):
+    tablet_collage(['play-tablet10-1-vehicle', 'play-tablet10-4-material'], os.path.join(out, 'ata-tablet.png'))
+elif os.path.exists(os.path.join(phone, 'tablet-neon-dark.png')):
     tablet_collage(['tablet-neon-dark', 'tablet-material-light'], os.path.join(out, 'ata-tablet.png'))
