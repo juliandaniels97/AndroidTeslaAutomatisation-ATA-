@@ -26,6 +26,14 @@ and nothing is sent to the developer or to anyone else.
 This data is deleted when you uninstall ATA or clear its storage. ATA turns off Android's cloud backup
 (`allowBackup=false`), so nothing goes into a backup either.
 
+## Settings export
+
+When you export settings, ATA writes a file only where you put it with the Android file dialog.
+The file contains appearance, layout and the VIN **unencrypted**, and no vehicle keys or permissions.
+ATA does not upload the file and does not send it anywhere. The app does not request the internet
+permission, so it cannot transmit the file. Uninstalling ATA does not delete a file you saved
+outside the app.
+
 ## Permissions and why ATA needs them
 
 | Permission | Purpose |
@@ -95,6 +103,14 @@ bleibt auf deinem Gerät. Nichts wird an den Entwickler oder an Dritte gesendet.
 
 Diese Daten werden gelöscht, wenn du ATA deinstallierst oder den Speicher der App löschst. ATA schaltet
 die Android-Cloud-Sicherung ab (`allowBackup=false`), es landet also auch nichts in einem Backup.
+
+## Export der Einstellungen
+
+Wenn du Einstellungen exportierst, schreibt ATA die Datei nur dorthin, wo du sie im Android-Dateidialog
+ablegst. Die Datei enthält Darstellung, Anordnung und die FIN **unverschlüsselt**, aber keine
+Fahrzeugschlüssel und keine Freigaben. ATA lädt die Datei nicht hoch und überträgt sie nirgendwohin.
+Die App fordert keine Internet-Berechtigung an und kann die Datei deshalb nicht versenden. Wenn du ATA
+deinstallierst, bleibt eine außerhalb der App gespeicherte Datei liegen.
 
 ## Berechtigungen und wofür ATA sie braucht
 

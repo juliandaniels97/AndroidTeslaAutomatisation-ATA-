@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Nfc
+import androidx.compose.material.icons.filled.SettingsBackupRestore
 import androidx.compose.material.icons.filled.Watch
 import androidx.compose.material.icons.filled.Widgets
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -78,6 +79,7 @@ fun SettingsScreen(
   onAbout: () -> Unit,
   onGuide: () -> Unit,
   onReport: () -> Unit,
+  onBackup: () -> Unit,
   onKeyCard: () -> Unit,
 ) {
   val s = state.settings
@@ -150,6 +152,7 @@ fun SettingsScreen(
       }
 
       HorizontalDivider()
+      LinkRow(stringResource(R.string.settings_backup), Icons.Filled.SettingsBackupRestore, onBackup)
       LinkRow(stringResource(R.string.report_title), Icons.Filled.BugReport, onReport)
       LinkRow(stringResource(R.string.settings_about), Icons.Filled.Info, onAbout)
     }

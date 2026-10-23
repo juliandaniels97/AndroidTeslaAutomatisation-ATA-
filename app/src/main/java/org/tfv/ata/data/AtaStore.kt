@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import org.tfv.ata.core.AtaSettings
+import org.tfv.ata.core.SettingsBackup
 import org.tfv.ata.core.TriggerSource
 import org.tfv.ata.core.Vehicle
 import org.tfv.ata.core.VehicleSnapshot
@@ -105,6 +106,31 @@ class AtaStore(private val context: Context) {
   private fun newToken(): String {
     val bytes = ByteArray(24).also { java.security.SecureRandom().nextBytes(it) }
     return bytes.joinToString("") { "%02x".format(it) }
+  }
+
+  /**
+   * One edit for a settings backup: vehicles, the whitelisted settings, then the selection.
+   * Tokens and snapshots stay untouched. A null result from [block] writes nothing.
+   */
+  suspend fun importLayout(
+    block: (AtaSettings, List<Vehicle>, String?) -> SettingsBackup.Write?,
+  ): Boolean {
+    var wrote = false
+    context.dataStore.edit { prefs ->
+      val current = prefs[keySettings]?.let {
+        runCatching { json.decodeFromString<AtaSettings>(it) }.getOrNull()
+      } ?: AtaSettings()
+      val list = prefs[keyVehicles]?.let {
+        runCatching { json.decodeFromString(ListSerializer(Vehicle.serializer()), it) }.getOrNull()
+      } ?: emptyList()
+      val write = block(current, list, prefs[keySelected]) ?: return@edit
+      prefs[keyVehicles] = json.encodeToString(ListSerializer(Vehicle.serializer()), write.vehicles)
+      prefs[keySettings] = json.encodeToString(AtaSettings.serializer(), write.settings)
+      val selected = write.selectedId
+      if (selected == null) prefs.remove(keySelected) else prefs[keySelected] = selected
+      wrote = true
+    }
+    return wrote
   }
 
   suspend fun saveSnapshot(vehicleId: String, snapshot: VehicleSnapshot) {
