@@ -158,8 +158,9 @@ multi‑tiles and tiles per row. Both designs come in light and dark:
     - **charging (2×2):** start/stop, battery, kW, time to full, limit, amps
     - volume, climate keeper, overheat protection
     - sentry, steering‑wheel heater (shows **Auto** when the car runs it by itself, else low/high), bioweapon defence
-  - **Sliders** (volume, temperature, limit, amps): slide up or down. The command is sent only when
-    you let go, so the car gets one command instead of dozens. A tap on the upper or lower half
+  - **Sliders** (volume, temperature, limit, amps): touch, hold briefly (it vibrates), then slide up or
+    down; a quick swipe scrolls the page. The command is sent only when you let go, so the car gets one
+    command instead of dozens. A tap on the upper or lower half
     changes the value by one step.
   - Off: one tile per action, with a slider dialog for values.
 - **Tiles per row:** 2–6 or Auto (3 on phones, more on tablets). Names stay visible at every size.

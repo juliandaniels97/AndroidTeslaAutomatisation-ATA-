@@ -32,3 +32,9 @@
   - **Wie die App**, **Neon** oder **Material**.
   - Optional ein **durchscheinender Hintergrund**.
   - Die Widgets folgen dem hellen/dunklen Theme der App.
+
+### Bedienung
+- **Schieber** (Temperatur, Lautstärke, Ladelimit, Ampere) verstellen sich nicht mehr versehentlich beim Scrollen.
+  - Antippen, kurz halten (es vibriert), dann schieben.
+  - Ein schneller Wisch scrollt die Seite.
+  - Antippen oben/unten ändert wie bisher um eine Stufe.

@@ -5,8 +5,8 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.gestures.detectVerticalDragGestures
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.clickable
@@ -232,9 +232,10 @@ fun LevelDots(level: Int, enabled: Boolean, onSelect: (Int) -> Unit, modifier: M
 }
 
 /**
- * A button you slide up and down to change a value (volume, temperature, charge limit …). The value follows the
- * finger, but the command is only sent once the finger lets go ([onCommit]), so the car gets one command, not
- * dozens. A tap on the upper / lower half steps up / down by [step].
+ * A button you slide up and down to change a value (volume, temperature, charge limit …): touch, hold briefly
+ * (it vibrates), then slide. A quick swipe scrolls the page instead. The value follows the finger, but the
+ * command is only sent once the finger lets go ([onCommit]), so the car gets one command, not dozens. A tap on
+ * the upper / lower half steps up / down by [step].
  */
 @Composable
 fun DragFader(
@@ -285,33 +286,48 @@ fun DragFader(
       .then(if (!palette.material) Modifier.border(1.dp, fill.copy(alpha = if (dragging) .9f else .4f), shape) else Modifier)
       .pointerInput(enabled, range, step) {
         if (!enabled) return@pointerInput
-        var raw = 0f
-        detectVerticalDragGestures(
-          onDragStart = { raw = shown; dragging = true },
-          onDragEnd = {
-            dragging = false
-            if (abs(shown - latestValue) > step / 2) latestCommit(shown)
-          },
-          onDragCancel = { dragging = false; shown = latestValue },
-          onVerticalDrag = { change, dy ->
-            change.consume()
-            raw = (raw - dy / fullTravelPx * span).coerceIn(range.start, range.endInclusive)
-            val q = quantize(raw)
-            if (q != shown) {
-              shown = q
-              if (haptics) view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+        awaitEachGesture {
+          val down = awaitFirstDown(requireUnconsumed = false)
+          // 0 = held still (start adjusting), 1 = let go (tap), 2 = moved first (a scroll: leave it to the page).
+          val start = withTimeoutOrNull(HOLD_MS) {
+            while (true) {
+              val change = awaitPointerEvent().changes.firstOrNull { it.id == down.id } ?: return@withTimeoutOrNull 2
+              if (!change.pressed) return@withTimeoutOrNull 1
+              if ((change.position - down.position).getDistance() > viewConfiguration.touchSlop) return@withTimeoutOrNull 2
             }
-          },
-        )
-      }
-      .pointerInput(enabled, range, step) {
-        if (!enabled) return@pointerInput
-        detectTapGestures { pos ->
-          val next = quantize(shown + if (pos.y < size.height / 2) step else -step)
-          if (next != shown) {
-            shown = next
-            if (haptics) view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
-            latestCommit(next)
+            @Suppress("UNREACHABLE_CODE")
+            2
+          } ?: 0
+          when (start) {
+            1 -> {
+              val next = quantize(shown + if (down.position.y < size.height / 2) step else -step)
+              if (next != shown) {
+                shown = next
+                if (haptics) view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                latestCommit(next)
+              }
+            }
+            0 -> {
+              dragging = true
+              if (haptics) view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+              var raw = shown
+              var lastY = down.position.y
+              while (true) {
+                val change = awaitPointerEvent().changes.firstOrNull { it.id == down.id } ?: break
+                if (!change.pressed) break
+                val dy = change.position.y - lastY
+                lastY = change.position.y
+                change.consume()
+                raw = (raw - dy / fullTravelPx * span).coerceIn(range.start, range.endInclusive)
+                val q = quantize(raw)
+                if (q != shown) {
+                  shown = q
+                  if (haptics) view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+                }
+              }
+              dragging = false
+              if (abs(shown - latestValue) > step / 2) latestCommit(shown)
+            }
           }
         }
       },
@@ -328,6 +344,9 @@ fun DragFader(
     }
   }
 }
+
+/** How long a finger rests on a slider before it adjusts (shorter = scroll). */
+private const val HOLD_MS = 200L
 
 /** Small "status" pill, e.g. "48 kW". */
 @Composable
