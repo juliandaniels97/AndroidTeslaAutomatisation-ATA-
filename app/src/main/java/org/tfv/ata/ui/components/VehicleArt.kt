@@ -121,7 +121,12 @@ fun VehicleArt(
         }
         if (charging) {
           val kw = snapshot?.chargingPowerKw ?: 0
-          StateChip(Icons.Filled.Bolt, palette.success, if (kw > 0) "$kw kW" else null, pulse = true)
+          val minutes = snapshot?.minutesToFull ?: 0
+          val text = listOfNotNull(
+            "$kw kW".takeIf { kw > 0 },
+            stringResource(R.string.st_full_in_short, org.tfv.ata.ui.tiles.formatMinutes(minutes)).takeIf { minutes > 0 },
+          ).joinToString(" · ").ifEmpty { null }
+          StateChip(Icons.Filled.Bolt, palette.success, text, pulse = true)
         }
         if (climate) StateChip(Icons.Filled.AcUnit, palette.accent)
         if (snapshot?.sentry == true) StateChip(Icons.Filled.Shield, palette.critical)

@@ -74,7 +74,10 @@ enum class AtaAction(
   // Temperature for one side only (°C); the other side keeps its setting.
   SET_TEMPERATURE_DRIVER("set_temperature_driver", AtaCategory.FUNCTION_A, true, needsValue = true),
   SET_TEMPERATURE_PASSENGER("set_temperature_passenger", AtaCategory.FUNCTION_A, true, needsValue = true),
-  OVERHEAT_PROTECTION_FAN_ONLY("overheat_protection_fan_only", AtaCategory.FUNCTION_A, true);
+  OVERHEAT_PROTECTION_FAN_ONLY("overheat_protection_fan_only", AtaCategory.FUNCTION_A, true),
+  // Automatic seat climate (heating / ventilation chosen by the car) for a front seat: value 1 = on, 0 = off.
+  SEAT_AUTO_FRONT_LEFT("seat_auto_fl", AtaCategory.FUNCTION_A, true, needsValue = true),
+  SEAT_AUTO_FRONT_RIGHT("seat_auto_fr", AtaCategory.FUNCTION_A, true, needsValue = true);
 
   companion object {
     fun fromId(id: String?): AtaAction? = entries.firstOrNull { it.id == id }

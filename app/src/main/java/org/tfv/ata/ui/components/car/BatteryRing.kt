@@ -21,8 +21,8 @@ fun batteryColor(level: Int): Color = when {
 
 /**
  * Neon battery ring with a slow, viscous glow: the brightness flows gently along the arc like thick liquid.
- * Dashed while the level is unknown. While charging, drops of light flow from the start of the ring to the
- * current level (faster with more [chargeKw]), the tip breathes and a faint dashed arc shows the way to the
+ * Dashed while the level is unknown. While charging, green dots climb slowly along the ring up to the current
+ * level (a little faster with more [chargeKw]), the tip breathes and a faint dashed arc shows the way to the
  * [chargeLimit].
  */
 fun DrawScope.drawBatteryRing(
@@ -52,11 +52,6 @@ fun DrawScope.drawBatteryRing(
     drawCircle(color.copy(alpha = .16f), radius, center, style = Stroke(width))
     val sweepAll = 360f * level.coerceIn(0, 100) / 100f
     drawArc(color, -90f, sweepAll, false, topLeft, box, style = Stroke(width, cap = StrokeCap.Round))
-    if (charging && sweepAll > 20f) {
-      // A lighter segment travels along the arc while charging.
-      val head = (t * 120f) % sweepAll
-      drawArc(Color.White.copy(alpha = .45f), -90f + head, minOf(18f, sweepAll - head), false, topLeft, box, style = Stroke(width * .55f, cap = StrokeCap.Round))
-    }
     if (charging) drawChargeFlow(center, radius, level, chargeKw, chargeLimit, t, width, color, glow, true, topLeft, box)
     return
   }
@@ -72,10 +67,6 @@ fun DrawScope.drawBatteryRing(
     var light = .80f + .10f * sin(rel / 57.3f * 3f + t * .5f) + .06f * sin(rel / 57.3f * 7f - t * .8f)
     val d = ((rel - blob + 540f) % 360f) - 180f
     light += .14f * exp(-(d / 28f) * (d / 28f))
-    if (charging) {
-      val c = ((rel - (t * 90f) % 360f + 540f) % 360f) - 180f
-      light += .35f * exp(-(c / 14f) * (c / 14f))
-    }
     val alpha = light.coerceIn(0f, 1f)
     if (glow) {
       drawArc(color.copy(alpha = .10f * alpha), a, step, false, topLeft, box, style = Stroke(width * 3.2f), blendMode = blend)
@@ -110,16 +101,22 @@ private fun DrawScope.drawChargeFlow(
     )
   }
   if (sweep < 8f) return
-  // 60 °/s at a wall box, up to ~400 °/s at a Supercharger.
-  val speed = (60f + kw * 2.6f).coerceAtMost(400f)
-  val drops = 3
-  val flowColor = if (material) Color.White else color
-  for (k in 0 until drops) {
-    val head = ((t * speed) + k * sweep / drops) % sweep
-    val len = minOf(26f, head)
-    if (len <= 0f) continue
-    if (glow) drawArc(flowColor.copy(alpha = .25f), -90f + head - len, len, false, topLeft, box, style = Stroke(width * 2.4f, cap = StrokeCap.Round), blendMode = BlendMode.Plus)
-    drawArc(flowColor.copy(alpha = if (material) .5f else .9f), -90f + head - len, len, false, topLeft, box, style = Stroke(width * .6f, cap = StrokeCap.Round))
+  // Green dots climb slowly along the charged part of the ring towards the tip, like energy flowing in; a little
+  // faster with more power, never hectic. Each fades in at the start and out at the tip.
+  val green = if (material) Color(0xFF2E9E5B) else Color(0xFF39FF88)
+  val speed = (14f + kw * .12f).coerceAtMost(40f)
+  val spacing = 26f
+  val count = (sweep / spacing).toInt().coerceAtLeast(1)
+  val shift = (t * speed) % spacing
+  for (k in 0..count) {
+    val pos = k * spacing + shift
+    if (pos > sweep) continue
+    val f = pos / sweep
+    val fade = minOf(1f, f * 6f, (1f - f) * 6f).coerceIn(0f, 1f)
+    val rad = Math.toRadians((-90f + pos).toDouble())
+    val p = Offset(center.x + radius * kotlin.math.cos(rad).toFloat(), center.y + radius * kotlin.math.sin(rad).toFloat())
+    if (glow) drawCircle(green.copy(alpha = .28f * fade), width * .9f, p, blendMode = BlendMode.Plus)
+    drawCircle(green.copy(alpha = .95f * fade), width * .3f, p)
   }
   // Breathing tip at the current level.
   val breathe = .5f + .5f * sin(t * 3.2f)

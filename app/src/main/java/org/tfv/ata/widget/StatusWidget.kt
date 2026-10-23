@@ -4,7 +4,17 @@ import android.content.Context
 import android.content.Intent
 import android.text.format.DateUtils
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BatteryChargingFull
+import androidx.compose.material.icons.filled.BatteryStd
+import androidx.compose.material.icons.filled.DirectionsCar
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.LockOpen
+import androidx.compose.material.icons.filled.Route
+import androidx.compose.material.icons.filled.Thermostat
+import androidx.compose.material.icons.filled.WbSunny
+import androidx.compose.ui.graphics.vector.ImageVector
+import org.tfv.ata.ui.tiles.formatMinutes
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
@@ -42,14 +52,6 @@ import org.tfv.ata.R
 import org.tfv.ata.core.VehicleSnapshot
 import org.tfv.ata.data.AtaStore
 import org.tfv.ata.ui.MainActivity
-import androidx.glance.color.ColorProvider as DayNight
-
-private val BACKGROUND = DayNight(day = Color(0xFFF4F6F9), night = Color(0xFF1C1F24))
-private val CELL = DayNight(day = Color(0xFFE6EBF1), night = Color(0xFF262A31))
-private val TEXT = DayNight(day = Color(0xFF161B22), night = Color.White)
-private val MUTED = DayNight(day = Color(0xFF5B6B7C), night = Color(0xFFABB6C4))
-private val ACCENT = DayNight(day = Color(0xFF0B63BD), night = Color(0xFF4FB4FF))
-private val CHARGE = DayNight(day = Color(0xFF1E8E4E), night = Color(0xFF2ECC71))
 
 /** What the widget shows; "--" for values that were never read. */
 private data class StatusValues(
@@ -60,19 +62,23 @@ private data class StatusValues(
   val inside: String,
   val outside: String,
   val charging: Boolean,
-  val lock: String,
+  /** "48 kW · full in 1 h 20 min" while charging. */
+  val chargeText: String?,
+  val locked: Boolean?,
   val updated: String,
 )
 
 /**
- * Vehicle status: battery, range, inside and outside temperature, charging and lock state. Responsive: from a
- * single cell up to a large widget it always shows every value, only arranged differently.
+ * Vehicle status in the look of the app's tiles: battery (with kW and time to full while charging), range,
+ * inside and outside temperature and lock state. Responsive: from a single cell up to a large widget it always
+ * shows every value, only arranged differently.
  */
 class StatusWidget : GlanceAppWidget() {
   override val sizeMode = SizeMode.Responsive(setOf(TINY, WIDE, MEDIUM, LARGE))
 
   override suspend fun provideGlance(context: Context, id: GlanceId) {
     val store = AtaStore.get(context)
+    val look = widgetLook(store.settings.first())
     val vehicles = store.vehicles.first()
     val selectedId = store.selectedVehicleId.first()
     val vehicle = vehicles.firstOrNull { it.id == selectedId } ?: vehicles.firstOrNull()
@@ -82,15 +88,15 @@ class StatusWidget : GlanceAppWidget() {
     provideContent {
       val size = LocalSize.current
       Box(
-        modifier = GlanceModifier.fillMaxSize().background(BACKGROUND).cornerRadius(16.dp)
+        modifier = GlanceModifier.fillMaxSize().background(look.background).cornerRadius(20.dp)
           .clickable(actionStartActivity(Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))),
         contentAlignment = Alignment.Center,
       ) {
         when {
-          size.height < 90.dp && size.width < 200.dp -> Tiny(values)
-          size.height < 90.dp -> Wide(context, values)
-          size.width < 230.dp || size.height < 160.dp -> Medium(context, values)
-          else -> Large(context, values)
+          size.height < 90.dp && size.width < 200.dp -> Tiny(look, values)
+          size.height < 90.dp -> Wide(context, look, values)
+          size.width < 230.dp || size.height < 160.dp -> Medium(context, look, values)
+          else -> Large(context, look, values)
         }
       }
     }
@@ -106,6 +112,7 @@ class StatusWidget : GlanceAppWidget() {
 
 private fun values(context: Context, name: String, s: VehicleSnapshot?): StatusValues {
   fun temp(c: Float) = "${Math.round(c)}°"
+  val charging = s?.charging == true
   return StatusValues(
     name = name,
     battery = s?.let { "${it.batteryPercent}%" } ?: "--",
@@ -113,119 +120,156 @@ private fun values(context: Context, name: String, s: VehicleSnapshot?): StatusV
     range = s?.let { "${it.rangeKm} km" } ?: "--",
     inside = s?.let { temp(it.insideTempC) } ?: "--",
     outside = s?.let { temp(it.outsideTempC) } ?: "--",
-    charging = s?.charging == true,
-    lock = when (s?.locked) { true -> "🔒"; false -> "🔓"; null -> "" },
+    charging = charging,
+    chargeText = if (charging && s != null) {
+      listOfNotNull(
+        "${s.chargingPowerKw} kW".takeIf { s.chargingPowerKw > 0 },
+        context.getString(R.string.st_full_in_short, formatMinutes(s.minutesToFull)).takeIf { s.minutesToFull > 0 },
+      ).joinToString(" · ").ifEmpty { context.getString(R.string.st_charging) }
+    } else {
+      null
+    },
+    locked = s?.locked,
     updated = s?.let {
       DateUtils.getRelativeTimeSpanString(it.updatedAt, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS, DateUtils.FORMAT_ABBREV_RELATIVE).toString()
     } ?: context.getString(R.string.widget_status_unknown),
   )
 }
 
-private fun style(size: TextUnit, color: ColorProvider = TEXT, bold: Boolean = false) =
+private fun style(size: TextUnit, color: ColorProvider, bold: Boolean = false) =
   TextStyle(color = color, fontSize = size, fontWeight = if (bold) FontWeight.Bold else FontWeight.Normal)
 
+private fun batteryIcon(v: StatusValues): ImageVector = if (v.charging) Icons.Filled.BatteryChargingFull else Icons.Filled.BatteryStd
+
 @Composable
-private fun BatteryText(v: StatusValues, size: TextUnit) {
-  Row(verticalAlignment = Alignment.CenterVertically) {
-    Text(v.battery, style = style(size, if (v.charging) CHARGE else ACCENT, bold = true))
-    if (v.charging) Text(" ⚡", style = style(size * .8f, CHARGE))
+private fun LockIcon(look: WidgetLook, v: StatusValues, size: androidx.compose.ui.unit.Dp) {
+  when (v.locked) {
+    true -> WidgetIcon(Icons.Filled.Lock, look.charge, size)
+    false -> WidgetIcon(Icons.Filled.LockOpen, look.warning, size)
+    null -> Unit
   }
 }
 
-/** Value with a small label underneath, centred in a rounded cell. */
 @Composable
-private fun Cell(label: String, value: String, modifier: GlanceModifier, valueSize: TextUnit = 16.sp) {
-  Column(
-    modifier = modifier.background(CELL).cornerRadius(10.dp).padding(vertical = 4.dp, horizontal = 4.dp),
-    horizontalAlignment = Alignment.CenterHorizontally,
-    verticalAlignment = Alignment.CenterVertically,
-  ) {
-    Text(value, style = style(valueSize, bold = true).copy(textAlign = TextAlign.Center), maxLines = 1)
-    Text(label, style = style(10.sp, MUTED).copy(textAlign = TextAlign.Center), maxLines = 1)
+private fun BatteryLine(look: WidgetLook, v: StatusValues, size: TextUnit, icon: androidx.compose.ui.unit.Dp) {
+  Row(verticalAlignment = Alignment.CenterVertically) {
+    WidgetIcon(batteryIcon(v), if (v.charging) look.charge else look.accent, icon)
+    Text(v.battery, style = style(size, if (v.charging) look.charge else look.text, bold = true), modifier = GlanceModifier.padding(start = 2.dp))
+  }
+}
+
+/** Value with icon and a small label, in a card like the app's tiles. */
+@Composable
+private fun Cell(look: WidgetLook, icon: ImageVector, label: String, value: String, modifier: GlanceModifier, valueSize: TextUnit = 16.sp) {
+  WidgetCard(look, modifier, radius = 12.dp) {
+    Column(GlanceModifier.padding(vertical = 4.dp, horizontal = 4.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalAlignment = Alignment.CenterVertically) {
+      Row(verticalAlignment = Alignment.CenterVertically) {
+        WidgetIcon(icon, look.accent, 14.dp)
+        Text(value, style = style(valueSize, look.text, bold = true).copy(textAlign = TextAlign.Center), maxLines = 1, modifier = GlanceModifier.padding(start = 3.dp))
+      }
+      Text(label, style = style(10.sp, look.muted).copy(textAlign = TextAlign.Center), maxLines = 1)
+    }
+  }
+}
+
+@Composable
+private fun ThreeCells(context: Context, look: WidgetLook, v: StatusValues, modifier: GlanceModifier, valueSize: TextUnit, gap: androidx.compose.ui.unit.Dp) {
+  Row(modifier) {
+    Cell(look, Icons.Filled.Route, context.getString(R.string.widget_status_range), v.range, GlanceModifier.defaultWeight().fillMaxHeight(), valueSize)
+    Spacer(GlanceModifier.width(gap))
+    Cell(look, Icons.Filled.Thermostat, context.getString(R.string.widget_status_inside), v.inside, GlanceModifier.defaultWeight().fillMaxHeight(), valueSize)
+    Spacer(GlanceModifier.width(gap))
+    Cell(look, Icons.Filled.WbSunny, context.getString(R.string.widget_status_outside), v.outside, GlanceModifier.defaultWeight().fillMaxHeight(), valueSize)
   }
 }
 
 /** One cell (1×1 / 2×1): two compact lines. */
 @Composable
-private fun Tiny(v: StatusValues) {
+private fun Tiny(look: WidgetLook, v: StatusValues) {
   Column(GlanceModifier.padding(horizontal = 8.dp, vertical = 4.dp), horizontalAlignment = Alignment.CenterHorizontally) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-      BatteryText(v, 15.sp)
-      Text("  ${v.range}", style = style(12.sp), maxLines = 1)
+      BatteryLine(look, v, 15.sp, 16.dp)
+      Text("  ${v.range}", style = style(12.sp, look.text), maxLines = 1)
     }
-    Text("${v.inside} / ${v.outside}  ${v.lock}", style = style(11.sp, MUTED), maxLines = 1)
+    Row(verticalAlignment = Alignment.CenterVertically) {
+      Text(v.chargeText ?: "${v.inside} / ${v.outside}", style = style(11.sp, if (v.charging) look.charge else look.muted), maxLines = 1)
+      Spacer(GlanceModifier.width(4.dp))
+      LockIcon(look, v, 12.dp)
+    }
   }
 }
 
-/** Wide and flat (3×1, 4×1): one row of values. */
+/** Wide and flat (3×1, 4×1): one row of cards. */
 @Composable
-private fun Wide(context: Context, v: StatusValues) {
+private fun Wide(context: Context, look: WidgetLook, v: StatusValues) {
   Row(GlanceModifier.fillMaxSize().padding(6.dp), verticalAlignment = Alignment.CenterVertically) {
-    Column(GlanceModifier.defaultWeight(), horizontalAlignment = Alignment.CenterHorizontally) {
-      BatteryText(v, 17.sp)
-      Text("${v.lock} ${context.getString(R.string.widget_status_battery)}", style = style(10.sp, MUTED), maxLines = 1)
+    WidgetCard(look, GlanceModifier.defaultWeight().fillMaxHeight(), radius = 12.dp) {
+      Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        BatteryLine(look, v, 16.sp, 15.dp)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+          LockIcon(look, v, 11.dp)
+          Text(
+            v.chargeText ?: context.getString(R.string.widget_status_battery),
+            style = style(10.sp, if (v.charging) look.charge else look.muted),
+            maxLines = 1,
+            modifier = GlanceModifier.padding(start = 2.dp),
+          )
+        }
+      }
     }
-    Cell(context.getString(R.string.widget_status_range), v.range, GlanceModifier.defaultWeight().height(44.dp), 14.sp)
     Spacer(GlanceModifier.width(4.dp))
-    Cell(context.getString(R.string.widget_status_inside), v.inside, GlanceModifier.defaultWeight().height(44.dp), 14.sp)
-    Spacer(GlanceModifier.width(4.dp))
-    Cell(context.getString(R.string.widget_status_outside), v.outside, GlanceModifier.defaultWeight().height(44.dp), 14.sp)
+    ThreeCells(context, look, v, GlanceModifier.defaultWeight().fillMaxHeight(), 14.sp, 4.dp)
   }
 }
 
-/** 2×2: name, battery with bar, then three cells. */
 @Composable
-private fun Medium(context: Context, v: StatusValues) {
+private fun Header(look: WidgetLook, v: StatusValues, size: TextUnit) {
+  Row(GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+    WidgetIcon(Icons.Filled.DirectionsCar, look.accent, 16.dp)
+    Text(v.name, style = style(size, look.text, bold = true), maxLines = 1, modifier = GlanceModifier.defaultWeight().padding(start = 5.dp))
+    LockIcon(look, v, 16.dp)
+  }
+}
+
+/** 2×2: name, battery with bar and charging state, then three cards. */
+@Composable
+private fun Medium(context: Context, look: WidgetLook, v: StatusValues) {
   Column(GlanceModifier.fillMaxSize().padding(10.dp)) {
-    Row(GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-      Text(v.name, style = style(12.sp, MUTED), maxLines = 1, modifier = GlanceModifier.defaultWeight())
-      Text(v.lock, style = style(12.sp))
-    }
-    BatteryText(v, 24.sp)
+    Header(look, v, 12.sp)
+    BatteryLine(look, v, 24.sp, 22.dp)
+    if (v.chargeText != null) Text(v.chargeText, style = style(11.sp, look.charge, bold = true), maxLines = 1)
     LinearProgressIndicator(
       progress = v.batteryLevel,
-      modifier = GlanceModifier.fillMaxWidth().height(5.dp),
-      color = if (v.charging) CHARGE else ACCENT,
-      backgroundColor = CELL,
+      modifier = GlanceModifier.fillMaxWidth().height(5.dp).cornerRadius(3.dp),
+      color = if (v.charging) look.charge else look.accent,
+      backgroundColor = look.track,
     )
     Spacer(GlanceModifier.height(6.dp))
-    Row(GlanceModifier.fillMaxWidth().defaultWeight()) {
-      Cell(context.getString(R.string.widget_status_range), v.range, GlanceModifier.defaultWeight().fillMaxHeight(), 13.sp)
-      Spacer(GlanceModifier.width(4.dp))
-      Cell(context.getString(R.string.widget_status_inside), v.inside, GlanceModifier.defaultWeight().fillMaxHeight(), 13.sp)
-      Spacer(GlanceModifier.width(4.dp))
-      Cell(context.getString(R.string.widget_status_outside), v.outside, GlanceModifier.defaultWeight().fillMaxHeight(), 13.sp)
-    }
+    ThreeCells(context, look, v, GlanceModifier.fillMaxWidth().defaultWeight(), 13.sp, 4.dp)
   }
 }
 
 /** 4×2 and bigger: like the medium one, larger, with the time of the last reading. */
 @Composable
-private fun Large(context: Context, v: StatusValues) {
+private fun Large(context: Context, look: WidgetLook, v: StatusValues) {
   Column(GlanceModifier.fillMaxSize().padding(14.dp)) {
-    Row(GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-      Text(v.name, style = style(15.sp, bold = true), maxLines = 1, modifier = GlanceModifier.defaultWeight())
-      Text(v.lock, style = style(16.sp))
-    }
-    Row(verticalAlignment = Alignment.Bottom) {
-      BatteryText(v, 34.sp)
-      Text("  ${v.range}", style = style(16.sp, MUTED), maxLines = 1)
+    Header(look, v, 15.sp)
+    Row(verticalAlignment = Alignment.CenterVertically) {
+      BatteryLine(look, v, 34.sp, 30.dp)
+      Column(GlanceModifier.padding(start = 10.dp)) {
+        Text(v.range, style = style(16.sp, look.muted), maxLines = 1)
+        if (v.chargeText != null) Text(v.chargeText, style = style(12.sp, look.charge, bold = true), maxLines = 1)
+      }
     }
     LinearProgressIndicator(
       progress = v.batteryLevel,
-      modifier = GlanceModifier.fillMaxWidth().height(7.dp),
-      color = if (v.charging) CHARGE else ACCENT,
-      backgroundColor = CELL,
+      modifier = GlanceModifier.fillMaxWidth().height(7.dp).cornerRadius(4.dp),
+      color = if (v.charging) look.charge else look.accent,
+      backgroundColor = look.track,
     )
     Spacer(GlanceModifier.height(8.dp))
-    Row(GlanceModifier.fillMaxWidth().defaultWeight()) {
-      Cell(context.getString(R.string.widget_status_range), v.range, GlanceModifier.defaultWeight().fillMaxHeight(), 18.sp)
-      Spacer(GlanceModifier.width(6.dp))
-      Cell(context.getString(R.string.widget_status_inside), v.inside, GlanceModifier.defaultWeight().fillMaxHeight(), 18.sp)
-      Spacer(GlanceModifier.width(6.dp))
-      Cell(context.getString(R.string.widget_status_outside), v.outside, GlanceModifier.defaultWeight().fillMaxHeight(), 18.sp)
-    }
-    Text(v.updated, style = style(10.sp, MUTED), modifier = GlanceModifier.padding(top = 4.dp))
+    ThreeCells(context, look, v, GlanceModifier.fillMaxWidth().defaultWeight(), 18.sp, 6.dp)
+    Text(v.updated, style = style(10.sp, look.muted), modifier = GlanceModifier.padding(top = 4.dp))
   }
 }
 

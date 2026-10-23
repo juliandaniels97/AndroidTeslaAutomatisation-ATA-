@@ -3,7 +3,11 @@ package org.tfv.ata.widget
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.ui.graphics.Color
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Explore
+import androidx.glance.appwidget.cornerRadius
+import androidx.glance.layout.Box
+import androidx.glance.text.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceId
@@ -14,7 +18,6 @@ import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.appwidget.provideContent
 import androidx.glance.background
-import androidx.glance.color.ColorProvider as DayNight
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Column
 import androidx.glance.layout.fillMaxSize
@@ -52,26 +55,22 @@ class CarFinderWidget : GlanceAppWidget() {
       .setClass(context, MainActivity::class.java)
       .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
+    val look = widgetLook(settings)
     provideContent {
-      Column(
-        modifier = GlanceModifier.fillMaxSize()
-          .background(DayNight(day = Color(0xFFF4F6F9), night = Color(0xFF1C1F24))).padding(10.dp)
-          .clickable(actionStartActivity(open)),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalAlignment = Alignment.CenterHorizontally,
+      Box(
+        GlanceModifier.fillMaxSize().background(look.background).cornerRadius(20.dp).padding(6.dp).clickable(actionStartActivity(open)),
       ) {
-        Text(
-          text = big,
-          style = TextStyle(
-            color = DayNight(day = Color(0xFF0B63BD), night = Color(0xFF4FB4FF)),
-            fontWeight = FontWeight.Bold,
-            fontSize = 22.sp,
-          ),
-        )
-        Text(
-          text = small,
-          style = TextStyle(color = DayNight(day = Color(0xFF45505C), night = Color(0xFFABB6C4)), fontSize = 12.sp),
-        )
+        WidgetCard(look, GlanceModifier.fillMaxSize(), radius = 16.dp) {
+          Column(
+            modifier = GlanceModifier.padding(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalAlignment = Alignment.CenterHorizontally,
+          ) {
+            WidgetIcon(Icons.Filled.Explore, look.accent, 22.dp)
+            Text(text = big, style = TextStyle(color = look.accent, fontWeight = FontWeight.Bold, fontSize = 22.sp))
+            Text(text = small, style = TextStyle(color = look.muted, fontSize = 12.sp, textAlign = TextAlign.Center))
+          }
+        }
       }
     }
   }

@@ -104,7 +104,7 @@ and don't work on every model. Then:
    - climate: on/off, temperature for both sides or for driver / passenger only, keeper/dog/camp,
      defrost, steering‑wheel heater, bioweapon defence, cabin overheat protection (on, fan only, off)
    - **seat heaters per seat** (front left/right, rear left/centre/right; off or level 1–3) and
-     **ventilated front seats** (off or level 1–3)
+     **ventilated front seats** (off or level 1–3), **automatic seat climate** for the front seats
    - charging: start/stop, limit, amps, charge port
    - media: play/pause, next, previous, **volume** (set 0–10 in steps, up, down)
    - sentry, honk, flash, wake, remote drive
@@ -151,12 +151,13 @@ multi‑tiles and tiles per row. Both designs come in light and dark:
   - Only the buttons inside are tappable, and each tile shows the car's state.
   - Multi‑tiles take 2 (2×1) or 4 (2×2) places:
     - lock/unlock, doors (driver/passenger), frunk & trunk, windows, charge port, media
-    - **seat heating (2×2):** every seat on its own, with an on/off button and three dots for level 1–3
-    - seat ventilation
+    - **seats (2×2):** heating and ventilation in one tile, switched with **Heat / Vent** inside it. Every
+      seat on its own, with an on/off button and three dots for level 1–3; the front seats also have an
+      **"A"** button for the car's automatic seat climate
     - **climate (2×2):** on/off, defrost, driver and passenger temperature
     - **charging (2×2):** start/stop, battery, kW, time to full, limit, amps
     - volume, climate keeper, overheat protection
-    - sentry, steering‑wheel heater, bioweapon defence
+    - sentry, steering‑wheel heater (shows **Auto** when the car runs it by itself, else low/high), bioweapon defence
   - **Sliders** (volume, temperature, limit, amps): slide up or down. The command is sent only when
     you let go, so the car gets one command instead of dozens. A tap on the upper or lower half
     changes the value by one step.
@@ -170,9 +171,9 @@ The Vehicle tab shows your car inside a **battery ring** (dark blue 100–80 %, 
 20–10 %, red below 10 %, with a subtle animated glow).
 
 **While charging:**
-- Drops of light flow along the ring, faster at higher power.
+- Green dots climb slowly along the ring up to the current level (a little faster at higher power).
 - The tip pulses, and a dashed arc shows the way to the charge limit.
-- A chip shows **⚡ X kW**.
+- A chip under the car shows **⚡ X kW · full in …**; the full‑screen view shows it too.
 
 - **Six body styles:** Model 3, Model Y, Model S, Model X, Cybertruck and Roadster. ATA picks the
   style from the VIN; you can override it under **Settings → Vehicles → Edit** (with a live preview).
@@ -296,9 +297,18 @@ BLE commands run in a short foreground service (or a background job when Android
 service), so they also work while the phone is in your pocket.
 
 ### Widgets
-- **Status:** battery (with bar), range, inside and outside temperature, charging and lock state.
-  Responsive from 1×1 to 4×2 — every size shows every value, only arranged differently.
-- **Actions:** the actions chosen in Settings → *Menu & widgets* (Basic and BLE).
+
+The widgets look like the app's tiles: cards with icons, neon or Material, light or dark.
+Choose under **Settings → Design → Widgets**: *Like the app*, *Neon* or *Material*, optionally with a
+see‑through background.
+
+- **Status:**
+  - battery with bar, range, inside and outside temperature, lock state
+  - while charging, the kW and the time until full
+  - responsive from 1×1 to 4×2: every size shows every value, only arranged differently
+  - updates after every command
+- **Actions:** the actions chosen in Settings → *Menu & widgets* (Basic and BLE), as tiles with icon and name
+  (2–4 per row).
 - **Find my car:** distance and direction to where the car was last reached over Bluetooth.
 
 ## Wear OS

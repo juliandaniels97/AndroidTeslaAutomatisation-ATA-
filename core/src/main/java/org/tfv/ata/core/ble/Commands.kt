@@ -71,6 +71,9 @@ internal object Commands {
     AtaAction.VOLUME_DOWN -> infotainment(16, buildProto { varint(1, zigzag(-1)) })
     AtaAction.SET_TEMPERATURE_DRIVER -> value?.let { temperatures(it.toFloat(), climate?.second ?: it.toFloat()) }
     AtaAction.SET_TEMPERATURE_PASSENGER -> value?.let { temperatures(climate?.first ?: it.toFloat(), it.toFloat()) }
+    // AutoSeatClimateAction: CarSeat { on = 1, seat_position = 2 (1 front left, 2 front right) }.
+    AtaAction.SEAT_AUTO_FRONT_LEFT -> value?.takeIf { it in 0..1 }?.let { autoSeat(1, it == 1) }
+    AtaAction.SEAT_AUTO_FRONT_RIGHT -> value?.takeIf { it in 0..1 }?.let { autoSeat(2, it == 1) }
     AtaAction.OVERHEAT_PROTECTION_FAN_ONLY -> infotainment(50, buildProto { bool(1, true); bool(2, true) })
     else -> null
   }
@@ -85,6 +88,9 @@ internal object Commands {
     if (level !in 0..3) return null
     return infotainment(49, buildProto { message(1, buildProto { enum(1, level + 1); enum(2, position) }) })
   }
+
+  private fun autoSeat(position: Int, on: Boolean) =
+    infotainment(48, buildProto { message(1, buildProto { bool(1, on); enum(2, position) }) })
 
   private fun temperatures(driver: Float, passenger: Float) =
     infotainment(14, buildProto { float(6, driver); float(7, passenger) })

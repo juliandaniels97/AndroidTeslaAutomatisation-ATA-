@@ -136,4 +136,5 @@ private fun iconFor(action: AtaAction): ImageVector = when (action) {
   AtaAction.VOLUME_DOWN -> Icons.Filled.VolumeDown
   AtaAction.SET_TEMPERATURE_DRIVER, AtaAction.SET_TEMPERATURE_PASSENGER -> Icons.Filled.Thermostat
   AtaAction.OVERHEAT_PROTECTION_FAN_ONLY -> Icons.Filled.Air
+  AtaAction.SEAT_AUTO_FRONT_LEFT, AtaAction.SEAT_AUTO_FRONT_RIGHT -> Icons.Filled.AirlineSeatReclineNormal
 }

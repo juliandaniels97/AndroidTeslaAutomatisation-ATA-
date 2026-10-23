@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import org.tfv.ata.R
 import org.tfv.ata.core.ThemeMode
 import org.tfv.ata.core.UiDesign
+import org.tfv.ata.core.WidgetDesign
 import org.tfv.ata.ui.AtaUiState
 import org.tfv.ata.ui.AtaViewModel
 
@@ -105,6 +106,32 @@ fun DesignScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit) {
         }
       }
       Text(stringResource(R.string.settings_columns_desc), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+
+      HorizontalDivider()
+      Text(stringResource(R.string.settings_widget_design), style = MaterialTheme.typography.titleSmall)
+      Text(stringResource(R.string.settings_widget_design_desc), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+      FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        WidgetDesign.entries.forEach { d ->
+          FilterChip(
+            selected = s.widgetDesign == d,
+            onClick = { vm.updateSettings { it.copy(widgetDesign = d) } },
+            label = {
+              Text(
+                stringResource(
+                  when (d) {
+                    WidgetDesign.APP -> R.string.widget_design_app
+                    WidgetDesign.NEON -> R.string.design_neon
+                    WidgetDesign.MATERIAL -> R.string.design_material
+                  },
+                ),
+              )
+            },
+          )
+        }
+      }
+      SwitchRow(stringResource(R.string.settings_widget_translucent), stringResource(R.string.settings_widget_translucent_desc), s.widgetTranslucent) {
+        vm.updateSettings { it.copy(widgetTranslucent = it.widgetTranslucent.not()) }
+      }
     }
   }
 }

@@ -98,6 +98,11 @@ internal object StatusParser {
       seatCoolFrontLeft = level(climate.int(139)),
       seatCoolFrontRight = level(climate.int(140)),
       steeringHeater = climate.flag(125),
+      // StwHeatLevel: 1 off, 2 low, 3 high.
+      steeringLevel = ((climate.int(148) ?: 1) - 1).coerceIn(0, 2),
+      steeringAuto = climate.flag(147),
+      seatAutoFrontLeft = climate.flag(137),
+      seatAutoFrontRight = climate.flag(138),
       defrost = defrost,
       bioweapon = climate.flag(134),
       overheatProtection = overheat,

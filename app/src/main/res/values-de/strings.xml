@@ -504,7 +504,6 @@
     <string name="proximity_notif_text">Achtet auf das Auto in der Nähe</string>
     <string name="mt_lock">Verriegelung</string>
     <string name="mt_climate">Klima</string>
-    <string name="mt_seats">Sitzheizung</string>
     <string name="mt_charging">Laden</string>
     <string name="mt_lids">Frunk &amp; Kofferraum</string>
     <string name="mt_doors">Türen</string>
@@ -515,7 +514,6 @@
     <string name="mt_sentry">Wächter</string>
     <string name="mt_steering">Lenkradheizung</string>
     <string name="mt_keeper">Klima halten</string>
-    <string name="mt_seat_cooling">Sitzbelüftung</string>
     <string name="mt_overheat">Überhitzungsschutz</string>
     <string name="mt_bioweapon">Bioweapon-Modus</string>
     <string name="st_locked">Verriegelt</string>
@@ -560,4 +558,18 @@
     <string name="favorites_empty">Noch keine Favoriten. Im Fahrzeug-Tab eine Kachel lange drücken und ☆ tippen.</string>
     <string name="seat_sheet_title">Sitze</string>
     <string name="steering_sheet_title">Lenkrad</string>
+    <string name="a_seat_auto_fl">Sitz-Automatik Fahrer</string>
+    <string name="a_seat_auto_fr">Sitz-Automatik Beifahrer</string>
+    <string name="st_auto">Auto</string>
+    <string name="seat_mode_heat">Heizen</string>
+    <string name="seat_mode_cool">Lüften</string>
+    <string name="mt_seats_climate">Sitze</string>
+    <string name="st_low">Niedrig</string>
+    <string name="st_high">Hoch</string>
+    <string name="st_full_in_short">voll in %1$s</string>
+    <string name="settings_widget_design">Widgets</string>
+    <string name="settings_widget_design_desc">Aussehen der Widgets auf dem Startbildschirm (Status, Aktionen, Auto finden). Sie folgen dem hellen / dunklen Theme der App.</string>
+    <string name="widget_design_app">Wie die App</string>
+    <string name="settings_widget_translucent">Durchscheinender Hintergrund</string>
+    <string name="settings_widget_translucent_desc">Das Hintergrundbild scheint leicht durch.</string>
 </resources>
