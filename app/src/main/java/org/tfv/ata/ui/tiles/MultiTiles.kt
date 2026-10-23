@@ -6,6 +6,15 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.filled.LocalFireDepartment
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -83,8 +92,9 @@ fun MultiTileView(
     MultiTile.SENTRY -> s?.sentry == true
     MultiTile.STEERING -> s?.steeringHeater == true
     MultiTile.BIOWEAPON -> s?.bioweapon == true
-    MultiTile.SEATS -> listOfNotNull(s?.seatHeatFrontLeft, s?.seatHeatFrontRight, s?.seatHeatRearLeft, s?.seatHeatRearCenter, s?.seatHeatRearRight).any { it > 0 }
-    MultiTile.SEAT_COOLING -> listOfNotNull(s?.seatCoolFrontLeft, s?.seatCoolFrontRight).any { it > 0 }
+    MultiTile.SEATS -> listOfNotNull(
+      s?.seatHeatFrontLeft, s?.seatHeatFrontRight, s?.seatHeatRearLeft, s?.seatHeatRearCenter, s?.seatHeatRearRight, s?.seatCoolFrontLeft, s?.seatCoolFrontRight,
+    ).any { it > 0 } || s?.seatAutoFrontLeft == true || s?.seatAutoFrontRight == true
     MultiTile.KEEPER -> (s?.climateKeeper ?: 0) > 0
     else -> false
   }
@@ -131,42 +141,39 @@ fun MultiTileView(
           }
         }
         MultiTile.SEATS -> {
-          TileHeader(tile.icon, label, compact = compact)
-          // A car that reports its seat heaters leaves out the seats it doesn't have.
+          val heating = listOfNotNull(s?.seatHeatFrontLeft, s?.seatHeatFrontRight, s?.seatHeatRearLeft, s?.seatHeatRearCenter, s?.seatHeatRearRight).any { it > 0 }
+          val cooling = listOfNotNull(s?.seatCoolFrontLeft, s?.seatCoolFrontRight).any { it > 0 }
+          // Heating or ventilation, switched in the tile; starts with ventilation only when that is what runs.
+          var cool by rememberSaveable { mutableStateOf(cooling && !heating) }
+          Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Box(Modifier.weight(1f)) { TileHeader(if (cool) Icons.Filled.Air else tile.icon, label, compact = compact) }
+            ModeSwitch(cool, interactive, haptics, compact) { cool = it }
+          }
+          // A car that reports its seats leaves out the ones it doesn't have.
           val known = s?.seatHeatFrontLeft != null
           val last = remember { mutableStateMapOf<AtaAction, Int>() }
           val set: (AtaAction, Int) -> Unit = { action, lv ->
             if (lv > 0) last[action] = lv
             run.withValue(action, lv)
           }
-          val ctx = SeatCtx(known, on, haptics, compact, last, set)
+          val ctx = SeatCtx(known, on, haptics, compact, last, set, cool)
+          val autoL = s?.seatAutoFrontLeft
+          val autoR = s?.seatAutoFrontRight
           Row(Modifier.weight(1f).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-            Seat(ctx, AtaAction.SEAT_HEATER_FRONT_LEFT, R.string.seat_fl, s?.seatHeatFrontLeft)
-            Seat(ctx, AtaAction.SEAT_HEATER_FRONT_RIGHT, R.string.seat_fr, s?.seatHeatFrontRight)
+            if (cool) {
+              Seat(ctx, AtaAction.SEAT_COOLER_FRONT_LEFT, R.string.seat_fl, s?.seatCoolFrontLeft, autoL) { run.withValue(AtaAction.SEAT_AUTO_FRONT_LEFT, if (autoL == true) 0 else 1) }
+              Seat(ctx, AtaAction.SEAT_COOLER_FRONT_RIGHT, R.string.seat_fr, s?.seatCoolFrontRight, autoR) { run.withValue(AtaAction.SEAT_AUTO_FRONT_RIGHT, if (autoR == true) 0 else 1) }
+            } else {
+              Seat(ctx, AtaAction.SEAT_HEATER_FRONT_LEFT, R.string.seat_fl, s?.seatHeatFrontLeft, autoL) { run.withValue(AtaAction.SEAT_AUTO_FRONT_LEFT, if (autoL == true) 0 else 1) }
+              Seat(ctx, AtaAction.SEAT_HEATER_FRONT_RIGHT, R.string.seat_fr, s?.seatHeatFrontRight, autoR) { run.withValue(AtaAction.SEAT_AUTO_FRONT_RIGHT, if (autoR == true) 0 else 1) }
+            }
           }
-          if (!known || listOf(s?.seatHeatRearLeft, s?.seatHeatRearCenter, s?.seatHeatRearRight).any { it != null }) {
+          if (!cool && (!known || listOf(s?.seatHeatRearLeft, s?.seatHeatRearCenter, s?.seatHeatRearRight).any { it != null })) {
             Row(Modifier.weight(1f).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(5.dp)) {
               Seat(ctx, AtaAction.SEAT_HEATER_REAR_LEFT, R.string.seat_rl, s?.seatHeatRearLeft)
               Seat(ctx, AtaAction.SEAT_HEATER_REAR_CENTER, R.string.seat_rc, s?.seatHeatRearCenter)
               Seat(ctx, AtaAction.SEAT_HEATER_REAR_RIGHT, R.string.seat_rr, s?.seatHeatRearRight)
             }
-          }
-        }
-        MultiTile.SEAT_COOLING -> {
-          TileHeader(tile.icon, label, compact = compact)
-          Row(Modifier.weight(1f).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-            val left = s?.seatCoolFrontLeft ?: 0
-            val right = s?.seatCoolFrontRight ?: 0
-            SeatCell(
-              Icons.Filled.Air, stringResource(R.string.seat_fl), left, on, haptics, compact, Modifier.weight(1f).fillMaxHeight(),
-              onToggle = { run.withValue(AtaAction.SEAT_COOLER_FRONT_LEFT, if (left > 0) 0 else 3) },
-              onLevel = { run.withValue(AtaAction.SEAT_COOLER_FRONT_LEFT, it) },
-            )
-            SeatCell(
-              Icons.Filled.Air, stringResource(R.string.seat_fr), right, on, haptics, compact, Modifier.weight(1f).fillMaxHeight(),
-              onToggle = { run.withValue(AtaAction.SEAT_COOLER_FRONT_RIGHT, if (right > 0) 0 else 3) },
-              onLevel = { run.withValue(AtaAction.SEAT_COOLER_FRONT_RIGHT, it) },
-            )
           }
         }
         MultiTile.CHARGING -> ChargingBody(tile, label, s, on, haptics, compact, run)
@@ -234,7 +241,16 @@ fun MultiTileView(
         MultiTile.SENTRY -> Toggle(tile, label, Icons.Filled.Security, s?.sentry == true, on, haptics, compact) {
           run(if (s?.sentry == true) AtaAction.SENTRY_OFF else AtaAction.SENTRY_ON)
         }
-        MultiTile.STEERING -> Toggle(tile, label, SteeringWheelIcon, s?.steeringHeater == true, on, haptics, compact) {
+        MultiTile.STEERING -> Toggle(
+          tile, label, SteeringWheelIcon, s?.steeringHeater == true, on, haptics, compact,
+          // The car's automatic mode can only be shown (Bluetooth has no command for it); the level while on.
+          stateText = when {
+            s?.steeringAuto == true -> stringResource(R.string.st_auto) + if (s.steeringHeater == true) " · " + stringResource(R.string.st_on) else ""
+            s?.steeringHeater == true && s.steeringLevel == 1 -> stringResource(R.string.st_low)
+            s?.steeringHeater == true && s.steeringLevel == 2 -> stringResource(R.string.st_high)
+            else -> null
+          },
+        ) {
           run(if (s?.steeringHeater == true) AtaAction.STEERING_WHEEL_HEATER_OFF else AtaAction.STEERING_WHEEL_HEATER)
         }
         MultiTile.BIOWEAPON -> Toggle(tile, label, Icons.Filled.Masks, s?.bioweapon == true, on, haptics, compact) {
@@ -308,6 +324,7 @@ private fun ColumnScope.Toggle(
   enabled: Boolean,
   haptics: Boolean,
   compact: Boolean,
+  stateText: String? = null,
   onClick: () -> Unit,
 ) {
   Text(
@@ -321,7 +338,7 @@ private fun ColumnScope.Toggle(
   )
   TileButton(
     icon,
-    stringResource(if (active) R.string.st_on else R.string.st_off),
+    stateText ?: stringResource(if (active) R.string.st_on else R.string.st_off),
     active,
     enabled,
     onClick,
@@ -330,7 +347,7 @@ private fun ColumnScope.Toggle(
   )
 }
 
-/** What the seat cells of the seat-heater tile share. */
+/** What the seat cells of the seat tile share; [cool] = ventilation instead of heating. */
 private class SeatCtx(
   val known: Boolean,
   val enabled: Boolean,
@@ -338,23 +355,32 @@ private class SeatCtx(
   val compact: Boolean,
   val last: Map<AtaAction, Int>,
   val set: (AtaAction, Int) -> Unit,
+  val cool: Boolean,
 )
 
-/** One heated seat; skipped when the car reports that this seat has no heater. */
+/**
+ * One seat; skipped when the car reports that this seat has no heater. Front seats also get the automatic
+ * mode ([auto], toggled by [onAuto]).
+ */
 @Composable
-private fun RowScope.Seat(ctx: SeatCtx, action: AtaAction, name: Int, level: Int?) {
-  if (ctx.known && level == null) return
+private fun RowScope.Seat(ctx: SeatCtx, action: AtaAction, name: Int, level: Int?, auto: Boolean? = null, onAuto: (() -> Unit)? = null) {
+  if (ctx.known && level == null && !ctx.cool) return
   val lv = level ?: 0
   SeatCell(
-    Icons.Filled.AirlineSeatReclineNormal, stringResource(name), lv, ctx.enabled, ctx.haptics, ctx.compact,
+    if (ctx.cool) Icons.Filled.Air else Icons.Filled.AirlineSeatReclineNormal, stringResource(name), lv, ctx.enabled, ctx.haptics, ctx.compact,
     Modifier.weight(1f).fillMaxHeight(),
     // On = the level used last on this seat (3 the first time).
     onToggle = { ctx.set(action, if (lv > 0) 0 else ctx.last[action] ?: 3) },
     onLevel = { ctx.set(action, it) },
+    auto = auto,
+    onAuto = onAuto,
   )
 }
 
-/** One seat: the button switches on/off, the three dots pick level 1 … 3 (tapping the current level = off). */
+/**
+ * One seat: the button switches on/off, the three dots pick level 1 … 3 (tapping the current level = off), "A"
+ * switches the car's automatic seat climate (front seats).
+ */
 @Composable
 private fun SeatCell(
   icon: ImageVector,
@@ -366,10 +392,88 @@ private fun SeatCell(
   modifier: Modifier,
   onToggle: () -> Unit,
   onLevel: (Int) -> Unit,
+  auto: Boolean? = null,
+  onAuto: (() -> Unit)? = null,
 ) {
+  val isAuto = auto == true
   Column(modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-    TileButton(icon, name, level > 0, enabled, onToggle, Modifier.weight(1f).fillMaxWidth(), haptics = haptics)
-    LevelDots(level, enabled, onSelect = { onLevel(if (it == level) 0 else it) }, dot = if (compact) 5.dp else 7.dp, haptics = haptics)
+    TileButton(
+      icon,
+      if (isAuto) "$name · ${stringResource(R.string.st_auto)}" else name,
+      level > 0 || isAuto,
+      enabled,
+      onToggle,
+      Modifier.weight(1f).fillMaxWidth(),
+      haptics = haptics,
+    )
+    Row(verticalAlignment = Alignment.CenterVertically) {
+      LevelDots(level, enabled, onSelect = { onLevel(if (it == level) 0 else it) }, dot = if (compact) 5.dp else 7.dp, haptics = haptics)
+      if (onAuto != null) AutoChip(isAuto, enabled, compact, haptics, onAuto)
+    }
+  }
+}
+
+/** Small "A" pill: the car's automatic mode on (filled) or off. */
+@Composable
+private fun AutoChip(on: Boolean, enabled: Boolean, compact: Boolean, haptics: Boolean, onClick: () -> Unit) {
+  val palette = AtaColors.current
+  val view = androidx.compose.ui.platform.LocalView.current
+  val accent = if (palette.material) androidx.compose.material3.MaterialTheme.colorScheme.primary else palette.accent
+  val shape = androidx.compose.foundation.shape.RoundedCornerShape(50)
+  Box(
+    Modifier
+      .padding(start = 2.dp)
+      .clip(shape)
+      .background(if (on) accent.copy(alpha = if (palette.material) 1f else .25f) else palette.muted.copy(alpha = .15f))
+      .clickable(enabled = enabled) {
+        if (haptics) view.performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY)
+        onClick()
+      }
+      .padding(horizontal = if (compact) 4.dp else 6.dp, vertical = 1.dp),
+    contentAlignment = Alignment.Center,
+  ) {
+    Text(
+      "A",
+      fontSize = if (compact) 8.sp else 10.sp,
+      fontWeight = FontWeight.Bold,
+      color = when {
+        on && palette.material -> androidx.compose.material3.MaterialTheme.colorScheme.onPrimary
+        on -> accent
+        else -> palette.muted
+      },
+    )
+  }
+}
+
+/** Heating / ventilation switch in the seat tile's header. */
+@Composable
+private fun ModeSwitch(cool: Boolean, enabled: Boolean, haptics: Boolean, compact: Boolean, onChange: (Boolean) -> Unit) {
+  val palette = AtaColors.current
+  val view = androidx.compose.ui.platform.LocalView.current
+  val accent = if (palette.material) androidx.compose.material3.MaterialTheme.colorScheme.primary else palette.accent
+  val shape = androidx.compose.foundation.shape.RoundedCornerShape(50)
+  Row(Modifier.clip(shape).background(palette.muted.copy(alpha = .15f)).padding(2.dp)) {
+    listOf(false to stringResource(R.string.seat_mode_heat), true to stringResource(R.string.seat_mode_cool)).forEach { (mode, text) ->
+      val selected = mode == cool
+      Row(
+        Modifier.clip(shape)
+          .background(if (selected) accent.copy(alpha = if (palette.material) 1f else .28f) else androidx.compose.ui.graphics.Color.Transparent)
+          .clickable(enabled = enabled) {
+            if (haptics) view.performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY)
+            onChange(mode)
+          }
+          .padding(horizontal = if (compact) 4.dp else 7.dp, vertical = 2.dp),
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
+        val tint = when {
+          selected && palette.material -> androidx.compose.material3.MaterialTheme.colorScheme.onPrimary
+          selected -> accent
+          else -> palette.muted
+        }
+        Icon(if (mode) Icons.Filled.Air else Icons.Filled.LocalFireDepartment, contentDescription = text, tint = tint, modifier = Modifier.size(if (compact) 12.dp else 14.dp))
+        if (!compact) Text(text, fontSize = 10.sp, color = tint, modifier = Modifier.padding(start = 2.dp), maxLines = 1)
+      }
+    }
   }
 }
 
@@ -467,4 +571,5 @@ private fun ColumnScope.ChargingBody(
   }
 }
 
-private fun formatMinutes(m: Int): String = if (m >= 60) "${m / 60} h ${m % 60} min" else "$m min"
+/** "1 h 20 min" / "35 min". */
+internal fun formatMinutes(m: Int): String = if (m >= 60) "${m / 60} h ${m % 60} min" else "$m min"

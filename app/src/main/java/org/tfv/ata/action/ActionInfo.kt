@@ -66,5 +66,7 @@ object ActionInfo {
     AtaAction.SET_TEMPERATURE_DRIVER -> R.string.a_set_temperature_driver
     AtaAction.SET_TEMPERATURE_PASSENGER -> R.string.a_set_temperature_passenger
     AtaAction.OVERHEAT_PROTECTION_FAN_ONLY -> R.string.a_overheat_protection_fan_only
+    AtaAction.SEAT_AUTO_FRONT_LEFT -> R.string.a_seat_auto_fl
+    AtaAction.SEAT_AUTO_FRONT_RIGHT -> R.string.a_seat_auto_fr
   }
 }

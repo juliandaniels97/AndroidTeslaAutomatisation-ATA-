@@ -504,7 +504,6 @@
     <string name="proximity_notif_text">Watching for the car nearby</string>
     <string name="mt_lock">Locks</string>
     <string name="mt_climate">Climate</string>
-    <string name="mt_seats">Seat heating</string>
     <string name="mt_charging">Charging</string>
     <string name="mt_lids">Frunk &amp; trunk</string>
     <string name="mt_doors">Doors</string>
@@ -515,7 +514,6 @@
     <string name="mt_sentry">Sentry</string>
     <string name="mt_steering">Steering wheel heater</string>
     <string name="mt_keeper">Keep climate</string>
-    <string name="mt_seat_cooling">Seat ventilation</string>
     <string name="mt_overheat">Overheat protection</string>
     <string name="mt_bioweapon">Bioweapon defense</string>
     <string name="st_locked">Locked</string>
@@ -560,4 +558,18 @@
     <string name="favorites_empty">No favorites yet. Long-press a tile in the vehicle tab and tap ☆.</string>
     <string name="seat_sheet_title">Seats</string>
     <string name="steering_sheet_title">Steering wheel</string>
+    <string name="a_seat_auto_fl">Auto seat climate driver</string>
+    <string name="a_seat_auto_fr">Auto seat climate passenger</string>
+    <string name="st_auto">Auto</string>
+    <string name="seat_mode_heat">Heat</string>
+    <string name="seat_mode_cool">Vent</string>
+    <string name="mt_seats_climate">Seats</string>
+    <string name="st_low">Low</string>
+    <string name="st_high">High</string>
+    <string name="st_full_in_short">full in %1$s</string>
+    <string name="settings_widget_design">Widgets</string>
+    <string name="settings_widget_design_desc">Look of the home-screen widgets (status, actions, find car). They follow the app\'s light / dark theme.</string>
+    <string name="widget_design_app">Like the app</string>
+    <string name="settings_widget_translucent">See-through background</string>
+    <string name="settings_widget_translucent_desc">The wallpaper shines through a little.</string>
 </resources>

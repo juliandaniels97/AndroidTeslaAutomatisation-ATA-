@@ -59,4 +59,12 @@ class CommandsTest {
     assertEquals(23f, Float.fromBits(temp.fixed32(6)!!), 0.001f)
     assertEquals(19f, Float.fromBits(temp.fixed32(7)!!), 0.001f)
   }
+
+  @Test
+  fun autoSeatClimateIsVehicleAction48() {
+    val seat = ProtoReader(Commands.forAction(AtaAction.SEAT_AUTO_FRONT_RIGHT, 1)!!.payload).message(2)!!.message(48)!!.message(1)!!
+    assertEquals(1L, seat.varint(1))
+    assertEquals(2L, seat.varint(2))
+    assertEquals(null, Commands.forAction(AtaAction.SEAT_AUTO_FRONT_LEFT, 2))
+  }
 }

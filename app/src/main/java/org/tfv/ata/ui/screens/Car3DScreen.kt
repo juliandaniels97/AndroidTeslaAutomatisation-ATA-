@@ -166,7 +166,7 @@ private fun spotIcon(spot: CarHotspot): ImageVector = when (spot) {
 
 /** Tiles shown at the top of a spot's sheet (seat levels, steering wheel heater, climate, charging). */
 private fun tilesFor(spot: CarHotspot?): List<MultiTile> = when (spot) {
-  CarHotspot.SEATS -> listOf(MultiTile.SEATS, MultiTile.SEAT_COOLING)
+  CarHotspot.SEATS -> listOf(MultiTile.SEATS)
   CarHotspot.STEERING_WHEEL -> listOf(MultiTile.STEERING)
   CarHotspot.CLIMATE -> listOf(MultiTile.CLIMATE)
   CarHotspot.CHARGE_PORT -> listOf(MultiTile.CHARGING)
@@ -316,7 +316,15 @@ fun Car3DScreen(vm: AtaViewModel, state: AtaUiState, onBack: () -> Unit) {
         Column(Modifier.weight(1f)) {
           Text(state.selected?.name ?: stringResource(R.string.tab_vehicle), color = fg, style = MaterialTheme.typography.titleLarge)
           if (known && snapshot != null) {
-            Text("${snapshot.batteryPercent}% · ${snapshot.rangeKm} km", color = accent, style = MaterialTheme.typography.labelLarge)
+            val charge = if (snapshot.charging) {
+              listOfNotNull(
+                "⚡ ${snapshot.chargingPowerKw} kW".takeIf { snapshot.chargingPowerKw > 0 } ?: "⚡",
+                stringResource(R.string.st_full_in_short, org.tfv.ata.ui.tiles.formatMinutes(snapshot.minutesToFull)).takeIf { snapshot.minutesToFull > 0 },
+              ).joinToString(" · ", prefix = " · ")
+            } else {
+              ""
+            }
+            Text("${snapshot.batteryPercent}% · ${snapshot.rangeKm} km$charge", color = accent, style = MaterialTheme.typography.labelLarge)
           }
         }
         IconButton(onClick = { yaw = -35f; pitch = 18f; zoom = 1f; pan = Offset.Zero }) {

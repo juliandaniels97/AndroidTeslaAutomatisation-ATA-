@@ -12,15 +12,18 @@ fun VehicleSnapshot.after(action: AtaAction, value: Int? = null): VehicleSnapsho
   AtaAction.SET_TEMPERATURE -> value?.let { copy(driverTempC = it.toFloat(), passengerTempC = it.toFloat()) } ?: this
   AtaAction.SET_TEMPERATURE_DRIVER -> value?.let { copy(driverTempC = it.toFloat()) } ?: this
   AtaAction.SET_TEMPERATURE_PASSENGER -> value?.let { copy(passengerTempC = it.toFloat()) } ?: this
-  AtaAction.SEAT_HEATER_FRONT_LEFT -> copy(seatHeatFrontLeft = value ?: seatHeatFrontLeft)
-  AtaAction.SEAT_HEATER_FRONT_RIGHT -> copy(seatHeatFrontRight = value ?: seatHeatFrontRight)
+  // Setting a level by hand ends the automatic mode of that seat (as in the car).
+  AtaAction.SEAT_HEATER_FRONT_LEFT -> copy(seatHeatFrontLeft = value ?: seatHeatFrontLeft, seatAutoFrontLeft = seatAutoFrontLeft?.let { false })
+  AtaAction.SEAT_HEATER_FRONT_RIGHT -> copy(seatHeatFrontRight = value ?: seatHeatFrontRight, seatAutoFrontRight = seatAutoFrontRight?.let { false })
+  AtaAction.SEAT_AUTO_FRONT_LEFT -> copy(seatAutoFrontLeft = value == 1)
+  AtaAction.SEAT_AUTO_FRONT_RIGHT -> copy(seatAutoFrontRight = value == 1)
   AtaAction.SEAT_HEATER_REAR_LEFT -> copy(seatHeatRearLeft = value ?: seatHeatRearLeft)
   AtaAction.SEAT_HEATER_REAR_CENTER -> copy(seatHeatRearCenter = value ?: seatHeatRearCenter)
   AtaAction.SEAT_HEATER_REAR_RIGHT -> copy(seatHeatRearRight = value ?: seatHeatRearRight)
-  AtaAction.SEAT_COOLER_FRONT_LEFT -> copy(seatCoolFrontLeft = value ?: seatCoolFrontLeft)
-  AtaAction.SEAT_COOLER_FRONT_RIGHT -> copy(seatCoolFrontRight = value ?: seatCoolFrontRight)
-  AtaAction.STEERING_WHEEL_HEATER -> copy(steeringHeater = true)
-  AtaAction.STEERING_WHEEL_HEATER_OFF -> copy(steeringHeater = false)
+  AtaAction.SEAT_COOLER_FRONT_LEFT -> copy(seatCoolFrontLeft = value ?: seatCoolFrontLeft, seatAutoFrontLeft = seatAutoFrontLeft?.let { false })
+  AtaAction.SEAT_COOLER_FRONT_RIGHT -> copy(seatCoolFrontRight = value ?: seatCoolFrontRight, seatAutoFrontRight = seatAutoFrontRight?.let { false })
+  AtaAction.STEERING_WHEEL_HEATER -> copy(steeringHeater = true, steeringAuto = steeringAuto?.let { false })
+  AtaAction.STEERING_WHEEL_HEATER_OFF -> copy(steeringHeater = false, steeringLevel = 0, steeringAuto = steeringAuto?.let { false })
   AtaAction.DEFROST -> copy(defrost = true, climateOn = true)
   AtaAction.DEFROST_OFF -> copy(defrost = false)
   AtaAction.CHARGE_START -> copy(charging = true)

@@ -150,6 +150,7 @@ class AtaViewModel(app: Application) : AndroidViewModel(app) {
     runCatching {
       ActionsWidget().updateAll(getApplication())
       StatusWidget().updateAll(getApplication())
+      org.tfv.ata.widget.CarFinderWidget().updateAll(getApplication())
     }
   }
 

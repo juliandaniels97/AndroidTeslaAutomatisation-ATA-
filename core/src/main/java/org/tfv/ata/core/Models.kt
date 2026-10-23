@@ -104,6 +104,13 @@ data class VehicleSnapshot(
   val seatCoolFrontLeft: Int? = null,
   val seatCoolFrontRight: Int? = null,
   val steeringHeater: Boolean? = null,
+  /** Steering wheel heater level while on: 1 low, 2 high (0 = off / unknown). */
+  val steeringLevel: Int = 0,
+  /** The car switches the steering wheel heater by itself. */
+  val steeringAuto: Boolean? = null,
+  /** Automatic seat climate of the front seats; null = not reported. */
+  val seatAutoFrontLeft: Boolean? = null,
+  val seatAutoFrontRight: Boolean? = null,
   val defrost: Boolean = false,
   val bioweapon: Boolean? = null,
   /** Cabin overheat protection: 0 off, 1 on, 2 fan only; null = unknown. */
@@ -130,6 +137,9 @@ enum class ThemeMode { SYSTEM, LIGHT, DARK }
 
 /** Look of the app: glowing neon lines, or calm Material 3 surfaces. Both come in light and dark. */
 enum class UiDesign { NEON, MATERIAL }
+
+/** Look of the home-screen widgets: like the app ([APP]), or always neon / Material. */
+enum class WidgetDesign { APP, NEON, MATERIAL }
 
 @Serializable
 data class AtaSettings(
@@ -178,6 +188,9 @@ data class AtaSettings(
   val multiTiles: Boolean = true,
   /** Tiles per row, 2 … 6; 0 = automatic (3 on phones, more on tablets). */
   val tileColumns: Int = 0,
+  val widgetDesign: WidgetDesign = WidgetDesign.APP,
+  /** Widgets with a see-through background. */
+  val widgetTranslucent: Boolean = false,
   /** Tab shown at the start: the one open when the app was closed. */
   val lastTab: String = "vehicle",
   /** The vehicle tab got the former actions tab's tiles appended (1.9.2). */

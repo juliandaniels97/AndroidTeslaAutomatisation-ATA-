@@ -115,6 +115,7 @@ object ActionPolicy {
     AtaAction.SEAT_HEATER_REAR_CENTER, AtaAction.SEAT_HEATER_REAR_RIGHT,
     AtaAction.SEAT_COOLER_FRONT_LEFT, AtaAction.SEAT_COOLER_FRONT_RIGHT -> 0..3
     AtaAction.SET_VOLUME -> 0..100
+    AtaAction.SEAT_AUTO_FRONT_LEFT, AtaAction.SEAT_AUTO_FRONT_RIGHT -> 0..1
     else -> null
   }
 

@@ -6,6 +6,7 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.widget.Toast
+import androidx.glance.appwidget.updateAll
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
@@ -88,6 +89,7 @@ object CommandDispatcher {
       // Show the new state (seat level, lock, volume …) right away; the next status read confirms it.
       val store = org.tfv.ata.data.AtaStore.get(context)
       store.snapshot(vehicle.id).first()?.let { store.saveSnapshot(vehicle.id, it.after(action, number)) }
+      runCatching { org.tfv.ata.widget.StatusWidget().updateAll(context) }
     }
     feedback(context, action, result, source, inForeground)
     return result

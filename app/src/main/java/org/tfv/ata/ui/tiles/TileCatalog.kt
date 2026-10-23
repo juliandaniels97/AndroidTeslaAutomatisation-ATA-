@@ -42,11 +42,14 @@ enum class MultiTile(
       AtaAction.SET_TEMPERATURE_DRIVER, AtaAction.SET_TEMPERATURE_PASSENGER, AtaAction.DEFROST, AtaAction.DEFROST_OFF,
     ),
   ),
+  /** Seat heating and ventilation in one tile (switch inside), with the front seats' automatic mode. */
   SEATS(
-    "m_seats", 2, 2, R.string.mt_seats,
+    "m_seats", 2, 2, R.string.mt_seats_climate,
     listOf(
       AtaAction.SEAT_HEATER_FRONT_LEFT, AtaAction.SEAT_HEATER_FRONT_RIGHT, AtaAction.SEAT_HEATER_REAR_LEFT,
       AtaAction.SEAT_HEATER_REAR_CENTER, AtaAction.SEAT_HEATER_REAR_RIGHT,
+      AtaAction.SEAT_COOLER_FRONT_LEFT, AtaAction.SEAT_COOLER_FRONT_RIGHT,
+      AtaAction.SEAT_AUTO_FRONT_LEFT, AtaAction.SEAT_AUTO_FRONT_RIGHT,
     ),
   ),
   CHARGING(
@@ -65,7 +68,6 @@ enum class MultiTile(
     "m_keeper", 2, 1, R.string.mt_keeper,
     listOf(AtaAction.CLIMATE_KEEP_OFF, AtaAction.CLIMATE_KEEP, AtaAction.DOG_MODE, AtaAction.CAMP_MODE),
   ),
-  SEAT_COOLING("m_seat_cool", 2, 1, R.string.mt_seat_cooling, listOf(AtaAction.SEAT_COOLER_FRONT_LEFT, AtaAction.SEAT_COOLER_FRONT_RIGHT)),
   OVERHEAT(
     "m_overheat", 2, 1, R.string.mt_overheat,
     listOf(AtaAction.OVERHEAT_PROTECTION_OFF, AtaAction.OVERHEAT_PROTECTION_ON, AtaAction.OVERHEAT_PROTECTION_FAN_ONLY),
@@ -88,13 +90,14 @@ enum class MultiTile(
       SENTRY -> Icons.Filled.Security
       STEERING -> SteeringWheelIcon
       KEEPER -> Icons.Filled.Pets
-      SEAT_COOLING -> Icons.Filled.AcUnit
       OVERHEAT -> Icons.Filled.DeviceThermostat
       BIOWEAPON -> Icons.Filled.Masks
     }
 
   companion object {
-    fun fromId(id: String): MultiTile? = entries.firstOrNull { it.id == id }
+    /** Ids of tiles that were merged into others ("m_seat_cool" → seats since 1.9.3). */
+    private val aliases = mapOf("m_seat_cool" to "m_seats")
+    fun fromId(id: String): MultiTile? = (aliases[id] ?: id).let { key -> entries.firstOrNull { it.id == key } }
     fun covering(action: AtaAction): MultiTile? = entries.firstOrNull { action in it.actions }
   }
 }
@@ -132,7 +135,7 @@ object TileCatalog {
       basicDefaults.map { it.id }
 
   /** Tiles added for existing layouts on the update to 1.9.2. */
-  val newIn192: List<String> = listOf(MultiTile.SEATS.id, MultiTile.SEAT_COOLING.id, MultiTile.VOLUME.id)
+  val newIn192: List<String> = listOf(MultiTile.SEATS.id, MultiTile.VOLUME.id)
 
   val favoriteDefaults: List<String> =
     listOf(MultiTile.LOCK.id, MultiTile.CLIMATE.id, MultiTile.LIDS.id) + basicDefaults.map { it.id }

@@ -1,61 +1,40 @@
-## ATA v1.9.2 — Multikacheln, Sitzheizung pro Sitz, Lautstärke, Laden mit kW, neue Struktur
+## ATA v1.9.3 — Sitze mit Heizen/Lüften und Automatik, grüne Ladepunkte, neue Widgets
 
-### Neue Struktur
-- **Favoriten** ganz links (statt „Aktionen“), dann **Fahrzeug** und **Einstellungen**.
-- **Fahrzeug** ist beim ersten Start die Standardansicht. Danach öffnet ATA den Tab, der beim Schließen offen war.
-- Die bisherigen **Aktionen** (Navigation, Tesla-App …) stehen jetzt am **Ende des Fahrzeug-Tabs**.
-  - Sie sind auch ohne eingerichtetes Bluetooth aktiv.
-  - Wie alle Kacheln lassen sie sich verschieben.
-- **Favoriten:** Im Bearbeiten-Modus (Kachel lange drücken) mit ☆ markieren.
-- **Neu: Einstellungen → Design.** Dort ist alles zum Aussehen zusammengefasst: Neon/Material, hell/dunkel, dynamische Farben, 3D-Auto, Multikacheln und Kacheln pro Reihe.
+### Sitze: eine Kachel für Heizen und Lüften
+- Die **Sitzkachel** fasst Sitzheizung und Sitzbelüftung zusammen. Der **Schalter Heizen / Lüften** oben in der Kachel wechselt zwischen beiden.
+  - **Heizen:** alle Sitze einzeln, jeweils An/Aus und Stufe 1–3.
+  - **Lüften:** Fahrer und Beifahrer, jeweils An/Aus und Stufe 1–3.
+- Die bisherige Kachel „Sitzbelüftung“ geht in der neuen Sitzkachel auf. Gespeicherte Layouts werden automatisch umgestellt.
 
-### Multikacheln (Standard: an)
-- **Mehrere Aktionen in einer Kachel.** Nur die Buttons darin sind klickbar, nicht die ganze Kachel. Der Status steht direkt in der Kachel.
-- **Größen:** Multikacheln belegen 2 Plätze (2×1) oder 4 Plätze (2×2) und lassen sich wie bisher verschieben.
-- **Die Kacheln:**
-  - **Verriegelung:** Zu-/Aufsperren mit Status.
-  - **Türen** Fahrer/Beifahrer als Doppelkachel.
-  - **Frunk & Kofferraum, Fenster, Ladeklappe.**
-  - **Sitzheizung (2×2):** alle Sitze einzeln. Pro Sitz ein An/Aus-Button und 3 Punkte für Stufe 1–3.
-  - **Sitzbelüftung** Fahrer/Beifahrer.
-  - **Klima (2×2):** An/Aus, Enteisen, Temperatur Fahrer und Beifahrer getrennt.
-  - **Laden (2×2):** Start/Stopp, Ladestand, kW, Restzeit, Ladelimit und Ampere.
-  - **Lautstärke:** leiser, lauter und ein Schieber.
-  - **Medien, Klima halten** (Aus/Halten/Hund/Camp), **Überhitzungsschutz** (Aus/Klima/nur Lüfter).
-  - **Wächter, Lenkradheizung, Bioweapon** mit An/Aus-Status.
-- **Schieber** (Lautstärke, Temperatur, Limit, Ampere): hoch und runter wischen. Der Befehl geht erst beim **Loslassen** raus, also nur einer statt vieler. Antippen oben/unten ändert um eine Stufe.
-- **Ausschalten** unter Einstellungen → Design → Multikacheln: dann gibt es wieder eine Kachel pro Aktion, mit Schieber-Dialog für Werte.
+### Auto-Modus
+- **Sitze:** Fahrer und Beifahrer haben einen **„A“-Knopf** für die Sitz-Automatik des Autos. Ist sie an, steht „Auto“ am Sitz.
+  - Eine Stufe von Hand zu wählen beendet die Automatik für diesen Sitz, wie im Auto.
+  - Neu als Aktion: „Sitz-Automatik Fahrer/Beifahrer“, auch für Kurzbefehle, NFC und Automationen.
+- **Lenkradheizung:** Die Kachel zeigt **„Auto“**, wenn das Auto die Heizung selbst steuert, sonst die Stufe (Niedrig/Hoch).
+  - Einschalten lässt sich die Lenkrad-Automatik nicht. Teslas Bluetooth-Protokoll hat dafür keinen Befehl.
 
-### Neue Funktionen
-- **Sitzheizung pro Sitz:** vorne links/rechts, hinten links/Mitte/rechts, jeweils Aus/Stufe 1–3.
-- **Sitzbelüftung** vorne, Aus/Stufe 1–3.
-- **Lautstärke:** auf einen Wert setzen (0–10, in Schritten), lauter und leiser.
-- **Temperatur nur für Fahrer oder Beifahrer.** Die andere Seite behält ihre Einstellung.
-- **Überhitzungsschutz nur mit Lüfter.**
-- Alle neuen Aktionen gibt es auch als Kurzbefehl, für Widgets, NFC und Automationen.
+### Laden
+- **„Voll in …“** steht jetzt auch direkt am Fahrzeug: an der Plakette unter dem Auto (z. B. „⚡ 48 kW · voll in 1 h 20 min“) und in der Vollbildansicht.
+- **Neue Ladeanimation:** grüne Punkte wandern langsam am Akkuring entlang bis zum aktuellen Ladestand.
+  - Bei mehr kW etwas schneller, aber nie hektisch.
+  - Dazu die pulsierende Spitze und der gestrichelte Bogen bis zum Ladelimit.
+  - In Neon und Material.
 
-### Status
-- Die Kacheln zeigen den echten Zustand des Autos:
-  - Sitzstufen, Lenkradheizung, Enteisen, Klima halten
-  - Türen, Frunk/Kofferraum, Fenster, Ladeklappe
-  - Lautstärke und der laufende Titel
-- Nach einem Befehl zeigen die Kacheln den neuen Zustand sofort an.
-- **Laden:** „lädt mit X kW“, dazu Restzeit bis voll, Ladelimit und Ampere.
+### Widgets im Look der App
+- **Status-Widget:**
+  - Karten mit Icons wie die Kacheln der App.
+  - Beim Laden mit kW und „voll in …“.
+  - Schloss-Symbol und Akku-Balken.
+  - Aktualisiert sich nach jedem Befehl.
+- **Aktionen-Widget:** Kacheln mit Icon und Namen, 2 bis 4 pro Reihe je nach Breite. Kritische Aktionen in Rot.
+- **Auto-finden-Widget:** als Karte mit Kompass-Icon.
+- **Neu: Einstellungen → Design → Widgets:**
+  - **Wie die App**, **Neon** oder **Material**.
+  - Optional ein **durchscheinender Hintergrund**.
+  - Die Widgets folgen dem hellen/dunklen Theme der App.
 
-### Akkuring beim Laden
-- Lichttropfen fließen den Ring entlang, **schneller bei mehr kW**.
-- Die Spitze pulsiert, und ein gestrichelter Bogen zeigt den Weg bis zum Ladelimit.
-- Am Auto erscheint eine Plakette „⚡ X kW“.
-- Funktioniert in Neon und Material, hell und dunkel.
-
-### 3D-Ansicht
-- **Neue Punkte** zum Antippen:
-  - **Sitze:** Sitzheizung und Belüftung direkt einstellen.
-  - **Lenkrad:** Lenkradheizung.
-- **Klima** und **Ladeklappe** öffnen jetzt zusätzlich ihre Multikachel. Die **Türen** funktionieren wie bisher.
-- Die Sitze im Auto glühen warm, solange eine Sitzheizung läuft.
-
-### Responsiv
-- **Kacheln pro Reihe:** einstellbar 2 bis 6 oder Auto (Handy 3, Tablet mehr). Die Namen bleiben bei jeder Größe sichtbar.
-- **Tablet/Querformat:** das Auto links, die Kacheln rechts daneben.
-- Alle Kacheln haben Icons. Das Lenkrad hat ein eigenes Icon.
+### Bedienung
+- **Schieber** (Temperatur, Lautstärke, Ladelimit, Ampere) verstellen sich nicht mehr versehentlich beim Scrollen.
+  - Antippen, kurz halten (es vibriert), dann schieben.
+  - Ein schneller Wisch scrollt die Seite.
+  - Antippen oben/unten ändert wie bisher um eine Stufe.
