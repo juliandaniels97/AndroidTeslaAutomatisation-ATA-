@@ -1,5 +1,6 @@
 package org.tfv.ata.ui
 
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DirectionsCar
@@ -26,6 +27,7 @@ import org.tfv.ata.R
 import org.tfv.ata.ui.screens.AboutScreen
 import org.tfv.ata.ui.screens.AutomationScreen
 import org.tfv.ata.ui.screens.Car3DScreen
+import org.tfv.ata.ui.screens.BehaviorScreen
 import org.tfv.ata.ui.screens.CarFinderScreen
 import org.tfv.ata.ui.screens.DesignScreen
 import org.tfv.ata.ui.screens.GuideScreen
@@ -49,6 +51,7 @@ private enum class Tab(val route: String, val labelRes: Int) {
   SETTINGS("settings", R.string.tab_settings),
 }
 
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
 fun AtaNavHost(vm: AtaViewModel, state: AtaUiState, pendingRoute: String? = null, onRouteShown: () -> Unit = {}) {
   val nav = rememberNavController()
@@ -105,7 +108,8 @@ fun AtaNavHost(vm: AtaViewModel, state: AtaUiState, pendingRoute: String? = null
     NavHost(
       navController = nav,
       startDestination = startRoute,
-      modifier = Modifier.padding(padding),
+      // Consume the bars' insets here, so the screens' own top bars don't add the status bar a second time.
+      modifier = Modifier.padding(padding).consumeWindowInsets(padding),
     ) {
       composable(Tab.HOME.route) { HomeScreen(vm, state, onAddVehicle = { nav.navigate("vehicles") }) }
       composable(Tab.VEHICLE.route) {
@@ -123,6 +127,7 @@ fun AtaNavHost(vm: AtaViewModel, state: AtaUiState, pendingRoute: String? = null
           onVehicles = { nav.navigate("vehicles") },
           onMenu = { nav.navigate("menu") },
           onDesign = { nav.navigate("design") },
+          onBehavior = { nav.navigate("behavior") },
           onWear = { nav.navigate("wear") },
           onAutomation = { nav.navigate("automation") },
           onAbout = { nav.navigate("about") },
@@ -131,6 +136,7 @@ fun AtaNavHost(vm: AtaViewModel, state: AtaUiState, pendingRoute: String? = null
           onKeyCard = { nav.navigate("nfc_card") },
         )
       }
+      composable("behavior") { BehaviorScreen(vm, state, onBack = { nav.popBackStack() }, onKeyCard = { nav.navigate("nfc_card") }) }
       composable("design") { DesignScreen(vm, state, onBack = { nav.popBackStack() }) }
       composable("vehicles") { VehiclesScreen(vm, state, onBack = { nav.popBackStack() }) }
       composable("menu") { MenuConfigScreen(vm, state, onBack = { nav.popBackStack() }, onOpen = { nav.navigate("menu/${it.route}") }) }

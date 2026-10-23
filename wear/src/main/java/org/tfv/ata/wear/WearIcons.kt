@@ -5,6 +5,9 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.drawable.Icon
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PowerOff
+import androidx.compose.material.icons.filled.Power
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.AirlineSeatReclineNormal
 import androidx.compose.material.icons.filled.Speaker
 import androidx.compose.material.icons.filled.VolumeDown
@@ -101,11 +104,11 @@ private fun iconFor(action: AtaAction): ImageVector = when (action) {
   AtaAction.CHARGE_STOP -> Icons.Filled.Bolt
   AtaAction.CHARGE_LIMIT -> Icons.Filled.EvStation
   AtaAction.CHARGING_AMPS -> Icons.Filled.EvStation
-  AtaAction.CHARGE_PORT_OPEN -> Icons.Filled.EvStation
-  AtaAction.CHARGE_PORT_CLOSE -> Icons.Filled.EvStation
+  AtaAction.CHARGE_PORT_OPEN -> Icons.Filled.Power
+  AtaAction.CHARGE_PORT_CLOSE -> Icons.Filled.PowerOff
   AtaAction.TRUNK -> Icons.Filled.Luggage
   AtaAction.FRUNK -> Icons.Filled.Inventory2
-  AtaAction.VENT_WINDOWS -> Icons.Filled.Window
+  AtaAction.VENT_WINDOWS -> Icons.Filled.Air
   AtaAction.CLOSE_WINDOWS -> Icons.Filled.Window
   AtaAction.HONK -> Icons.Filled.VolumeUp
   AtaAction.FLASH_LIGHTS -> Icons.Filled.FlashOn
@@ -121,8 +124,8 @@ private fun iconFor(action: AtaAction): ImageVector = when (action) {
   AtaAction.BIOWEAPON_OFF -> Icons.Filled.Masks
   AtaAction.OVERHEAT_PROTECTION_ON -> Icons.Filled.DeviceThermostat
   AtaAction.OVERHEAT_PROTECTION_OFF -> Icons.Filled.DeviceThermostat
-  AtaAction.DOOR_DRIVER_OPEN -> Icons.Filled.DoorFront
-  AtaAction.DOOR_PASSENGER_OPEN -> Icons.Filled.DoorBack
+  AtaAction.DOOR_DRIVER_OPEN -> SteeringWheelIcon
+  AtaAction.DOOR_PASSENGER_OPEN -> Icons.Filled.Person
   AtaAction.TRUNK_CLOSE -> Icons.Filled.Luggage
   AtaAction.REMOTE_DRIVE -> Icons.Filled.Key
   AtaAction.MEDIA_TOGGLE -> Icons.Filled.PlayArrow

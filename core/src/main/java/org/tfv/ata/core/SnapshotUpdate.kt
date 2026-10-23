@@ -55,3 +55,74 @@ fun VehicleSnapshot.after(action: AtaAction, value: Int? = null): VehicleSnapsho
   AtaAction.VOLUME_DOWN -> copy(volume = volume?.let { (it - 1f).coerceAtLeast(0f) })
   else -> this
 }
+
+/**
+ * The charging state carried forward to [now] from the last reading: time to full counts down, and battery,
+ * range and energy added rise with the reported power (roughly: the rate comes from the reading's level, limit
+ * and time to full). Readings without charging, or older than a day, are returned unchanged.
+ */
+fun VehicleSnapshot.projected(now: Long): VehicleSnapshot {
+  if (!charging || updatedAt <= 0 || now <= updatedAt) return this
+  val minutes = (now - updatedAt) / 60_000f
+  if (minutes < .5f || minutes > 24 * 60) return this
+  val limit = (chargeLimit ?: 100).coerceIn(batteryPercent, 100)
+  val ratePerMinute = if (minutesToFull > 0) (limit - batteryPercent).toFloat() / minutesToFull else 0f
+  val left = (minutesToFull - minutes).coerceAtLeast(0f)
+  val battery = (batteryPercent + ratePerMinute * minutes).coerceAtMost(limit.toFloat())
+  val range = if (batteryPercent > 0) (rangeKm * battery / batteryPercent).toInt() else rangeKm
+  val done = minutesToFull > 0 && left <= 0f
+  return copy(
+    batteryPercent = battery.toInt(),
+    rangeKm = range,
+    minutesToFull = left.toInt(),
+    chargeEnergyAddedKwh = chargeEnergyAddedKwh + chargingPowerKw * (if (done) minutesToFull.toFloat() else minutes) / 60f,
+    charging = !done,
+    chargingPowerKw = if (done) 0 else chargingPowerKw,
+  )
+}
+
+/** Demo mode: a made-up car, connected and charging, used instead of Bluetooth (Settings → Demo mode). */
+object DemoCar {
+  const val VEHICLE_ID = "demo"
+  val vehicle = Vehicle(id = VEHICLE_ID, name = "Demo Model Y", vin = "7SAYGDEE1RA000001")
+
+  /** The state the demo always starts from: 50 %, charging at 22 kW to 80 %, 1 h left, 20 kWh added. */
+  fun start(now: Long) = VehicleSnapshot(
+    batteryPercent = 50,
+    rangeKm = 265,
+    charging = true,
+    locked = true,
+    climateOn = false,
+    insideTempC = 19.5f,
+    outsideTempC = 12f,
+    sentry = false,
+    chargingPowerKw = 22,
+    chargerVoltage = 400,
+    chargerCurrent = 32,
+    minutesToFull = 60,
+    chargeLimit = 80,
+    chargeAmpsRequest = 32,
+    pluggedIn = true,
+    chargePortOpen = true,
+    chargeEnergyAddedKwh = 20f,
+    driverTempC = 21f,
+    passengerTempC = 21f,
+    seatHeatFrontLeft = 0,
+    seatHeatFrontRight = 0,
+    seatHeatRearLeft = 0,
+    seatHeatRearCenter = 0,
+    seatHeatRearRight = 0,
+    seatCoolFrontLeft = 0,
+    seatCoolFrontRight = 0,
+    seatAutoFrontLeft = false,
+    seatAutoFrontRight = false,
+    steeringHeater = false,
+    steeringAuto = false,
+    bioweapon = false,
+    overheatProtection = 1,
+    volume = 4f,
+    volumeMax = 11f,
+    nowPlaying = "ATA Demo Radio",
+    updatedAt = now,
+  )
+}

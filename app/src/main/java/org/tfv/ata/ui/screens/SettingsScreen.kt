@@ -14,6 +14,7 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.MenuBook
@@ -71,6 +72,7 @@ fun SettingsScreen(
   onVehicles: () -> Unit,
   onMenu: () -> Unit,
   onDesign: () -> Unit,
+  onBehavior: () -> Unit,
   onWear: () -> Unit,
   onAutomation: () -> Unit,
   onAbout: () -> Unit,
@@ -80,16 +82,6 @@ fun SettingsScreen(
 ) {
   val s = state.settings
   val context = LocalContext.current
-  val locationLauncher = rememberLauncherForActivityResult(
-    ActivityResultContracts.RequestMultiplePermissions(),
-  ) { result ->
-    if (result.values.any { it }) vm.updateSettings { it.copy(directionFx = true) }
-  }
-  val proximityLauncher = rememberLauncherForActivityResult(
-    ActivityResultContracts.RequestMultiplePermissions(),
-  ) { result ->
-    if (result.values.all { it }) vm.updateSettings { it.copy(proximityUnlock = true) }
-  }
   Scaffold(
     topBar = { TopAppBar(title = { Text(stringResource(R.string.tab_settings)) }) },
   ) { padding ->
@@ -151,80 +143,10 @@ fun SettingsScreen(
       }
 
       HorizontalDivider()
-      SectionTitle(stringResource(R.string.section_behavior))
-      SwitchRow(stringResource(R.string.settings_confirm), stringResource(R.string.settings_confirm_desc), s.confirmCritical) {
-        vm.updateSettings { it.copy(confirmCritical = it.confirmCritical.not()) }
-      }
-      SwitchRow(stringResource(R.string.settings_haptics), null, s.haptics) {
-        vm.updateSettings { it.copy(haptics = it.haptics.not()) }
-      }
-      SwitchRow(stringResource(R.string.settings_biometric), stringResource(R.string.settings_biometric_desc), s.biometricLock) {
-        vm.updateSettings { it.copy(biometricLock = it.biometricLock.not()) }
-      }
-      SwitchRow(stringResource(R.string.settings_direction_fx), stringResource(R.string.settings_direction_fx_desc), s.directionFx) {
-        if (s.directionFx) {
-          vm.updateSettings { it.copy(directionFx = false) }
-        } else if (Geo.hasLocationPermission(context)) {
-          vm.updateSettings { it.copy(directionFx = true) }
-        } else {
-          locationLauncher.launch(
-            arrayOf(
-              android.Manifest.permission.ACCESS_FINE_LOCATION,
-              android.Manifest.permission.ACCESS_COARSE_LOCATION,
-            ),
-          )
-        }
-      }
-
-      var pollLocal by remember(s.pollIntervalMinutes) { mutableFloatStateOf(s.pollIntervalMinutes.toFloat()) }
-      Text(stringResource(R.string.settings_poll, pollLocal.toInt()), style = MaterialTheme.typography.titleSmall)
-      Slider(
-        value = pollLocal,
-        valueRange = 0f..120f,
-        steps = 11,
-        onValueChange = { pollLocal = (it / 10f).toInt() * 10f },
-        onValueChangeFinished = { vm.updateSettings { it.copy(pollIntervalMinutes = pollLocal.toInt()) } },
-      )
-      Text(stringResource(R.string.settings_poll_desc), style = MaterialTheme.typography.bodySmall)
-
-      HorizontalDivider()
-      SectionTitle(stringResource(R.string.section_experimental))
-      SwitchRow(stringResource(R.string.settings_experimental_ble), stringResource(R.string.settings_experimental_ble_desc), s.experimentalBle) {
-        vm.updateSettings { it.copy(experimentalBle = it.experimentalBle.not()) }
-      }
-      SwitchRow(stringResource(R.string.nfc_keycard), stringResource(R.string.nfc_keycard_desc), s.nfcKeyCard) {
-        vm.updateSettings { it.copy(nfcKeyCard = it.nfcKeyCard.not()) }
-      }
-      LinkRow(stringResource(R.string.keycard_title), Icons.Filled.CreditCard, onKeyCard)
-      if (s.nfcKeyCard) KeyCardHint()
-
-      HorizontalDivider()
-      SectionTitle(stringResource(R.string.section_proximity))
-      SwitchRow(stringResource(R.string.settings_proximity), stringResource(R.string.settings_proximity_desc), s.proximityUnlock && s.experimentalBle) {
-        when {
-          s.proximityUnlock -> vm.updateSettings { it.copy(proximityUnlock = false) }
-          !s.experimentalBle -> android.widget.Toast.makeText(context, R.string.proximity_needs_ble, android.widget.Toast.LENGTH_LONG).show()
-          // Bluetooth scanning and location (Android only reports the car's advertisement with location access).
-          org.tfv.ata.core.ble.TeslaController.BLE_PERMISSIONS.any {
-            androidx.core.content.ContextCompat.checkSelfPermission(context, it) != android.content.pm.PackageManager.PERMISSION_GRANTED
-          } -> proximityLauncher.launch(org.tfv.ata.core.ble.TeslaController.BLE_PERMISSIONS)
-          else -> vm.updateSettings { it.copy(proximityUnlock = true) }
-        }
-      }
-      if (s.proximityUnlock && s.experimentalBle) {
-        var meters by remember(s.proximityMeters) { mutableFloatStateOf(s.proximityMeters.coerceIn(2, 20).toFloat()) }
-        Text(stringResource(R.string.settings_proximity_meters, meters.toInt()), style = MaterialTheme.typography.titleSmall)
-        Slider(
-          value = meters,
-          valueRange = 2f..20f,
-          steps = 17,
-          onValueChange = { meters = it },
-          onValueChangeFinished = { vm.updateSettings { it.copy(proximityMeters = meters.toInt()) } },
-        )
-        SwitchRow(stringResource(R.string.settings_proximity_locked), stringResource(R.string.settings_proximity_locked_desc), s.proximityWhenLocked) {
-          vm.updateSettings { it.copy(proximityWhenLocked = it.proximityWhenLocked.not()) }
-        }
-        Text(stringResource(R.string.settings_proximity_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+      SectionTitle(stringResource(R.string.section_behavior_connections))
+      LinkRow(stringResource(R.string.settings_behavior_page), Icons.Filled.Tune, onBehavior)
+      SwitchRow(stringResource(R.string.settings_demo), stringResource(R.string.settings_demo_desc), s.demoMode) {
+        vm.setDemoMode(!s.demoMode)
       }
 
       HorizontalDivider()
@@ -256,7 +178,7 @@ internal fun LinkRow(title: String, icon: ImageVector, onClick: () -> Unit) {
 }
 
 @Composable
-private fun AddressField(label: String, value: String, onCommit: (String) -> Unit) {
+internal fun AddressField(label: String, value: String, onCommit: (String) -> Unit) {
   var text by remember(value) { mutableStateOf(value) }
   OutlinedTextField(
     value = text,
@@ -288,7 +210,7 @@ internal fun SwitchRow(title: String, desc: String?, checked: Boolean, onToggle:
 
 /** Explains how the key card and the Tesla app share the car's card reader. */
 @Composable
-private fun KeyCardHint() {
+internal fun KeyCardHint() {
   val context = LocalContext.current
   NfcOffCard()
   val teslaApp = remember { org.tfv.ata.nfc.KeyCardRegistration.teslaAppInstalled(context) }

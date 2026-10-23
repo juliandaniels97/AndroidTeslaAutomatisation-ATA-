@@ -60,6 +60,7 @@ fun HomeScreen(vm: AtaViewModel, state: AtaUiState, onAddVehicle: () -> Unit = {
   val shown = if (editMode) order else savedActions
   val hidden = TileCatalog.all(multi).filter { t -> shown.none { it.key == t.key } }
   val carReady = state.settings.experimentalBle && state.selected != null
+  val liveSnapshot = org.tfv.ata.ui.tiles.rememberLiveSnapshot(state.snapshot)
 
   ActionHost(vm, state, onAddVehicle = onAddVehicle) { run ->
     Scaffold(
@@ -130,7 +131,7 @@ fun HomeScreen(vm: AtaViewModel, state: AtaUiState, onAddVehicle: () -> Unit = {
           showAddTile = hidden.isNotEmpty(),
           haptics = state.settings.haptics,
           multi = { tile, enabled, interactive, compact ->
-            MultiTileView(tile, state.snapshot, enabled, interactive, compact, state.settings.haptics, run)
+            MultiTileView(tile, liveSnapshot, enabled, interactive, compact, state.settings.haptics, run)
           },
         )
       }

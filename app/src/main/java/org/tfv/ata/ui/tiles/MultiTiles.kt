@@ -48,6 +48,9 @@ import androidx.compose.material.icons.filled.Thermostat
 import androidx.compose.material.icons.filled.VolumeDown
 import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material.icons.filled.Window
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Power
+import androidx.compose.material.icons.filled.PowerOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -191,15 +194,15 @@ fun MultiTileView(
         MultiTile.DOORS -> {
           TileHeader(tile.icon, label, compact = compact)
           ButtonRow {
-            Btn(Icons.Filled.DoorFront, stringResource(R.string.seat_fl), s?.doorDriverOpen == true, on, haptics, critical = true) { run(AtaAction.DOOR_DRIVER_OPEN) }
-            Btn(Icons.Filled.DoorBack, stringResource(R.string.seat_fr), s?.doorPassengerOpen == true, on, haptics, critical = true) { run(AtaAction.DOOR_PASSENGER_OPEN) }
+            Btn(SteeringWheelIcon, stringResource(R.string.seat_fl), s?.doorDriverOpen == true, on, haptics, critical = true) { run(AtaAction.DOOR_DRIVER_OPEN) }
+            Btn(Icons.Filled.Person, stringResource(R.string.seat_fr), s?.doorPassengerOpen == true, on, haptics, critical = true) { run(AtaAction.DOOR_PASSENGER_OPEN) }
           }
         }
         MultiTile.WINDOWS -> {
           val open = s?.windowsOpen == true
           TileHeader(tile.icon, label, if (open) stringResource(R.string.st_open) else null, palette.warning, compact)
           ButtonRow {
-            Btn(Icons.Filled.Window, stringResource(R.string.btn_vent), open, on, haptics) { run(AtaAction.VENT_WINDOWS) }
+            Btn(Icons.Filled.Air, stringResource(R.string.btn_vent), open, on, haptics) { run(AtaAction.VENT_WINDOWS) }
             Btn(Icons.Filled.Window, stringResource(R.string.btn_close), s != null && !open, on, haptics) { run(AtaAction.CLOSE_WINDOWS) }
           }
         }
@@ -207,8 +210,8 @@ fun MultiTileView(
           val open = s?.chargePortOpen
           TileHeader(tile.icon, label, if (open == true) stringResource(R.string.st_open) else null, palette.accent, compact)
           ButtonRow {
-            Btn(Icons.Filled.EvStation, stringResource(R.string.btn_open), open == true, on, haptics) { run(AtaAction.CHARGE_PORT_OPEN) }
-            Btn(Icons.Filled.EvStation, stringResource(R.string.btn_close), open == false, on, haptics) { run(AtaAction.CHARGE_PORT_CLOSE) }
+            Btn(Icons.Filled.Power, stringResource(R.string.btn_open), open == true, on, haptics) { run(AtaAction.CHARGE_PORT_OPEN) }
+            Btn(Icons.Filled.PowerOff, stringResource(R.string.btn_close), open == false, on, haptics) { run(AtaAction.CHARGE_PORT_CLOSE) }
           }
         }
         MultiTile.VOLUME -> {
@@ -535,6 +538,9 @@ private fun ColumnScope.ChargingBody(
           else -> null
         }
         if (sub != null) Text(sub, fontSize = 10.sp, color = palette.muted, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        if (charging && (s?.chargeEnergyAddedKwh ?: 0f) > 0f) {
+          Text("+" + formatKwh(s!!.chargeEnergyAddedKwh), fontSize = 10.sp, color = palette.success, maxLines = 1, fontWeight = FontWeight.SemiBold)
+        }
       }
       TileButton(
         Icons.Filled.Bolt,

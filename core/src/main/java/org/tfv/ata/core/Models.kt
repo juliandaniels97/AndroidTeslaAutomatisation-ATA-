@@ -135,6 +135,15 @@ data class VehicleSnapshot(
 
 enum class ThemeMode { SYSTEM, LIGHT, DARK }
 
+/**
+ * When ATA reads the car's status by itself:
+ * - [BATTERY_SAVER]: never, only when you refresh (pull down or ↻).
+ * - [SMART]: at app start, then every [AtaSettings.smartMinutes] while the car is plugged in and the phone is in use.
+ * - [INTERVAL]: every [AtaSettings.intervalMinutes], also in the background.
+ * Background reads never wake a sleeping car.
+ */
+enum class StatusMode { BATTERY_SAVER, SMART, INTERVAL }
+
 /** Look of the app: glowing neon lines, or calm Material 3 surfaces. Both come in light and dark. */
 enum class UiDesign { NEON, MATERIAL }
 
@@ -150,7 +159,17 @@ data class AtaSettings(
   val haptics: Boolean = true,
   val biometricLock: Boolean = false,
   val experimentalBle: Boolean = false,
+  /** Old interval setting (before 1.9.4), read once to pick [statusMode]. */
   val pollIntervalMinutes: Int = 0,
+  val statusMode: StatusMode = StatusMode.BATTERY_SAVER,
+  /** [StatusMode.SMART]: minutes between reads while plugged in (5 … 180). */
+  val smartMinutes: Int = 30,
+  /** [StatusMode.INTERVAL]: minutes between reads (5 … 180). */
+  val intervalMinutes: Int = 30,
+  /** Status settings moved to [statusMode] (1.9.4). */
+  val statusModeMigrated: Boolean = false,
+  /** Demo mode: a made-up car instead of Bluetooth (see DemoCar). */
+  val demoMode: Boolean = false,
   val navigationApp: NavigationApp = NavigationApp.TESLA,
   val homeAddress: String = "",
   val workAddress: String = "",
@@ -221,3 +240,14 @@ data class AtaSettings(
     AtaAction.NAVIGATE_HOME.id,
   ),
 )
+
+/** 120 slider steps from 5 min to 3 h: 1-minute steps up to an hour, coarser after that. */
+object StatusIntervals {
+  val steps: List<Int> = buildList {
+    for (m in 5..60) add(m) // 56 steps of 1 min
+    for (m in 62..120 step 2) add(m) // 30 steps of 2 min
+    for (i in 1..34) add(120 + Math.round(i * 60f / 34)) // 34 steps up to 3 h
+  }
+
+  fun indexOf(minutes: Int): Int = steps.indices.minByOrNull { kotlin.math.abs(steps[it] - minutes) } ?: 0
+}

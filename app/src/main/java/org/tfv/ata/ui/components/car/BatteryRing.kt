@@ -21,9 +21,9 @@ fun batteryColor(level: Int): Color = when {
 
 /**
  * Neon battery ring with a slow, viscous glow: the brightness flows gently along the arc like thick liquid.
- * Dashed while the level is unknown. While charging, green dots climb slowly along the ring up to the current
- * level (a little faster with more [chargeKw]), the tip breathes and a faint dashed arc shows the way to the
- * [chargeLimit].
+ * Dashed while the level is unknown. A tick marks the [chargeLimit]. While charging, green dots come out of the
+ * empty part of the ring and flow slowly into the charged part (a little faster with more [chargeKw]), the tip
+ * breathes and a faint dashed arc shows the way to the limit.
  */
 fun DrawScope.drawBatteryRing(
   center: Offset,
@@ -53,6 +53,7 @@ fun DrawScope.drawBatteryRing(
     val sweepAll = 360f * level.coerceIn(0, 100) / 100f
     drawArc(color, -90f, sweepAll, false, topLeft, box, style = Stroke(width, cap = StrokeCap.Round))
     if (charging) drawChargeFlow(center, radius, level, chargeKw, chargeLimit, t, width, color, glow, true, topLeft, box)
+    drawLimitMark(center, radius, chargeLimit, width, glow)
     return
   }
   drawCircle(color.copy(alpha = .10f), radius, center, style = Stroke(width))
@@ -75,6 +76,16 @@ fun DrawScope.drawBatteryRing(
     drawArc(color.copy(alpha = alpha), a, step + .6f, false, topLeft, box, style = Stroke(width, cap = if (i == 0 || i == segments - 1) StrokeCap.Round else StrokeCap.Butt))
   }
   if (charging) drawChargeFlow(center, radius, level, chargeKw, chargeLimit, t, width, color, glow, false, topLeft, box)
+  drawLimitMark(center, radius, chargeLimit, width, glow)
+}
+
+/** A short tick across the ring where charging stops (the charge limit). */
+private fun DrawScope.drawLimitMark(center: Offset, radius: Float, limit: Int?, width: Float, glow: Boolean) {
+  if (limit == null || limit !in 1..99) return
+  val rad = Math.toRadians((-90f + 360f * limit / 100f).toDouble())
+  val dir = Offset(kotlin.math.cos(rad).toFloat(), kotlin.math.sin(rad).toFloat())
+  val color = if (glow) Color.White.copy(alpha = .9f) else Color(0xFF5B6B7C)
+  drawLine(color, center + dir * (radius - width * 1.25f), center + dir * (radius + width * 1.25f), strokeWidth = width * .32f, cap = StrokeCap.Round)
 }
 
 /** Charging animation under the ring: target arc to the limit, flowing drops up to the level, breathing tip. */
@@ -100,23 +111,24 @@ private fun DrawScope.drawChargeFlow(
       style = Stroke(width * .35f, pathEffect = PathEffect.dashPathEffect(floatArrayOf(6f, 9f))),
     )
   }
-  if (sweep < 8f) return
-  // Green dots climb slowly along the charged part of the ring towards the tip, like energy flowing in; a little
-  // faster with more power, never hectic. Each fades in at the start and out at the tip.
-  val green = if (material) Color(0xFF2E9E5B) else Color(0xFF39FF88)
-  val speed = (14f + kw * .12f).coerceAtMost(40f)
-  val spacing = 26f
-  val count = (sweep / spacing).toInt().coerceAtLeast(1)
-  val shift = (t * speed) % spacing
-  for (k in 0..count) {
-    val pos = k * spacing + shift
-    if (pos > sweep) continue
-    val f = pos / sweep
-    val fade = minOf(1f, f * 6f, (1f - f) * 6f).coerceIn(0f, 1f)
-    val rad = Math.toRadians((-90f + pos).toDouble())
-    val p = Offset(center.x + radius * kotlin.math.cos(rad).toFloat(), center.y + radius * kotlin.math.sin(rad).toFloat())
-    if (glow) drawCircle(green.copy(alpha = .28f * fade), width * .9f, p, blendMode = BlendMode.Plus)
-    drawCircle(green.copy(alpha = .95f * fade), width * .3f, p)
+  // Green dots come out of the empty part of the ring (what is still to charge) and flow into the charged part:
+  // they travel back from the ring's end towards the current level and sink in at the tip.
+  val empty = 360f - sweep
+  if (empty >= 6f) {
+    val green = if (material) Color(0xFF2E9E5B) else Color(0xFF39FF88)
+    val speed = (12f + kw * .1f).coerceAtMost(30f)
+    val spacing = 22f
+    val count = (empty / spacing).toInt() + 1
+    for (k in 0 until count) {
+      val d = (k * spacing + t * speed) % (count * spacing)
+      if (d > empty) continue
+      val f = d / empty
+      val fade = minOf(1f, f * 5f, (1f - f) * 4f).coerceIn(0f, 1f)
+      val rad = Math.toRadians((-90f + sweep + empty - d).toDouble())
+      val p = Offset(center.x + radius * kotlin.math.cos(rad).toFloat(), center.y + radius * kotlin.math.sin(rad).toFloat())
+      if (glow) drawCircle(green.copy(alpha = .3f * fade), width * .9f, p, blendMode = BlendMode.Plus)
+      drawCircle(green.copy(alpha = .95f * fade), width * (.22f + .1f * fade), p)
+    }
   }
   // Breathing tip at the current level.
   val breathe = .5f + .5f * sin(t * 3.2f)

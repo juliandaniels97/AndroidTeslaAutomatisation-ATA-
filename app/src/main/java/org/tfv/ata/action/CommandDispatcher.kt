@@ -17,6 +17,7 @@ import org.tfv.ata.automation.Notifier
 import org.tfv.ata.core.ActionPolicy
 import org.tfv.ata.core.AtaAction
 import org.tfv.ata.core.after
+import org.tfv.ata.core.projected
 import org.tfv.ata.core.AtaCategory
 import org.tfv.ata.core.AtaSettings
 import org.tfv.ata.core.CommandResult
@@ -67,6 +68,8 @@ object CommandDispatcher {
       return ActionExecutor.run(context, action, vehicle, settings, value, foreground = canOpen)
     }
 
+    if (settings.demoMode) return runDemo(context, action, value, source, inForeground)
+
     val vin = vehicle?.vin
     if (vin.isNullOrBlank()) {
       val result = CommandResult.Failure("no vehicle", FailureCode.OTHER)
@@ -91,6 +94,34 @@ object CommandDispatcher {
       store.snapshot(vehicle.id).first()?.let { store.saveSnapshot(vehicle.id, it.after(action, number)) }
       runCatching { org.tfv.ata.widget.StatusWidget().updateAll(context) }
     }
+    feedback(context, action, result, source, inForeground)
+    return result
+  }
+
+  /** Demo mode: nothing is sent; after a short "connection" the made-up car takes the new state. */
+  private suspend fun runDemo(context: Context, action: AtaAction, value: String?, source: TriggerSource, inForeground: Boolean): CommandResult {
+    val number = if (action.needsValue) {
+      ActionPolicy.parseValue(action, value) ?: run {
+        val result = CommandResult.Failure("invalid value", FailureCode.INVALID_VALUE)
+        feedback(context, action, result, source, inForeground)
+        return result
+      }
+    } else {
+      null
+    }
+    kotlinx.coroutines.delay(600)
+    val store = org.tfv.ata.data.AtaStore.get(context)
+    val now = System.currentTimeMillis()
+    val current = (store.snapshot(org.tfv.ata.core.DemoCar.VEHICLE_ID).first() ?: org.tfv.ata.core.DemoCar.start(now)).projected(now).copy(updatedAt = now)
+    var next = current.after(action, number)
+    // The made-up charger: 22 kW, a 75 kWh pack, so starting or a new limit gives a fitting time to full.
+    if (next.charging && action in setOf(AtaAction.CHARGE_START, AtaAction.CHARGE_LIMIT)) {
+      val limit = (next.chargeLimit ?: 80).coerceAtLeast(next.batteryPercent)
+      next = next.copy(chargingPowerKw = 22, pluggedIn = true, minutesToFull = ((limit - next.batteryPercent) * .75f / 22f * 60f).toInt())
+    }
+    store.saveSnapshot(org.tfv.ata.core.DemoCar.VEHICLE_ID, next)
+    runCatching { org.tfv.ata.widget.StatusWidget().updateAll(context) }
+    val result = CommandResult.Success
     feedback(context, action, result, source, inForeground)
     return result
   }

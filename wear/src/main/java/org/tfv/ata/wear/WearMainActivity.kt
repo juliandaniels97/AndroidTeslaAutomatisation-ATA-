@@ -1,6 +1,24 @@
 package org.tfv.ata.wear
 
 import android.os.Bundle
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
+import androidx.compose.runtime.produceState
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import kotlinx.coroutines.delay
+import org.tfv.ata.core.VehicleSnapshot
+import org.tfv.ata.core.projected
+import kotlin.math.cos
+import kotlin.math.sin
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -76,7 +94,8 @@ import kotlin.math.roundToInt
 private const val CONFIRM_WINDOW_MS = 5_000L
 
 private val NEON = Color(0xFF4FB4FF)
-private val TILE = Color(0xFF1B212B)
+private val TILE = Color(0xFF10141B)
+private val TILE_TOP = Color(0xFF1E2532)
 private val TILE_EDGE = Color(0xFF2C3646)
 private val CRITICAL = Color(0xFFFF6B5E)
 private val CHARGE = Color(0xFF2ECC71)
@@ -198,16 +217,25 @@ private fun WearApp() {
     }
   }
 
+  // The car's state, carried forward to now while it charges (refreshed every 30 s).
+  val now by produceState(System.currentTimeMillis(), status) {
+    while (true) {
+      value = System.currentTimeMillis()
+      delay(30_000)
+    }
+  }
+  val car: VehicleSnapshot? = remember(status, now) { status?.takeIf { it.known }?.let { (it.snapshot ?: it.asSnapshot()).projected(now) } }
+
   val cfg = config ?: WatchConfig()
   val round = LocalConfiguration.current.isScreenRound
   val gridSize = if (cfg.grid == WearContract.GRID_LARGE) (if (round) 7 else 9) else 4
   val gridActions = cfg.actions.take(gridSize)
   val moreActions = cfg.actions.drop(gridSize)
-  val pager = rememberPagerState(pageCount = { 2 })
+  val pager = rememberPagerState(pageCount = { 3 })
 
   MaterialTheme {
     Scaffold(
-      timeText = { if (pager.currentPage == 0) StatusTimeText(status, round) else TimeText() },
+      timeText = { if (pager.currentPage == 0) StatusTimeText(car, round) else TimeText() },
       pageIndicator = { HorizontalPageIndicator(pageIndicatorState = remember(pager) { PagerIndicator(pager) }) },
     ) {
       HorizontalPager(state = pager, modifier = Modifier.fillMaxSize()) { page ->
@@ -221,10 +249,12 @@ private fun WearApp() {
                 modifier = Modifier.align(Alignment.Center).padding(28.dp),
               )
             } else {
-              ActionGrid(gridActions, round, armed, running) { runAction(it) }
+              ActionGrid(gridActions, round, armed, running, car) { runAction(it) }
             }
-            StatusRim(status, round)
+            StatusRim(car, round)
           }
+        } else if (page == 1) {
+          StatusCard(car, status?.vehicle.orEmpty(), round)
         } else {
           MoreList(
             actions = moreActions,
@@ -272,11 +302,10 @@ private class PagerIndicator(private val pager: PagerState) : PageIndicatorState
 
 /** Time at the top, battery left and range right of it (round: along the edge). */
 @Composable
-private fun StatusTimeText(status: WatchStatus?, round: Boolean) {
-  val s = status?.takeIf { it.known }
-  val battery = s?.let { "${it.battery}%${if (it.charging) " ⚡" else ""}" } ?: "--"
-  val range = s?.let { "${it.range} km" } ?: "--"
-  val color = s?.let { batteryColor(it.battery, it.charging) } ?: MUTED
+private fun StatusTimeText(s: VehicleSnapshot?, round: Boolean) {
+  val battery = s?.let { "${it.batteryPercent}%${if (it.charging) " ⚡" else ""}" } ?: "--"
+  val range = s?.let { "${it.rangeKm} km" } ?: "--"
+  val color = s?.let { batteryColor(it.batteryPercent, it.charging) } ?: MUTED
   if (round) {
     TimeText(
       startCurvedContent = { curvedText(battery, color = color) },
@@ -292,13 +321,13 @@ private fun StatusTimeText(status: WatchStatus?, round: Boolean) {
 
 /** Temperatures and lock state at the bottom edge (round: curved along the rim). */
 @Composable
-private fun StatusRim(status: WatchStatus?, round: Boolean) {
-  val s = status?.takeIf { it.known }
+private fun StatusRim(s: VehicleSnapshot?, round: Boolean) {
   val lock = when (s?.locked) { true -> "🔒"; false -> "🔓"; null -> "" }
-  val text = if (s == null) {
-    stringResource(R.string.wear_status_unknown)
-  } else {
-    stringResource(R.string.wear_status_temps, s.inside.roundToInt(), s.outside.roundToInt()) + if (lock.isNotEmpty()) "  $lock" else ""
+  val text = when {
+    s == null -> stringResource(R.string.wear_status_unknown)
+    // While charging: power and time to full instead of the temperatures.
+    s.charging -> chargeLine(s)
+    else -> stringResource(R.string.wear_status_temps, s.insideTempC.roundToInt(), s.outsideTempC.roundToInt()) + if (lock.isNotEmpty()) "  $lock" else ""
   }
   if (round) {
     // A little inside the edge, so the page dots stay free.
@@ -320,7 +349,7 @@ private data class TileSpot(val x: Dp, val y: Dp)
  * ring left for the status; square: 2×2 or 3×3.
  */
 @Composable
-private fun ActionGrid(actions: List<WatchAction>, round: Boolean, armed: String?, running: String?, onRun: (String) -> Unit) {
+private fun ActionGrid(actions: List<WatchAction>, round: Boolean, armed: String?, running: String?, car: VehicleSnapshot?, onRun: (String) -> Unit) {
   BoxWithConstraints(Modifier.fillMaxSize()) {
     val w = maxWidth
     val h = maxHeight
@@ -367,6 +396,7 @@ private fun ActionGrid(actions: List<WatchAction>, round: Boolean, armed: String
         showLabel = showLabel,
         armed = armed == action.id,
         running = running == action.id,
+        active = car?.let { isActive(action.id, it) } == true,
         modifier = Modifier.align(Alignment.Center).offset(spot.x, spot.y),
         onClick = { onRun(action.id) },
       )
@@ -382,15 +412,27 @@ private fun Tile(
   showLabel: Boolean,
   armed: Boolean,
   running: Boolean,
+  active: Boolean,
   modifier: Modifier,
   onClick: () -> Unit,
 ) {
   val critical = WearControl.isCritical(action.id)
   val tint = if (critical) CRITICAL else NEON
+  // Card look like the phone's tiles: dark gradient, glowing edge; brighter when the car is in that state.
+  val background = when {
+    armed -> Brush.verticalGradient(listOf(CRITICAL.copy(alpha = .9f), CRITICAL.copy(alpha = .7f)))
+    active -> Brush.verticalGradient(listOf(tint.copy(alpha = .32f), TILE))
+    else -> Brush.verticalGradient(listOf(TILE_TOP, TILE))
+  }
+  val edge = when {
+    armed -> CRITICAL
+    active -> tint
+    else -> tint.copy(alpha = .45f)
+  }
   Box(
     modifier.size(size).clip(shape)
-      .background(if (armed) CRITICAL.copy(alpha = .85f) else TILE)
-      .border(1.dp, if (armed) CRITICAL else TILE_EDGE, shape)
+      .background(background)
+      .border(if (active) 2.dp else 1.dp, edge, shape)
       .clickable(onClick = onClick),
     contentAlignment = Alignment.Center,
   ) {
@@ -413,6 +455,110 @@ private fun Tile(
           textAlign = TextAlign.Center,
           modifier = Modifier.padding(horizontal = size * .14f).padding(top = 2.dp),
         )
+      }
+    }
+    if (active && !armed) {
+      // Small dot: this is the car's current state (e.g. locked).
+      Box(Modifier.align(Alignment.TopCenter).padding(top = size * .1f).size(6.dp).clip(CircleShape).background(tint))
+    }
+  }
+}
+
+/** Whether the car is in the state an action leads to (shown as an active tile). */
+private fun isActive(id: String, s: VehicleSnapshot): Boolean = when (id) {
+  "lock" -> s.locked == true
+  "unlock" -> s.locked == false
+  "climate_on" -> s.climateOn
+  "climate_off" -> !s.climateOn
+  "sentry_on" -> s.sentry
+  "sentry_off" -> !s.sentry
+  "charge_start" -> s.charging
+  "charge_stop" -> !s.charging && s.pluggedIn
+  "frunk" -> s.frunkOpen
+  "trunk" -> s.trunkOpen
+  "vent_windows" -> s.windowsOpen
+  "close_windows" -> !s.windowsOpen
+  "defrost" -> s.defrost
+  "steering_wheel_heater" -> s.steeringHeater == true
+  "bioweapon_on" -> s.bioweapon == true
+  "charge_port_open" -> s.chargePortOpen == true
+  "climate_keep" -> s.climateKeeper == 1
+  "dog_mode" -> s.climateKeeper == 2
+  "camp_mode" -> s.climateKeeper == 3
+  else -> false
+}
+
+/** "⚡ 22 kW · 1 h · +20.0 kWh" while charging. */
+@Composable
+private fun chargeLine(s: VehicleSnapshot): String = listOfNotNull(
+  "⚡ ${s.chargingPowerKw} kW".takeIf { s.chargingPowerKw > 0 } ?: "⚡",
+  formatMinutes(s.minutesToFull).takeIf { s.minutesToFull > 0 },
+  ("+" + String.format(java.util.Locale.getDefault(), "%.1f kWh", s.chargeEnergyAddedKwh)).takeIf { s.chargeEnergyAddedKwh > 0f },
+).joinToString(" · ")
+
+private fun formatMinutes(m: Int): String = if (m >= 60) "${m / 60} h ${m % 60} min" else "$m min"
+
+/**
+ * Second page: the car as a card, like the phone's vehicle view. Battery ring (green dots flow into the charged
+ * part while charging, a tick marks the charge limit), battery and range in the middle, then charging details
+ * or temperatures and lock state.
+ */
+@Composable
+private fun StatusCard(s: VehicleSnapshot?, name: String, round: Boolean) {
+  val transition = rememberInfiniteTransition(label = "ring")
+  val t by transition.animateFloat(0f, 1000f, infiniteRepeatable(tween(1_000_000, easing = LinearEasing)), label = "t")
+  Box(Modifier.fillMaxSize().padding(if (round) 14.dp else 8.dp), contentAlignment = Alignment.Center) {
+    Canvas(Modifier.fillMaxSize()) {
+      val stroke = size.minDimension * .045f
+      val radius = size.minDimension / 2 - stroke
+      val c = center
+      val topLeft = Offset(c.x - radius, c.y - radius)
+      val box = Size(radius * 2, radius * 2)
+      if (s == null) {
+        drawCircle(MUTED.copy(alpha = .4f), radius, c, style = Stroke(3f, pathEffect = PathEffect.dashPathEffect(floatArrayOf(8f, 12f))))
+        return@Canvas
+      }
+      val color = batteryColor(s.batteryPercent, false)
+      val sweep = 360f * s.batteryPercent.coerceIn(0, 100) / 100f
+      drawCircle(color.copy(alpha = .14f), radius, c, style = Stroke(stroke))
+      drawArc(color, -90f, sweep, false, topLeft, box, style = Stroke(stroke, cap = StrokeCap.Round))
+      if (s.charging) {
+        val empty = 360f - sweep
+        val spacing = 24f
+        val count = (empty / spacing).toInt() + 1
+        val speed = (12f + s.chargingPowerKw * .1f).coerceAtMost(30f)
+        for (k in 0 until count) {
+          val d = (k * spacing + t * speed) % (count * spacing)
+          if (d > empty) continue
+          val f = d / empty
+          val fade = minOf(1f, f * 5f, (1f - f) * 4f).coerceIn(0f, 1f)
+          val rad = Math.toRadians((-90f + sweep + empty - d).toDouble())
+          val p = Offset(c.x + radius * cos(rad).toFloat(), c.y + radius * sin(rad).toFloat())
+          drawCircle(CHARGE.copy(alpha = .95f * fade), stroke * (.25f + .1f * fade), p)
+        }
+      }
+      s.chargeLimit?.takeIf { it in 1..99 }?.let { limit ->
+        val rad = Math.toRadians((-90f + 360f * limit / 100f).toDouble())
+        val dir = Offset(cos(rad).toFloat(), sin(rad).toFloat())
+        drawLine(Color.White.copy(alpha = .85f), c + dir * (radius - stroke * 1.2f), c + dir * (radius + stroke * 1.2f), strokeWidth = stroke * .35f, cap = StrokeCap.Round)
+      }
+    }
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+      if (name.isNotBlank()) Text(name, fontSize = 11.sp, color = MUTED, maxLines = 1)
+      if (s == null) {
+        Text(stringResource(R.string.wear_status_unknown), color = MUTED, fontSize = 13.sp, textAlign = TextAlign.Center)
+      } else {
+        Text("${s.batteryPercent}%", fontSize = 30.sp, color = batteryColor(s.batteryPercent, s.charging))
+        Text("${s.rangeKm} km", fontSize = 13.sp, color = Color.White)
+        if (s.charging) {
+          Text(listOfNotNull("⚡ ${s.chargingPowerKw} kW".takeIf { s.chargingPowerKw > 0 } ?: "⚡", formatMinutes(s.minutesToFull).takeIf { s.minutesToFull > 0 }).joinToString(" · "), fontSize = 12.sp, color = CHARGE)
+          if (s.chargeEnergyAddedKwh > 0f) {
+            Text("+" + String.format(java.util.Locale.getDefault(), "%.1f kWh", s.chargeEnergyAddedKwh), fontSize = 11.sp, color = CHARGE)
+          }
+        } else {
+          val lock = when (s.locked) { true -> "🔒"; false -> "🔓"; null -> "" }
+          Text(stringResource(R.string.wear_status_temps, s.insideTempC.roundToInt(), s.outsideTempC.roundToInt()) + if (lock.isNotEmpty()) "  $lock" else "", fontSize = 11.sp, color = MUTED)
+        }
       }
     }
   }

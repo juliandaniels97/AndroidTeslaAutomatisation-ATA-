@@ -51,7 +51,7 @@ object DebugReport {
       appendLine("Tesla app installed: ${KeyCardRegistration.teslaAppInstalled(context)}")
       appendLine(
         "Settings: active=${settings.active} ble=${settings.experimentalBle} nfcKeyCard=${settings.nfcKeyCard} " +
-          "theme=${settings.theme} poll=${settings.pollIntervalMinutes}min",
+          "theme=${settings.theme} status=${settings.statusMode} smart=${settings.smartMinutes}min interval=${settings.intervalMinutes}min demo=${settings.demoMode}",
       )
       appendLine("Vehicles: ${vehicles.size}")
       selected?.let { v ->

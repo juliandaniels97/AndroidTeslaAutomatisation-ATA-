@@ -71,18 +71,21 @@ fun VehicleScreen(
 ) {
   val context = LocalContext.current
   val scope = rememberCoroutineScope()
-  val snapshot = state.snapshot
+  val snapshot = org.tfv.ata.ui.tiles.rememberLiveSnapshot(state.snapshot)
   val experimental = state.settings.experimentalBle
   val refreshing by vm.refreshing.collectAsStateWithLifecycle()
   val pairedVins by remember { PairedKeys.vins(context) }.collectAsStateWithLifecycle()
-  val paired = state.selected?.let { Vin.normalize(it.vin) in pairedVins.orEmpty() } == true
+  val demo = state.settings.demoMode
+  val paired = demo || state.selected?.let { Vin.normalize(it.vin) in pairedVins.orEmpty() } == true
   val reportRefresh: (Boolean) -> Unit = { ok ->
     if (!ok) Toast.makeText(context, R.string.status_read_failed, Toast.LENGTH_LONG).show()
   }
-  // Read the status when the tab opens (without waking the car; ↻ wakes it). A successful read also records
-  // that this phone's key works, which hides the pairing card.
-  LaunchedEffect(state.selected?.vin, experimental) {
-    if (experimental && state.selected != null && org.tfv.ata.core.ble.TeslaController.hasBlePermission(context)) {
+  // Read the status when the tab opens (without waking the car; ↻ or pulling down wakes it), except in battery
+  // saver mode, which only reads on request. A successful read also records that this phone's key works, which
+  // hides the pairing card.
+  val autoRead = state.settings.statusMode != org.tfv.ata.core.StatusMode.BATTERY_SAVER
+  LaunchedEffect(state.selected?.vin, experimental, autoRead) {
+    if (experimental && autoRead && state.selected != null && (demo || org.tfv.ata.core.ble.TeslaController.hasBlePermission(context))) {
       vm.refreshStatus(wake = false)
     }
   }
@@ -144,6 +147,21 @@ fun VehicleScreen(
             StatBox(stringResource(R.string.stat_inside), snapshot?.let { "${it.insideTempC.toInt()}°" } ?: "--")
             StatBox(stringResource(R.string.stat_outside), snapshot?.let { "${it.outsideTempC.toInt()}°" } ?: "--")
           }
+          snapshot?.takeIf { it.charging }?.let { s ->
+            val parts = listOfNotNull(
+              stringResource(R.string.st_kwh_added, org.tfv.ata.ui.tiles.formatKwh(s.chargeEnergyAddedKwh)).takeIf { s.chargeEnergyAddedKwh > 0f },
+              s.chargeLimit?.let { stringResource(R.string.st_limit, it) },
+            )
+            if (parts.isNotEmpty()) {
+              Text(
+                "⚡ " + parts.joinToString("  ·  "),
+                style = MaterialTheme.typography.labelMedium,
+                color = org.tfv.ata.ui.theme.AtaColors.current.success,
+                modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
+                textAlign = TextAlign.Center,
+              )
+            }
+          }
           snapshot?.takeIf { it.updatedAt > 0 }?.let {
             Text(
               stringResource(R.string.last_updated, formatRelative(it.updatedAt)) +
@@ -198,7 +216,13 @@ fun VehicleScreen(
         )
       }
       // Tablets / landscape: the car on the left, the tiles next to it; phones: one column.
-      BoxWithConstraints(Modifier.fillMaxSize().padding(padding)) {
+      // Pull down to read the status (wakes the car), like ↻.
+      androidx.compose.material3.pulltorefresh.PullToRefreshBox(
+        isRefreshing = refreshing,
+        onRefresh = { if (experimental && !refreshing) vm.refreshStatus(wake = true, onDone = reportRefresh) },
+        modifier = Modifier.fillMaxSize().padding(padding),
+      ) {
+      BoxWithConstraints(Modifier.fillMaxSize()) {
         if (maxWidth >= 720.dp || (maxWidth > maxHeight && maxWidth >= 560.dp)) {
           Row(Modifier.fillMaxSize()) {
             Column(Modifier.weight(.42f).fillMaxHeight().verticalScroll(rememberScrollState()).padding(12.dp)) { header() }
@@ -211,6 +235,7 @@ fun VehicleScreen(
             board()
           }
         }
+      }
       }
     }
 

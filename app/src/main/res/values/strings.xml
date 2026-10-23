@@ -6,7 +6,7 @@
     <string name="in_development">This feature is in development.</string>
     <string name="error_no_app">No matching app installed.</string>
     <string name="onboarding_title">Welcome to ATA</string>
-    <string name="onboarding_body">ATA controls and automates your Tesla — no account, no Fleet API, no cloud.\n\n▸ BASIC FEATURES\nOpen the Tesla app; jump to Charging/Climate/Controls/Location (may just open the app). Navigate Home/Work or any address (sent to the Tesla app, or Google Maps/Waze). Share a destination.\n\n▸ BLE FEATURES\nEnable under Settings → Bluetooth &amp; NFC, add your vehicle (VIN) and pair the phone key. Then lock/unlock, climate, charging, trunk/frunk, windows, sentry and more over Bluetooth, plus live status (battery, range, temperatures).\n\n▸ MAKE IT YOURS\nOn the Actions tab, long-press a tile to edit: drag to reorder, delete, re-add with +, then Save layout. Add vehicle actions via the star on the Vehicle tab or the + list. Pin any action as a shortcut, app-icon menu entry or widget (up to 8 tiles).\n\n▸ AUTOMATION\nTrigger actions from Samsung Routines or Tasker, and react to the car status (battery, charging, locked…) via ATA broadcasts.\n\nTip: set Home/Work addresses under Settings → Addresses — navigation works even without a saved vehicle.</string>
+    <string name="onboarding_body">ATA controls and automates your Tesla — no account, no Fleet API, no cloud.\n\n▸ BASIC FEATURES\nOpen the Tesla app; jump to Charging/Climate/Controls/Location (may just open the app). Navigate Home/Work or any address (sent to the Tesla app, or Google Maps/Waze). Share a destination.\n\n▸ BLE FEATURES\nEnable under Settings → Behavior, status, Bluetooth &amp; NFC, add your vehicle (VIN) and pair the phone key. Then lock/unlock, climate, charging, trunk/frunk, windows, sentry and more over Bluetooth, plus live status (battery, range, temperatures).\n\n▸ MAKE IT YOURS\nOn the Vehicle or Favorites tab, long-press a tile to edit: drag to reorder, delete, re-add with +, star it for Favorites, then Save layout. Settings → Design sets multi-tiles and tiles per row. Pin any action as a shortcut, app-icon menu entry or widget (up to 8 tiles).\n\n▸ AUTOMATION\nTrigger actions from Samsung Routines or Tasker, and react to the car status (battery, charging, locked…) via ATA broadcasts.\n\nTip: set Home/Work addresses under Settings → Addresses — navigation works even without a saved vehicle.</string>
     <string name="onboarding_cta">Let\'s go</string>
 
     <string name="tab_home">Actions</string>
@@ -73,8 +73,6 @@
     <string name="nfc_write_failed">Could not write the tag. Try again.</string>
     <string name="settings_direction_fx">Point animation to car</string>
     <string name="settings_direction_fx_desc">Uses your location to aim the activation animation toward the car\'s last known spot. Needs location permission.</string>
-    <string name="settings_poll">Status interval: %1$d min</string>
-    <string name="settings_poll_desc">Requires the BLE features. 0 turns off background status (minimum 15 min). Background polls never wake the car: while it sleeps only the lock state is refreshed.</string>
 
 
     <string name="settings_about">About</string>
@@ -147,7 +145,7 @@
     <string name="settings_experimental_ble">Direct BLE control</string>
     <string name="settings_experimental_ble_desc">Controls the car directly over Bluetooth (after pairing the phone once). Some functions depend on the vehicle, e.g. opening doors or the power liftgate, and don\'t work on every model.</string>
     <string name="ble_enable_title">Enable BLE features</string>
-    <string name="ble_enable_desc">Direct Bluetooth control of your Tesla. You can turn it off again under Settings → Bluetooth &amp; NFC.</string>
+    <string name="ble_enable_desc">Direct Bluetooth control of your Tesla. You can turn it off again under Settings → Behavior, status, Bluetooth &amp; NFC.</string>
     <string name="activate">Activate</string>
     <string name="section_places">Addresses</string>
     <string name="settings_places_desc">Saved separately from vehicles, so navigation shortcuts (e.g. Navigate home) work even without a vehicle added.</string>
@@ -164,7 +162,7 @@
     <string name="result_failed">%1$s failed</string>
     <string name="result_blocked">%1$s blocked</string>
     <string name="deny_inactive">ATA is passive. Switch it to active to run automations.</string>
-    <string name="deny_ble_disabled">The Bluetooth features are turned off (Settings → Bluetooth &amp; NFC).</string>
+    <string name="deny_ble_disabled">The Bluetooth features are turned off (Settings → Behavior, status, Bluetooth &amp; NFC).</string>
     <string name="deny_locked">Unlock your phone to run this command, or allow it in Settings → Automation.</string>
     <string name="deny_external">Not allowed for other apps. Use an ATA shortcut or allow it in Settings → Automation.</string>
     <string name="confirm_title">Run %1$s?</string>
@@ -572,4 +570,18 @@
     <string name="widget_design_app">Like the app</string>
     <string name="settings_widget_translucent">See-through background</string>
     <string name="settings_widget_translucent_desc">The wallpaper shines through a little.</string>
+    <string name="st_kwh_added">%1$s added</string>
+    <string name="section_behavior_connections">Behavior &amp; connections</string>
+    <string name="settings_behavior_page">Behavior, status, Bluetooth &amp; NFC</string>
+    <string name="settings_demo">Demo mode</string>
+    <string name="settings_demo_desc">Shows a made-up, connected car (50 %, charging) so you can try everything without a Tesla. Nothing is sent. Starts from the same state each time it is turned on.</string>
+    <string name="section_status">Vehicle status</string>
+    <string name="status_mode_saver">Battery saver</string>
+    <string name="status_mode_saver_desc">Only when you ask: pull down on the vehicle tab or tap ↻. No reads in the background.</string>
+    <string name="status_mode_smart">Smart</string>
+    <string name="status_mode_smart_desc">When the app starts, then regularly while the car is plugged in and the phone is in use.</string>
+    <string name="status_mode_interval">Interval</string>
+    <string name="status_mode_interval_desc">At a fixed interval, also in the background (5 min to 3 h).</string>
+    <string name="status_every">Every %1$s</string>
+    <string name="status_never_wakes">Requires the BLE features. Automatic reads never wake the car: while it sleeps only the lock state is refreshed. Pulling down wakes it.</string>
 </resources>

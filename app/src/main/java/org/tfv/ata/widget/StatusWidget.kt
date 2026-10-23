@@ -15,6 +15,9 @@ import androidx.compose.material.icons.filled.Thermostat
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.ui.graphics.vector.ImageVector
 import org.tfv.ata.ui.tiles.formatMinutes
+import org.tfv.ata.ui.tiles.formatKwh
+import org.tfv.ata.core.DemoCar
+import org.tfv.ata.core.projected
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
@@ -78,11 +81,13 @@ class StatusWidget : GlanceAppWidget() {
 
   override suspend fun provideGlance(context: Context, id: GlanceId) {
     val store = AtaStore.get(context)
-    val look = widgetLook(store.settings.first())
+    val settings = store.settings.first()
+    val look = widgetLook(settings)
     val vehicles = store.vehicles.first()
     val selectedId = store.selectedVehicleId.first()
-    val vehicle = vehicles.firstOrNull { it.id == selectedId } ?: vehicles.firstOrNull()
-    val snapshot = vehicle?.let { store.snapshot(it.id).first() }?.takeIf { it.updatedAt > 0 }
+    val vehicle = if (settings.demoMode) DemoCar.vehicle else vehicles.firstOrNull { it.id == selectedId } ?: vehicles.firstOrNull()
+    // While charging, the last reading carried forward to now.
+    val snapshot = vehicle?.let { store.snapshot(it.id).first() }?.takeIf { it.updatedAt > 0 }?.projected(System.currentTimeMillis())
     val values = values(context, vehicle?.name ?: "ATA", snapshot)
 
     provideContent {
@@ -125,6 +130,7 @@ private fun values(context: Context, name: String, s: VehicleSnapshot?): StatusV
       listOfNotNull(
         "${s.chargingPowerKw} kW".takeIf { s.chargingPowerKw > 0 },
         context.getString(R.string.st_full_in_short, formatMinutes(s.minutesToFull)).takeIf { s.minutesToFull > 0 },
+        ("+" + formatKwh(s.chargeEnergyAddedKwh)).takeIf { s.chargeEnergyAddedKwh > 0f },
       ).joinToString(" · ").ifEmpty { context.getString(R.string.st_charging) }
     } else {
       null

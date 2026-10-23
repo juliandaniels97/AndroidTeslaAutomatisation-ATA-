@@ -17,7 +17,10 @@ for n in ET.parse('/tmp/ui.xml').iter('node'):
         print((x1 + x2) // 2, (y1 + y2) // 2); break
 PY
 )
-  if [ -n "$xy" ]; then adb shell input tap $xy; sleep 2; else echo "not found: $1"; fi
+  if [ -n "$xy" ]; then adb shell input tap $xy; sleep 2; else echo "not found: $1"; return 1; fi
+}
+tapany() { # like tap, scrolling down until the text shows up (at most 5 times)
+  for i in 1 2 3 4 5; do tap "$1" && return 0; scroll; done
 }
 tapswitch() { # tap the first switch (checkable node) on screen
   adb shell uiautomator dump /sdcard/ui.xml >/dev/null 2>&1
@@ -74,6 +77,10 @@ restart; tap "Vehicle"; tapswitch
 for b in "Allow" "While using the app" "Allow" "While using the app"; do tap "$b"; done
 restart; tap "Vehicle"; sleep 3; shot "readme-vehicle"
 
+# Demo mode for the rest: a connected car at 50 %, charging at 22 kW to 80 %, 1 h left, 20 kWh added.
+restart; tap "Settings"; tapany "Demo mode"
+restart; tap "Vehicle"; sleep 3; shot "demo-vehicle"
+
 for THEME in Dark Light; do
   t=$(echo $THEME | tr A-Z a-z)
   restart; tap "Settings"; tap "Design"; tap "$THEME"
@@ -81,6 +88,7 @@ for THEME in Dark Light; do
   tap "Vehicle"; sleep 2; shot "$t-2-vehicle"; scroll; shot "$t-2b-vehicle"; scroll; shot "$t-2c-vehicle"; scroll; shot "$t-2d-vehicle"
   restart; tap "Settings"; tap "Design"; shot "$t-2e-design"
   tap "Settings"; shot "$t-3-settings"; scroll; shot "$t-4-settings-2"; scroll; shot "$t-5-settings-3"
+  restart; tap "Settings"; tapany "Behavior, status, Bluetooth & NFC"; shot "$t-3b-behavior"; scroll; shot "$t-3c-behavior-2"
   i=6
   for ITEM in "NFC tags" "Automation (Routines, Tasker)" "Menu & widgets" "Wear OS watch" "Vehicles"; do
     restart; tap "Settings"; tap "$ITEM"; shot "$t-$i-$(echo "$ITEM" | tr -cd 'a-zA-Z' | tr A-Z a-z)"; i=$((i+1))
@@ -89,8 +97,8 @@ for THEME in Dark Light; do
   scroll; tap "Bluetooth control (BETA)"; scroll; shot "$t-11-guide-ble"
   tap "Open pairing assistant"; shot "$t-12-pair"; scroll; shot "$t-13-pair-2"; scroll; shot "$t-14-pair-3"
   restart; tap "Settings"; tap "Wear OS watch"; tap "Start"; sleep 5; shot "$t-15-wear-pair"; scroll; shot "$t-16-wear-pair-2"
-  restart; tap "Settings"; scroll; scroll; scroll; scroll; tap "Send bug report"; sleep 6; shot "$t-17-report"; scroll; shot "$t-18-report-2"
-  restart; tap "Settings"; scroll; scroll; scroll; tap "Set up NFC key card"; sleep 3; shot "$t-19-keycard"; scroll; shot "$t-20-keycard-2"
+  restart; tap "Settings"; tapany "Send bug report"; sleep 6; shot "$t-17-report"; scroll; shot "$t-18-report-2"
+  restart; tap "Settings"; tapany "Behavior, status, Bluetooth & NFC"; tapany "Set up NFC key card"; sleep 3; shot "$t-19-keycard"; scroll; shot "$t-20-keycard-2"
   adb shell am start -S -W -n org.tfv.ata/.ui.MainActivity -a android.intent.action.VIEW -d ata://car3d >/dev/null; sleep 6; shot "$t-21-car3d"
   adb shell input swipe 300 1200 900 1200 600; sleep 2; shot "$t-22-car3d-turned"
   tap "Show animations"; sleep 0.5; for n in 1 2 3 4 5 6 7; do sleep 3.2; shot "$t-demo-$n"; done

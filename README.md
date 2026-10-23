@@ -22,11 +22,12 @@ ATA is free for personal use. If it saves you a few taps every day, you can supp
 
 ## Downloads
 
-Latest release **v1.9.1** — phone APK for **64‑bit ARM (arm64‑v8a)**, watch APK for **64‑ and 32‑bit ARM (arm64‑v8a + armeabi‑v7a)**:
+Latest release **v1.9.4** — phone APK for **64‑bit ARM (arm64‑v8a)**, watch APK for **64‑ and 32‑bit ARM (arm64‑v8a + armeabi‑v7a)**:
 
-- 📱 Phone APK: **[ATA-phone-v1.9.1-arm64-v8a.apk](https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-/releases/download/v1.9.1/ATA-phone-v1.9.1-arm64-v8a.apk)**
-- ⌚ Wear OS APK: **[ATA-wear-v1.9.1.apk](https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-/releases/download/v1.9.1/ATA-wear-v1.9.1.apk)**
+- 📱 Phone APK: **[ATA-phone-v1.9.4-arm64-v8a.apk](https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-/releases/download/v1.9.4/ATA-phone-v1.9.4-arm64-v8a.apk)**
+- ⌚ Wear OS APK: **[ATA-wear-v1.9.4.apk](https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-/releases/download/v1.9.4/ATA-wear-v1.9.4.apk)**
 
+The newest version is always at [Releases → latest](https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-/releases/latest).
 All releases are listed under [Releases](https://github.com/juliandaniels97/AndroidTeslaAutomatisation-ATA-/releases).
 All release builds are signed with the same release key, so new versions install as an update over
 the old one. (Very early builds were signed with a public debug key; if ATA does not update over such a build,
@@ -90,7 +91,8 @@ documented vehicle‑command protocol. The cryptographic layer (ECDH key agreeme
 verification, AES‑GCM command signing, metadata serialization) is implemented from that spec and
 **verified byte‑for‑byte against Tesla's published test vectors**.
 
-They are **off by default**. Enable them under **Settings → Bluetooth & NFC → Direct BLE control**.
+They are **off by default**. Enable them under **Settings → Behavior, status, Bluetooth & NFC → Direct BLE
+control**. To look around first, turn on **Settings → Demo mode** (see below).
 Some functions are **vehicle‑specific** (e.g. opening single doors or the power liftgate)
 and don't work on every model. Then:
 
@@ -119,15 +121,32 @@ With the BLE features enabled, ATA reads over BLE:
 - **doors, frunk/trunk, windows, charge port**
 - **volume** and the current title
 
-The tiles show this state, and after a command they show the new state right away. Pull the latest reading any time with the **refresh** button on
-the Vehicle tab, or let ATA poll automatically on the interval you choose under **Settings → Status
-interval** (15 min minimum; `Off` disables it). **Background polls never wake the car:** ATA first
-asks the security controller (which stays awake) and, if the car sleeps, only refreshes the lock state
-and keeps battery/range from the last reading ("car asleep" is shown). Only the manual refresh wakes
-the car. Polling only runs while the BLE features are on, the app is **active**, a vehicle is selected
-and Bluetooth permission is granted.
+The tiles show this state, and after a command they show the new state right away.
+
+**While charging**, ATA keeps the reading going between two reads: from the reported power and time
+to full it counts the time down and raises battery, range and energy added (e.g. *full in 6 h* read
+3 h ago shows *full in 3 h*). The energy added shows with one decimal (*+20.4 kWh*).
+
+**When ATA reads the status** (Settings → *Behavior, status, Bluetooth & NFC* → *Vehicle status*):
+
+- **Battery saver (default):** only when you ask: **pull down on the Vehicle tab** or tap ↻.
+- **Smart:** when the app starts, then regularly while the car is plugged in and the phone is in use
+  (every 30 min by default, adjustable from 5 min to 3 h).
+- **Interval:** at a fixed interval, **also in the background**, 5 min to 3 h in 120 steps (default 30 min).
+
+**Automatic reads never wake the car:** ATA first asks the security controller (which stays awake)
+and, if the car sleeps, only refreshes the lock state and keeps the rest from the last reading ("car
+asleep" is shown). Pulling down / ↻ wakes the car. Reads only run while the BLE features are on, the
+app is **active**, a vehicle is selected and Bluetooth permission is granted.
 The last snapshot is cached on device and shown on the Vehicle tab, the status widget, the watch and
 its complications, with a relative "updated X ago" timestamp.
+
+#### Demo mode
+
+**Settings → Demo mode** shows a made‑up, connected Model Y so you can try everything without a car:
+it starts at **50 %, charging at 22 kW to an 80 % limit, 1 h to go, 20 kWh added**, and every button
+changes its state as the real car would. Nothing is sent over Bluetooth. Each time you turn it on it
+starts from that same state again.
 
 ## Design
 
@@ -157,7 +176,8 @@ multi‑tiles and tiles per row. Both designs come in light and dark:
     - **climate (2×2):** on/off, defrost, driver and passenger temperature
     - **charging (2×2):** start/stop, battery, kW, time to full, limit, amps
     - volume, climate keeper, overheat protection
-    - sentry, steering‑wheel heater (shows **Auto** when the car runs it by itself, else low/high), bioweapon defence
+    - sentry, steering‑wheel heater (shows **Auto** when the car runs it by itself, else low/high; Tesla's
+      Bluetooth protocol can only switch it on or off), bioweapon defence
   - **Sliders** (volume, temperature, limit, amps): touch, hold briefly (it vibrates), then slide up or
     down; a quick swipe scrolls the page. The command is sent only when you let go, so the car gets one
     command instead of dozens. A tap on the upper or lower half
@@ -165,16 +185,21 @@ multi‑tiles and tiles per row. Both designs come in light and dark:
   - Off: one tile per action, with a slider dialog for values.
 - **Tiles per row:** 2–6 or Auto (3 on phones, more on tablets). Names stay visible at every size.
 - **Tablets / landscape:** the car on the left, the tiles on the right.
+- **Pull down** on the Vehicle tab to read the status (wakes the car).
 
 ## Vehicle view
 
 The Vehicle tab shows your car inside a **battery ring** (dark blue 100–80 %, blue 80–20 %, yellow
 20–10 %, red below 10 %, with a subtle animated glow).
 
+A **tick on the ring** marks the charge limit.
+
 **While charging:**
-- Green dots climb slowly along the ring up to the current level (a little faster at higher power).
+- Green dots come out of the empty part of the ring and flow slowly into the charged part (a little
+  faster at higher power), e.g. at 20 % they travel from the empty 80 % into the 20 %.
 - The tip pulses, and a dashed arc shows the way to the charge limit.
-- A chip under the car shows **⚡ X kW · full in …**; the full‑screen view shows it too.
+- A chip under the car shows **⚡ X kW · full in …**, a line below the values the **energy added**
+  and the limit; the full‑screen view shows it too.
 
 - **Six body styles:** Model 3, Model Y, Model S, Model X, Cybertruck and Roadster. ATA picks the
   style from the VIN; you can override it under **Settings → Vehicles → Edit** (with a live preview).
@@ -202,7 +227,7 @@ The Vehicle tab shows your car inside a **battery ring** (dark blue 100–80 %, 
 
 #### Unlock when walking up
 
-**Settings → Unlock when approaching** unlocks the car once when you walk up to it with the phone. ATA watches
+**Settings → Behavior, status, Bluetooth & NFC → Unlock when approaching** unlocks the car once when you walk up to it with the phone. ATA watches
 the strength of the car's Bluetooth signal (filtered by the car's BLE name, so it also works with the screen off,
 or read from the Tesla app's existing connection) and unlocks when it rises above the distance you set
 (about 2–20 m). It only fires after you were away from the car, never right after starting next to it and not twice
@@ -223,7 +248,7 @@ The trust level comes **only** from ATA's own per‑install token — never from
 | Proximity unlock (walking up to the car) | — | — | **Unlock only**: straight away with the phone unlocked; with the phone locked a notification asks first (unless allowed) |
 | Other apps, links, foreign tags (no token) | ✅ | only actions you allow under **Settings → Automation**, phone unlocked | ❌ never |
 
-- The BLE features stay off until you turn them on under **Settings → Bluetooth & NFC**, and
+- The BLE features stay off until you turn them on under **Settings → Behavior, status, Bluetooth & NFC**, and
   automations only run while ATA is **active**.
 - There is no web‑link (`BROWSABLE`) entry point, so a web page can't trigger commands.
 - **Settings → Automation** shows the token (copy it into Tasker), renews it (ATA re‑issues its own
@@ -320,9 +345,14 @@ The watch app (separate APK) controls the car from your wrist:
   **1/2/1** (4 tiles) or **2/3/2** (7 tiles), square watches as **2×2** or **3×3**. Choose 4 or 7 (9)
   under **Settings → Wear OS watch → Watch layout** on the phone; the first actions you picked become
   tiles.
-- **Swipe left** for all other actions as a list, plus direct control, the NFC key card and pairing.
-- **Status around the edge:** battery and range next to the time, inside/outside temperature and lock
-  state along the bottom of the rim.
+- **Tiles in the app's card look:** a tile lights up when the car is in its state (e.g. *Lock* while
+  locked, *Climate on* while the climate runs).
+- **Swipe left** for the **status card**: battery ring (with the green charging dots and the limit
+  tick), battery, range and, while charging, power, time to full and energy added, carried forward
+  like on the phone.
+- **Swipe left again** for all other actions as a list, plus direct control, the NFC key card and pairing.
+- **Status around the edge:** battery and range next to the time; along the bottom of the rim the
+  inside/outside temperature and lock state, or while charging the power and time to full.
 - **Complications for any watch face:** each status value is its own source (*ATA battery* — also
   as a ring —, *ATA range*, *ATA inside/outside temperature*, *ATA lock state*), plus four action
   slots *ATA action 1–4* whose actions you choose on the phone (**Settings → Wear OS watch →
@@ -343,7 +373,7 @@ The watch app (separate APK) controls the car from your wrist:
 - **Direct control (BLE, Wear OS 4 / Android 12 or newer):** the watch can also talk to the car
   itself, without the phone in range. The phone's key is hardware‑backed and cannot be copied, so the
   watch uses **its own** key (Driver role) and is paired with the car once:
-  1. On the phone, select the vehicle (Actions tab) — its VIN syncs to the watch automatically, so
+  1. On the phone, select the vehicle (Favorites tab, car menu) — its VIN syncs to the watch automatically, so
      you never type a VIN on the watch.
   2. On the watch, enable **Direct control** (grants Bluetooth permission) and tap **Pair this
      watch**; confirm the new key in the car with your key card.
@@ -398,10 +428,11 @@ until the car confirms. After that, tap to lock/unlock like a card.
   activation animation toward the car's last‑known spot — the spot is remembered whenever a BLE
   command succeeds (i.e. when you were next to the car).
 - **Active toggle** for routines; **multi‑vehicle** (name, VIN, home & work addresses).
-- **Bluetooth & NFC → Direct BLE control** and **NFC key card** (phone as a Tesla key card).
+- **Behavior, status, Bluetooth & NFC** page: confirmations, haptics, biometric lock, direction
+  animation, **vehicle status** (battery saver / smart / interval, see [Live status](#live-status)),
+  **Direct BLE control**, **NFC key card** and **unlock when approaching**.
+- **Demo mode**: a made‑up connected car to try everything (see [Demo mode](#demo-mode)).
 - **3D vehicle view** on or off (off: solid 2D side view); vehicle **type** per vehicle.
-- **Status interval**: how often ATA polls the car for a battery/range/climate snapshot over BLE
-  (Off, or 15 min and up). Requires the BLE features.
 
 ## Known limitations
 
