@@ -44,11 +44,11 @@ uninstall it once and pair the phone with the car again.)
 
 **Material — dark mode**
 
-<img width="1832" alt="ATA Material design in dark mode: favourites, painted car, multi-tiles, full-screen car with animation, vehicle colours" src="docs/screenshots/ata-material-dark.png" />
+<img width="1832" alt="ATA Material design in dark mode: favourites, painted car, multi-tiles, full-screen car with animation, settings" src="docs/screenshots/ata-material-dark.png" />
 
 **Material — light mode**
 
-<img width="1832" alt="ATA Material design in light mode: favourites, painted car, multi-tiles, full-screen car with animation, vehicle colours" src="docs/screenshots/ata-material-light.png" />
+<img width="1832" alt="ATA Material design in light mode: favourites, painted car, multi-tiles, full-screen car with animation, settings" src="docs/screenshots/ata-material-light.png" />
 
 **Tablet — car on the left, tiles on the right**
 
